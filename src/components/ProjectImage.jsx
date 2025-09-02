@@ -56,3 +56,4 @@ export default function ProjectImage({
     </div>
   );
 }
+

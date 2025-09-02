@@ -284,8 +284,17 @@ function useTheme() {
   const [dark, setDark] = useState(prefersDark);
   useEffect(() => {
     const root = document.documentElement;
+    
+    // Désactiver temporairement les transitions
+    root.classList.add("disable-transitions");
+    
     if (dark) root.classList.add("dark");
     else root.classList.remove("dark");
+    
+    // Réactiver les transitions après un court délai
+    setTimeout(() => {
+      root.classList.remove("disable-transitions");
+    }, 1);
   }, [dark]);
   return { dark, setDark };
 }
