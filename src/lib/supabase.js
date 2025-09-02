@@ -285,17 +285,27 @@ export const useProductionGoals = () => {
   return { goals, projectCounts, loading, error }
 }
 
-// Fonction pour envoyer un message de contact
+// Fonction pour envoyer un message de contact avec email
 export const sendContactMessage = async (messageData) => {
   try {
-    const { data, error } = await supabase
-      .from('contact_messages')
-      .insert([messageData])
-      .select()
+    // Appeler notre API route qui gère Supabase + Resend
+    const response = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(messageData),
+    });
 
-    if (error) throw error
-    return { success: true, data }
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Erreur lors de l\'envoi');
+    }
+
+    return result;
   } catch (err) {
+    console.error('Erreur sendContactMessage:', err);
     return { success: false, error: err.message }
   }
 }

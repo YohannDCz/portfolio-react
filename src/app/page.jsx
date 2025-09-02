@@ -36,6 +36,7 @@ import { useDirectionalClasses, useLanguage } from "@/contexts/LanguageContext";
 // Import des composants de chargement
 import AnimatedSection from "@/components/AnimatedSection";
 import LoadingScreen from "@/components/LoadingScreen";
+import Notification from "@/components/Notification";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
 
 // ——————————————————————————————————————————————
@@ -420,6 +421,8 @@ export default function Portfolio() {
   const [sort, setSort] = useState("popular");
   const [sendingMessage, setSendingMessage] = useState(false);
   const [messageStatus, setMessageStatus] = useState(null);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationData, setNotificationData] = useState({});
 
   const t = TRANSLATIONS[currentLang];
 
@@ -496,9 +499,21 @@ export default function Portfolio() {
     
     if (result.success) {
       setMessageStatus('success');
+      setNotificationData({
+        type: 'success',
+        title: t.messageSent,
+        message: 'Nous vous répondrons dans les plus brefs délais.'
+      });
+      setShowNotification(true);
       e.target.reset();
     } else {
       setMessageStatus('error');
+      setNotificationData({
+        type: 'error',
+        title: t.messageError,
+        message: result.error || 'Une erreur inattendue s\'est produite.'
+      });
+      setShowNotification(true);
     }
     
     setSendingMessage(false);
@@ -645,20 +660,20 @@ export default function Portfolio() {
       {/* PROJETS */}
       <AnimatedSection direction="up" delay={0.3} duration={0.8}>
         <section id="projets" className="max-w-6xl mx-auto px-4 py-8">
-        <div className="flex items-end justify-between gap-4 flex-wrap">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">{t.projectSelection}</h2>
             <p className="text-muted-foreground">{t.projectFilter}</p>
           </div>
-          <div className="flex items-center gap-2 w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
             <Input
               placeholder={t.searchPlaceholder}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="md:w-72"
+              className="w-full sm:w-64 md:w-72"
             />
             <Select value={sort} onValueChange={setSort}>
-              <SelectTrigger className="w-36">
+              <SelectTrigger className="w-full sm:w-36">
                 <SelectValue placeholder={t.sort} />
               </SelectTrigger>
               <SelectContent>
@@ -670,12 +685,12 @@ export default function Portfolio() {
         </div>
 
         <Tabs value={tab} onValueChange={setTab} className="mt-4">
-          <TabsList className="grid grid-cols-5 bg-muted md:w-[560px]">
-            <TabsTrigger value="tous" className="font-bold">{t.all}</TabsTrigger>
-            <TabsTrigger value="web" className="font-bold">{t.web}</TabsTrigger>
-            <TabsTrigger value="mobile" className="font-bold">{t.mobile}</TabsTrigger>
-            <TabsTrigger value="design" className="font-bold">{t.design}</TabsTrigger>
-            <TabsTrigger value="autre" className="font-bold">{t.other}</TabsTrigger>
+          <TabsList className="grid grid-cols-5 bg-muted w-full md:w-[560px]">
+            <TabsTrigger value="tous" className="font-bold text-xs sm:text-sm">{t.all}</TabsTrigger>
+            <TabsTrigger value="web" className="font-bold text-xs sm:text-sm">{t.web}</TabsTrigger>
+            <TabsTrigger value="mobile" className="font-bold text-xs sm:text-sm">{t.mobile}</TabsTrigger>
+            <TabsTrigger value="design" className="font-bold text-xs sm:text-sm">{t.design}</TabsTrigger>
+            <TabsTrigger value="autre" className="font-bold text-xs sm:text-sm">{t.other}</TabsTrigger>
           </TabsList>
           <TabsContent value={tab} className="mt-6">
             {projectsLoading ? (
@@ -695,14 +710,15 @@ export default function Portfolio() {
       </AnimatedSection>
 
       {/* FREELANCE */}
-      <section id="freelance" className="max-w-6xl mx-auto px-4 py-8">
-        <div className="flex items-end justify-between gap-4 flex-wrap">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">{t.freelance}</h2>
-            <p className="text-muted-foreground">{t.mainPlatforms}</p>
+      <AnimatedSection direction="up" delay={0.4} duration={0.8}>
+        <section id="freelance" className="max-w-6xl mx-auto px-4 py-8">
+          <div className="flex items-end justify-between gap-4 flex-wrap">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">{t.freelance}</h2>
+              <p className="text-muted-foreground">{t.mainPlatforms}</p>
+            </div>
           </div>
-        </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
           {platformsLoading ? (
             <LoadingSpinner />
           ) : platformsError ? (
@@ -726,10 +742,12 @@ export default function Portfolio() {
               </Card>
             ))
           )}
-        </div>
-      </section>
+          </div>
+        </section>
+      </AnimatedSection>
 
       {/* CV / CERTIFICATIONS */}
+      <AnimatedSection direction="up" delay={0.5} duration={0.8}>
       <section id="cv" className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
@@ -737,7 +755,7 @@ export default function Portfolio() {
             <p className="text-muted-foreground">{t.courseAndSkills}</p>
           </div>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
           {certificationsLoading ? (
             <LoadingSpinner />
           ) : certificationsError ? (
@@ -777,8 +795,10 @@ export default function Portfolio() {
           )}
         </div>
       </section>
+      </AnimatedSection>
 
       {/* MEGA PROJETS */}
+      <AnimatedSection direction="up" delay={0.6} duration={0.8}>
       <section id="mega" className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
@@ -786,7 +806,7 @@ export default function Portfolio() {
             <p className="text-muted-foreground">{t.strategicProjects}</p>
           </div>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
           {projectsLoading ? (
             <LoadingSpinner />
           ) : (
@@ -813,8 +833,10 @@ export default function Portfolio() {
           )}
         </div>
       </section>
+      </AnimatedSection>
 
       {/* OBJECTIFS DE PRODUCTION */}
+      <AnimatedSection direction="up" delay={0.7} duration={0.8}>
       <section id="objectifs" className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
@@ -851,8 +873,10 @@ export default function Portfolio() {
           )}
         </div>
       </section>
+      </AnimatedSection>
 
       {/* À PROPOS */}
+      <AnimatedSection direction="up" delay={0.8} duration={0.8}>
       <section id="apropos" className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2">
@@ -886,8 +910,10 @@ export default function Portfolio() {
           </Card>
         </div>
       </section>
+      </AnimatedSection>
 
       {/* CONTACT */}
+      <AnimatedSection direction="up" delay={0.9} duration={0.8}>
       <section id="contact" className="max-w-6xl mx-auto px-4 py-10">
         <div className="grid lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2">
@@ -947,6 +973,7 @@ export default function Portfolio() {
           </Card>
         </div>
       </section>
+      </AnimatedSection>
 
       <footer className="py-10 border-t border-gray-200">
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
@@ -956,6 +983,15 @@ export default function Portfolio() {
           </p>
         </div>
       </footer>
+
+      {/* Notification système */}
+      <Notification
+        type={notificationData.type}
+        title={notificationData.title}
+        message={notificationData.message}
+        isVisible={showNotification}
+        onClose={() => setShowNotification(false)}
+      />
     </motion.div>
   );
 }

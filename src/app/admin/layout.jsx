@@ -4,14 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/lib/supabase";
 import {
-  Award,
-  FolderOpen,
-  Globe,
-  LayoutDashboard,
-  Loader2,
-  LogOut,
-  Settings,
-  User
+    Award,
+    FolderOpen,
+    Globe,
+    LayoutDashboard,
+    Loader2,
+    LogOut,
+    Mail,
+    Settings,
+    User
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -24,6 +25,7 @@ const navigation = [
   { name: 'Compétences', href: '/admin/skills', icon: Settings },
   { name: 'Profil', href: '/admin/profile', icon: User },
   { name: 'Plateformes', href: '/admin/platforms', icon: Globe },
+  { name: 'Messages', href: '/admin/contact', icon: Mail },
 ];
 
 export default function AdminLayout({ children }) {
