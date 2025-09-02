@@ -10,21 +10,21 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  createKanbanTask,
-  deleteKanbanTask,
-  updateKanbanTask,
-  useKanbanColumns,
-  useProjects
+    createKanbanTask,
+    deleteKanbanTask,
+    updateKanbanTask,
+    useKanbanColumns,
+    useProjects
 } from "@/lib/supabase";
 import {
-  Loader2,
-  Plus,
-  Trash2,
-  X
+    Loader2,
+    Plus,
+    Trash2,
+    X
 } from "lucide-react";
 
 const PRIORITY_OPTIONS = [
-  { value: 'low', label: 'Basse', color: 'bg-gray-100' },
+  { value: 'low', label: 'Basse', color: 'bg-muted' },
   { value: 'medium', label: 'Moyenne', color: 'bg-blue-100' },
   { value: 'high', label: 'Haute', color: 'bg-orange-100' },
   { value: 'urgent', label: 'Urgente', color: 'bg-red-100' }
@@ -46,7 +46,7 @@ export default function TaskModal({ isOpen, onClose, task = null, defaultColumnI
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    project_id: '',
+    project_id: 'none',
     column_id: defaultColumnId || '',
     assignee: '',
     priority: 'medium',
@@ -61,7 +61,7 @@ export default function TaskModal({ isOpen, onClose, task = null, defaultColumnI
       setFormData({
         title: task.title || '',
         description: task.description || '',
-        project_id: task.project_id || '',
+        project_id: task.project_id || 'none',
         column_id: task.column_id || '',
         assignee: task.assignee || '',
         priority: task.priority || 'medium',
@@ -73,7 +73,7 @@ export default function TaskModal({ isOpen, onClose, task = null, defaultColumnI
       setFormData({
         title: '',
         description: '',
-        project_id: '',
+        project_id: task?.project_id || 'none',
         column_id: defaultColumnId || (columns[0]?.id || ''),
         assignee: '',
         priority: 'medium',
@@ -93,7 +93,7 @@ export default function TaskModal({ isOpen, onClose, task = null, defaultColumnI
   };
 
   const addTag = (tag) => {
-    if (tag && !formData.tags.includes(tag)) {
+    if (tag && tag !== "placeholder" && !formData.tags.includes(tag)) {
       setFormData(prev => ({
         ...prev,
         tags: [...prev.tags, tag]
@@ -130,7 +130,7 @@ export default function TaskModal({ isOpen, onClose, task = null, defaultColumnI
     try {
       const taskData = {
         ...formData,
-        project_id: formData.project_id || null,
+        project_id: formData.project_id === 'none' ? null : formData.project_id,
         due_date: formData.due_date ? new Date(formData.due_date).toISOString() : null,
         estimated_hours: formData.estimated_hours ? parseInt(formData.estimated_hours) : null
       };
@@ -186,7 +186,7 @@ export default function TaskModal({ isOpen, onClose, task = null, defaultColumnI
               <h2 className="text-lg font-semibold">
                 {task ? 'Modifier la tâche' : 'Nouvelle tâche'}
               </h2>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 {task ? 'Modifiez les détails de votre tâche' : 'Créez une nouvelle tâche pour votre projet'}
               </p>
             </div>
@@ -237,7 +237,7 @@ export default function TaskModal({ isOpen, onClose, task = null, defaultColumnI
                     <SelectValue placeholder="Sélectionner un projet" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Aucun projet</SelectItem>
+                    <SelectItem value="none">Aucun projet</SelectItem>
                     {projects?.map((project) => (
                       <SelectItem key={project.id} value={project.id}>
                         {project.external_id ? `${project.external_id} - ${project.title_fr}` : project.title_fr}
@@ -332,11 +332,14 @@ export default function TaskModal({ isOpen, onClose, task = null, defaultColumnI
           <div className="space-y-2">
             <Label>Tags</Label>
             <div className="flex gap-2">
-              <Select value="" onValueChange={addTag}>
+              <Select value="placeholder" onValueChange={addTag}>
                 <SelectTrigger className="flex-1">
                   <SelectValue placeholder="Ajouter un tag prédéfini" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="placeholder" disabled>
+                    Ajouter un tag prédéfini
+                  </SelectItem>
                   {COMMON_TAGS.filter(tag => !formData.tags.includes(tag)).map((tag) => (
                     <SelectItem key={tag} value={tag}>
                       {tag}

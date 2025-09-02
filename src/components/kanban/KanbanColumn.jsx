@@ -9,7 +9,7 @@ import KanbanTask from './KanbanTask';
 export default function KanbanColumn({ column, tasks, onAddTask, onEditTask }) {
   return (
     <div className="min-w-80 max-w-80">
-      <Card className="h-full">
+      <Card variant="default" className="h-full">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -18,7 +18,7 @@ export default function KanbanColumn({ column, tasks, onAddTask, onEditTask }) {
                 style={{ backgroundColor: column.color }}
               />
               {column.name}
-              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+              <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
                 {tasks.length}
               </span>
             </CardTitle>
@@ -39,7 +39,7 @@ export default function KanbanColumn({ column, tasks, onAddTask, onEditTask }) {
                 ref={provided.innerRef}
                 {...provided.droppableProps}
                 className={`space-y-3 min-h-2 transition-colors ${
-                  snapshot.isDraggingOver ? 'bg-blue-50 rounded-lg p-2' : ''
+                  snapshot.isDraggingOver ? 'bg-accent/50 rounded-lg p-2' : ''
                 }`}
               >
                 {tasks
@@ -56,11 +56,11 @@ export default function KanbanColumn({ column, tasks, onAddTask, onEditTask }) {
                 
                 {/* Zone de drop vide */}
                 {tasks.length === 0 && (
-                  <div className="text-center py-8 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-lg">
+                  <div className="text-center py-8 text-muted-foreground text-sm border-2 border-dashed border-border rounded-lg">
                     Glissez une tâche ici ou{' '}
                     <button
                       onClick={onAddTask}
-                      className="text-blue-600 hover:text-blue-800 underline"
+                      className="text-primary hover:text-primary/80 underline"
                     >
                       créez-en une nouvelle
                     </button>

@@ -21,7 +21,7 @@ export default function KanbanBoard() {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectedColumnId, setSelectedColumnId] = useState(null);
-  const [projectFilter, setProjectFilter] = useState("");
+  const [projectFilter, setProjectFilter] = useState("all");
 
   // Initialiser le filtre de projet depuis l'URL
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function KanbanBoard() {
   }, [searchParams]);
 
   // Filtrer les tâches par projet si nécessaire
-  const filteredTasks = projectFilter 
+  const filteredTasks = projectFilter && projectFilter !== "all"
     ? tasks.filter(task => task.project_id === projectFilter)
     : tasks;
 
@@ -43,7 +43,7 @@ export default function KanbanBoard() {
   });
 
   // Trouver le projet sélectionné pour l'affichage
-  const selectedProject = projectFilter 
+  const selectedProject = projectFilter && projectFilter !== "all"
     ? projects?.find(p => p.id === projectFilter)
     : null;
 
@@ -100,7 +100,7 @@ export default function KanbanBoard() {
     setSelectedTask(task);
     setSelectedColumnId(columnId);
     // Si un projet est filtré et qu'on crée une nouvelle tâche, le définir par défaut
-    if (!task && projectFilter) {
+    if (!task && projectFilter && projectFilter !== "all") {
       setSelectedTask({ project_id: projectFilter });
     }
     setIsTaskModalOpen(true);
@@ -126,26 +126,26 @@ export default function KanbanBoard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-foreground">
             Tableau Kanban
             {selectedProject && (
-              <span className="text-lg text-gray-600 ml-2">
+              <span className="text-lg text-muted-foreground ml-2">
                 - {selectedProject.external_id || selectedProject.title_fr}
               </span>
             )}
           </h2>
-          <p className="text-gray-600">Gérez vos tâches et projets</p>
+          <p className="text-muted-foreground">Gérez vos tâches et projets</p>
         </div>
         <div className="flex items-center gap-3">
           {/* Filtre par projet */}
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-gray-500" />
+            <Filter className="w-4 h-4 text-muted-foreground" />
             <Select value={projectFilter} onValueChange={setProjectFilter}>
               <SelectTrigger className="w-64">
                 <SelectValue placeholder="Tous les projets" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tous les projets</SelectItem>
+                <SelectItem value="all">Tous les projets</SelectItem>
                 {projects?.map((project) => (
                   <SelectItem key={project.id} value={project.id}>
                     {project.external_id ? `${project.external_id} - ${project.title_fr}` : project.title_fr}
@@ -153,11 +153,11 @@ export default function KanbanBoard() {
                 ))}
               </SelectContent>
             </Select>
-            {projectFilter && (
+            {projectFilter && projectFilter !== "all" && (
               <Button 
                 variant="ghost" 
                 size="sm"
-                onClick={() => setProjectFilter("")}
+                onClick={() => setProjectFilter("all")}
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -178,7 +178,7 @@ export default function KanbanBoard() {
           const urgentTasks = columnTasks.filter(t => t.priority === 'urgent').length;
           
           return (
-            <Card key={column.id}>
+            <Card key={column.id} variant={urgentTasks > 0 ? "elevated" : "secondary"} className="card-hover">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -192,7 +192,7 @@ export default function KanbanBoard() {
                 </div>
                 {urgentTasks > 0 && (
                   <div className="mt-2">
-                    <span className="text-xs text-red-600 font-medium">
+                    <span className="text-xs text-red-600 dark:text-red-400 font-medium">
                       {urgentTasks} urgent{urgentTasks > 1 ? 's' : ''}
                     </span>
                   </div>
@@ -206,7 +206,7 @@ export default function KanbanBoard() {
       {/* Overlay de chargement pendant le drag */}
       {dragLoading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg flex items-center gap-2">
+          <div className="bg-card border border-border p-4 rounded-lg flex items-center gap-2 shadow-lg">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>Déplacement en cours...</span>
           </div>

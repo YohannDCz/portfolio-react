@@ -209,3 +209,4 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ---
 
 **✨ Votre portfolio est maintenant prêt pour un public international !**
+

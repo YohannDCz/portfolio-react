@@ -33,6 +33,11 @@ import {
 import LanguageSelector from "@/components/LanguageSelector";
 import { useDirectionalClasses, useLanguage } from "@/contexts/LanguageContext";
 
+// Import des composants de chargement
+import AnimatedSection from "@/components/AnimatedSection";
+import LoadingScreen from "@/components/LoadingScreen";
+import { useGlobalLoading } from "@/hooks/useGlobalLoading";
+
 // ——————————————————————————————————————————————
 // TRADUCTIONS STATIQUES
 // ——————————————————————————————————————————————
@@ -316,7 +321,18 @@ function ProjectCard({ project, currentLang, t }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className="h-full hover:shadow-lg transition-shadow">
+      <Card className="h-full hover:shadow-lg transition-shadow overflow-hidden">
+        {/* Image du projet */}
+        {project.image_url && (
+          <div className="h-48 w-full overflow-hidden">
+            <ProjectImage
+              src={project.image_url}
+              alt={getLocalizedText(project, 'title', currentLang)}
+              className="transition-transform duration-300 hover:scale-105"
+            />
+          </div>
+        )}
+        
         <CardHeader className="pb-3">
           <div className={getDirectionalClass("flex items-start justify-between")}>
             <div className="flex-1">
@@ -398,6 +414,9 @@ export default function Portfolio() {
 
   const t = TRANSLATIONS[currentLang];
 
+  // Hook de chargement global
+  const { isLoading, registerLoading } = useGlobalLoading();
+
   // Hooks Supabase
   const { profile, loading: profileLoading, error: profileError } = useProfile();
   const { skills, loading: skillsLoading, error: skillsError } = useSkills();
@@ -405,6 +424,16 @@ export default function Portfolio() {
   const { platforms, loading: platformsLoading, error: platformsError } = useFreelancePlatforms();
   const { certifications, loading: certificationsLoading, error: certificationsError } = useCertifications();
   const { goals, projectCounts, loading: goalsLoading, error: goalsError } = useProductionGoals();
+
+  // Enregistrer tous les états de chargement
+  useEffect(() => {
+    registerLoading('profile', profileLoading);
+    registerLoading('skills', skillsLoading);
+    registerLoading('projects', projectsLoading);
+    registerLoading('platforms', platformsLoading);
+    registerLoading('certifications', certificationsLoading);
+    registerLoading('goals', goalsLoading);
+  }, [profileLoading, skillsLoading, projectsLoading, platformsLoading, certificationsLoading, goalsLoading, registerLoading]);
 
   // Filtrage des projets
   const filtered = useMemo(() => {
@@ -474,8 +503,18 @@ export default function Portfolio() {
     return <ErrorMessage message={profileError} />;
   }
 
+  // Affichage de l'écran de chargement
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
   return (
-    <div className={`min-h-screen bg-gradient-to-b from-background to-background/60 dark:from-black dark:to-zinc-950 text-foreground ${isRTL ? 'rtl' : ''}`}>
+    <motion.div 
+      className={`min-h-screen bg-gradient-to-b from-background to-background/60 dark:from-black dark:to-zinc-950 text-foreground ${isRTL ? 'rtl' : ''}`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8 }}
+    >
       {/* NAVBAR */}
       <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className={`max-w-6xl mx-auto px-4 py-3 ${getDirectionalClass("flex items-center justify-between")}`}>
@@ -524,17 +563,18 @@ export default function Portfolio() {
       </header>
 
       {/* HERO */}
-      <section className="max-w-6xl mx-auto px-4 pt-12 pb-8">
-        <div className="grid md:grid-cols-[1.1fr_0.9fr] gap-8 items-center">
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <div className="flex gap-2 mb-4">
+      <AnimatedSection direction="up" delay={0.2} duration={0.8}>
+        <section className="max-w-6xl mx-auto px-4 pt-12 pb-8">
+          <div className="grid md:grid-cols-[1.1fr_0.9fr] gap-8 items-center">
+            <div>
+              <div className="flex gap-2 mb-4">
               <Badge>🎯 {currentLang === 'fr' ? 'Viser le millénaire' : currentLang === 'en' ? 'Aim for millennium' : currentLang === 'hi' ? 'सहस्राब्दी का लक्ष्य' : 'استهداف الألفية'}</Badge>
               <Badge variant="secondary">{t.availableForMissions}</Badge>
             </div>
             <h1 className="text-3xl md:text-5xl font-semibold tracking-tight">
               {profileLoading ? t.loading : getLocalizedText(profile, 'title', currentLang)}
             </h1>
-            <p className="mt-4 text-muted-foreground text-gray-500 max-w-prose">
+            <p className="mt-4 text-muted-foreground max-w-prose">
               {profileLoading ? t.loading : getLocalizedText(profile, 'tagline', currentLang)}
             </p>
             <div className={`mt-6 ${getDirectionalClass("flex flex-wrap gap-3")}`}>
@@ -557,9 +597,9 @@ export default function Portfolio() {
                 </Badge>
               ))}
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+          <div>
             <Card className="overflow-hidden">
               <div className="h-40 overflow-hidden">
                 <img
@@ -580,7 +620,7 @@ export default function Portfolio() {
                     <p className="text-muted-foreground">{profile?.location || "Paris, France"}</p>
                   </div>
                 </div>
-                <Separator className="my-6 bg-gray-200" />
+                <Separator className="my-6" />
                 <div className="grid grid-cols-3 gap-3">
                   <Stat label={t.yearsExp} value={`${profile?.years_experience || 5}+`} />
                   <Stat label={t.projects} value={`${projects?.length || 0}+`} />
@@ -588,16 +628,18 @@ export default function Portfolio() {
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
-        </div>
-      </section>
+          </div>
+          </div>
+        </section>
+      </AnimatedSection>
 
       {/* PROJETS */}
-      <section id="projets" className="max-w-6xl mx-auto px-4 py-8">
+      <AnimatedSection direction="up" delay={0.3} duration={0.8}>
+        <section id="projets" className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
             <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">{t.projectSelection}</h2>
-            <p className="text-muted-foreground text-gray-500">{t.projectFilter}</p>
+            <p className="text-muted-foreground">{t.projectFilter}</p>
           </div>
           <div className="flex items-center gap-2 w-full md:w-auto">
             <Input
@@ -619,7 +661,7 @@ export default function Portfolio() {
         </div>
 
         <Tabs value={tab} onValueChange={setTab} className="mt-4">
-          <TabsList className="grid grid-cols-5 bg-gray-100 md:w-[560px]">
+          <TabsList className="grid grid-cols-5 bg-muted md:w-[560px]">
             <TabsTrigger value="tous" className="font-bold">{t.all}</TabsTrigger>
             <TabsTrigger value="web" className="font-bold">{t.web}</TabsTrigger>
             <TabsTrigger value="mobile" className="font-bold">{t.mobile}</TabsTrigger>
@@ -640,14 +682,15 @@ export default function Portfolio() {
             )}
           </TabsContent>
         </Tabs>
-      </section>
+        </section>
+      </AnimatedSection>
 
       {/* FREELANCE */}
       <section id="freelance" className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
             <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">{t.freelance}</h2>
-            <p className="text-muted-foreground text-gray-500">{t.mainPlatforms}</p>
+            <p className="text-muted-foreground">{t.mainPlatforms}</p>
           </div>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
@@ -682,7 +725,7 @@ export default function Portfolio() {
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
             <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">{t.cv} / {t.certifications}</h2>
-            <p className="text-muted-foreground text-gray-500">{t.courseAndSkills}</p>
+            <p className="text-muted-foreground">{t.courseAndSkills}</p>
           </div>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
@@ -731,7 +774,7 @@ export default function Portfolio() {
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
             <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">{t.megaProjects}</h2>
-            <p className="text-muted-foreground text-gray-500">{t.strategicProjects}</p>
+            <p className="text-muted-foreground">{t.strategicProjects}</p>
           </div>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
@@ -904,7 +947,7 @@ export default function Portfolio() {
           </p>
         </div>
       </footer>
-    </div>
+    </motion.div>
   );
 }
 
@@ -934,13 +977,21 @@ function SocialLink({ href, icon, label }) {
 function MegaProjectCard({ project, currentLang, t }) {
   return (
     <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-      <Card className="h-full relative">
+      <Card className="h-full relative overflow-hidden">
         {project.is_mega_project && (
           <div className="absolute top-2 right-2 z-10">
             <Badge variant="destructive" className="text-xs">MEGA</Badge>
           </div>
         )}
-        <div className="h-48 rounded-t-xl bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100" />
+        {/* Image du projet mega ou fond par défaut */}
+        <div className="h-48 rounded-t-xl overflow-hidden">
+          <ProjectImage
+            src={project.image_url}
+            alt={getLocalizedText(project, 'title', currentLang)}
+            className="transition-transform duration-300 hover:scale-105"
+            fallbackGradient="from-gray-300 via-gray-200 to-gray-100"
+          />
+        </div>
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-2">
             <div>
