@@ -46,7 +46,7 @@ export default function ProjectImage({
       <img
         src={src}
         alt={alt}
-        className={`w-full h-full object-cover transition-all duration-300 ${
+        className={`w-full h-full object-contain transition-all duration-300 ${
           imageLoaded ? 'opacity-100' : 'opacity-0'
         }`}
         onError={handleImageError}

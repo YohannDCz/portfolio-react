@@ -6,26 +6,23 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
 import { ArrowUpRight, ExternalLink, Github, Globe, Linkedin, Mail, Moon, Star, Sun } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 // Import des hooks Supabase
 import {
   getLocalizedText,
-  getMegaProjects,
-  getNormalProjects,
   getProjectsByCategory,
   getPublicImageUrl,
   sendContactMessage,
   useCertifications,
   useFreelancePlatforms,
-  useProductionGoals,
   useProfile,
   useProjects,
   useSkills
@@ -329,91 +326,72 @@ function ProjectCard({ project, currentLang, t }) {
   const { getDirectionalClass, isRTL } = useDirectionalClasses();
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <Card className="h-full flex flex-col hover:shadow-lg transition-shadow overflow-hidden">
+    <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+      <Card className="h-full relative overflow-hidden">
+        {project.status === 'in_progress' && (
+          <div className="absolute top-2 right-2 z-10">
+            <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700">
+              {t.inProgress}
+            </Badge>
+          </div>
+        )}
         {/* Image du projet */}
-        {project.image_url && (
-          <div className="h-48 w-full overflow-hidden">
+        <div className="h-48 rounded-t-xl overflow-hidden bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100">
+          <div className="w-full h-full relative">
+            {/* Placeholder dégradé gris */}
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100" />
+            {/* Image décalée d'un tiers */}
+            <div className="absolute inset-0 transform -translate-y-10">
             <ProjectImage
               src={getPublicImageUrl(project.image_url)}
               alt={getLocalizedText(project, 'title', currentLang)}
-              className="transition-transform duration-300 hover:scale-105"
+                className="object-cover rounded-lg shadow-md transition-transform duration-300 hover:scale-105"
+                fallbackGradient="from-primary/20 to-primary/10"
             />
           </div>
-        )}
-        
-        <div className="flex flex-col flex-grow p-6 pt-0">
-          <div className="flex-grow">
-            <CardHeader className="pb-3 px-0 pt-4">
-              <div className={getDirectionalClass("flex items-start justify-between")}>
+          </div>
+        </div>
+        <CardHeader className="pb-2">
+          <div className={`${getDirectionalClass("flex items-start justify-between")} gap-2`}>
                 <div className="flex-1">
-                  <CardTitle className="text-lg leading-tight">
-                    {getLocalizedText(project, 'title', currentLang)}
-                  </CardTitle>
-                  <CardDescription className="mt-1 mb-3 line-clamp-2">
-                    {getLocalizedText(project, 'description', currentLang)}
-                  </CardDescription>
+              <CardTitle className="text-lg">{getLocalizedText(project, 'title', currentLang)}</CardTitle>
+              <CardDescription className="line-clamp-2 min-h-[2.5rem] mb-2">{getLocalizedText(project, 'description', currentLang)}</CardDescription>
                 </div>
                 {project.stars > 0 && (
-                  <div className={`${getDirectionalClass("flex items-center gap-1")} ${isRTL ? 'mr-2' : 'ml-2'} text-sm text-muted-foreground`}>
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 no-rtl-transform" />
-                    {project.stars}
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Star className="h-4 w-4 mr-1" /> {project.stars}
                   </div>
                 )}
               </div>
             </CardHeader>
-          </div>
-          
-          <div className="space-y-3 pt-3 mt-auto border-t">
-            {/* Catégories et tags */}
-            <div className={`${getDirectionalClass("flex flex-wrap gap-1") } ${isRTL ? 'justify-end' : 'justify-start'}`}>
-              {project.status === 'in_progress' && (
-                <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700">
-                  {t.inProgress}
-                </Badge>
-              )}
-              {project.category?.map((cat) => (
-                <Badge key={cat} variant="outline" className="text-xs">
-                  {cat}
-                </Badge>
-              ))}
-              {project.tags?.slice(0, 2).map((tag) => (
-                <Badge key={tag} variant="secondary" className="text-xs">
-                  {tag}
-                </Badge>
-              ))}
-              {project.tags?.length > 2 && (
-                <Badge variant="secondary" className="text-xs">
-                  +{project.tags.length - 2}
-                </Badge>
-              )}
+        <CardContent>
+          <div className={`${getDirectionalClass("flex flex-wrap gap-2")} mb-4`}>
+            {(Array.isArray(project.category) ? project.category : [project.category]).map((cat) => (
+              <Badge key={`${project.id}-category-${cat}`} variant="default" className="rounded-full capitalize h-6 px-3 text-xs">{cat}</Badge>
+            ))}
+            {project.tags?.map((tag) => (
+              <Badge key={tag} variant="secondary" className="rounded-full h-6 px-3 text-xs">{tag}</Badge>
+            ))}
             </div>
-
-            {/* Actions */}
-            <div className={getDirectionalClass("flex gap-2 pt-3 mt-1 border-t")}>
+                    <div className={`${getDirectionalClass("flex flex-col gap-2")}`}>
               {project.link && project.link !== '#' && (
-                <a href={project.link} target="_blank" rel="noopener noreferrer" className="flex-1">
-                  <Button variant="outline" size="sm" className={`w-full ${getDirectionalClass("flex items-center justify-center")}`}>
-                    <Globe className={`${isRTL ? 'ml-1' : 'mr-1'} w-4 h-4 no-rtl-transform`} />
+              <a href={project.link} target="_blank" rel="noopener noreferrer" className="w-full">
+                <Button size="sm" variant="outline" className={`w-full ${getDirectionalClass("flex items-center justify-center")}`}>
+                  <Globe className={`${isRTL ? 'ml-2' : 'mr-2'} w-4 h-4 no-rtl-transform`} />
                     {t.see}
                   </Button>
                 </a>
               )}
-              
               {project.github_url && (
-                <a href={project.github_url} target="_blank" rel="noopener noreferrer">
-                  <Button variant="ghost" size="sm" className="no-rtl-transform">
-                    <Github className="w-4 h-4" />
+              <a href={project.github_url} target="_blank" rel="noopener noreferrer" className="w-full">
+                <Button variant="ghost" size="sm" className={`w-full ${getDirectionalClass("flex items-center justify-center")} no-rtl-transform`}>
+                  <Github className={`${isRTL ? 'ml-2' : 'mr-2'} w-4 h-4`} />
+                  GitHub
                   </Button>
                 </a>
               )}
             </div>
-          </div>
-        </div>
+        </CardContent>
       </Card>
     </motion.div>
   );
@@ -433,6 +411,7 @@ export default function Portfolio() {
   const [messageStatus, setMessageStatus] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationData, setNotificationData] = useState({});
+  const [activeSection, setActiveSection] = useState("");
 
   const t = TRANSLATIONS[currentLang];
 
@@ -445,7 +424,6 @@ export default function Portfolio() {
   const { projects, loading: projectsLoading, error: projectsError } = useProjects();
   const { platforms, loading: platformsLoading, error: platformsError } = useFreelancePlatforms();
   const { certifications, loading: certificationsLoading, error: certificationsError } = useCertifications();
-  const { goals, projectCounts, loading: goalsLoading, error: goalsError } = useProductionGoals();
 
   // Enregistrer tous les états de chargement
   useEffect(() => {
@@ -454,8 +432,33 @@ export default function Portfolio() {
     registerLoading('projects', projectsLoading);
     registerLoading('platforms', platformsLoading);
     registerLoading('certifications', certificationsLoading);
-    registerLoading('goals', goalsLoading);
-  }, [profileLoading, skillsLoading, projectsLoading, platformsLoading, certificationsLoading, goalsLoading, registerLoading]);
+  }, [profileLoading, skillsLoading, projectsLoading, platformsLoading, certificationsLoading, registerLoading]);
+
+  // Scroll spy pour navigation active
+  const handleScroll = useCallback(() => {
+    const sections = ['projets', 'cv', 'contact'];
+    const scrollPosition = window.scrollY + 100;
+
+    for (const section of sections) {
+      const element = document.getElementById(section);
+      if (element) {
+        const offsetTop = element.offsetTop;
+        const offsetBottom = offsetTop + element.offsetHeight;
+        
+        if (scrollPosition >= offsetTop && scrollPosition < offsetBottom) {
+          setActiveSection(section);
+          break;
+        }
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Call once to set initial state
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
 
   // Filtrage des projets
   const filtered = useMemo(() => {
@@ -486,9 +489,8 @@ export default function Portfolio() {
     return items;
   }, [projects, query, tab, sort, currentLang]);
 
-  // Séparer les projets normaux et mega projets
-  const normalProjects = getNormalProjects(filtered);
-  const megaProjects = getMegaProjects(filtered);
+  // Tous les projets (normaux et mega) ensemble
+  const allProjects = filtered;
 
   // Gestion du formulaire de contact
   const handleContactSubmit = async (e) => {
@@ -567,11 +569,30 @@ export default function Portfolio() {
           </div>
 
           <nav className={`hidden md:flex items-center gap-6 text-sm ${getDirectionalClass("flex-row")}`}>
-            <a href="#projets" className="hover:opacity-80">{t.projects}</a>
-            <a href="#mega-projets" className="hover:opacity-80">{t.megaProjects}</a>
-            <a href="#cv" className="hover:opacity-80">{t.cv}</a>
-            <a href="#objectifs" className="hover:opacity-80">{t.goals}</a>
-            <a href="#apropos" className="hover:opacity-80">{t.about}</a>
+            <a 
+              href="#projets" 
+              className={`hover:opacity-80 transition-all ${
+                activeSection === 'projets' ? 'font-bold text-primary' : ''
+              }`}
+            >
+              {t.projects}
+            </a>
+            <a 
+              href="#cv" 
+              className={`hover:opacity-80 transition-all ${
+                activeSection === 'cv' ? 'font-bold text-primary' : ''
+              }`}
+            >
+              {t.cv}
+            </a>
+            <a 
+              href="#contact" 
+              className={`hover:opacity-80 transition-all ${
+                activeSection === 'contact' ? 'font-bold text-primary' : ''
+              }`}
+            >
+              {t.contact}
+            </a>
           </nav>
 
           <div className={getDirectionalClass("flex items-center gap-2")}>
@@ -648,7 +669,7 @@ export default function Portfolio() {
                     <AvatarImage alt="avatar" src={profile?.avatar_url || "profile.png"} />
                     <AvatarFallback>YDC</AvatarFallback>
                   </Avatar>
-                  <div className="pt-4">
+                  <div className="pb-1">
                     <h3 className="text-xl font-semibold leading-tight">{profile?.name || "Yohann Di Crescenzo"}</h3>
                     <p className="text-muted-foreground">{profile?.location || "Paris, France"}</p>
                   </div>
@@ -667,7 +688,6 @@ export default function Portfolio() {
       </AnimatedSection>
 
       {/* PROJETS */}
-      <AnimatedSection direction="up" delay={0.3} duration={0.8}>
         <section id="projets" className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
@@ -733,39 +753,20 @@ export default function Portfolio() {
               <ErrorMessage message={projectsError} />
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {normalProjects.map((p) => (
+                {allProjects.map((p) => (
+                  p.is_mega_project ? (
+                    <MegaProjectCard key={p.id} project={p} currentLang={currentLang} t={t} />
+                  ) : (
                   <ProjectCard key={p.id} project={p} currentLang={currentLang} t={t} />
+                  )
                 ))}
               </div>
             )}
           </TabsContent>
         </Tabs>
         </section>
-      </AnimatedSection>
-
-      {/* MEGA PROJETS */}
-      <AnimatedSection direction="up" delay={0.4} duration={0.8}>
-        <section id="mega-projets" className="max-w-6xl mx-auto px-4 py-8">
-          <div className="flex items-end justify-between gap-4 flex-wrap">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">{t.megaProjects}</h2>
-              <p className="text-muted-foreground">{t.strategicProjects}</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-            {projectsLoading ? (
-              <LoadingSpinner />
-            ) : (
-              megaProjects.map((p) => (
-                <MegaProjectCard key={p.id} project={p} currentLang={currentLang} t={t} />
-              ))
-            )}
-          </div>
-        </section>
-      </AnimatedSection>
 
       {/* FREELANCE */}
-      <AnimatedSection direction="up" delay={0.4} duration={0.8}>
         <section id="freelance" className="max-w-6xl mx-auto px-4 py-8">
           <div className="flex items-end justify-between gap-4 flex-wrap">
             <div>
@@ -799,10 +800,8 @@ export default function Portfolio() {
           )}
           </div>
         </section>
-      </AnimatedSection>
 
       {/* CV / CERTIFICATIONS */}
-      <AnimatedSection direction="up" delay={0.5} duration={0.8}>
       <section id="cv" className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
@@ -862,71 +861,11 @@ export default function Portfolio() {
           )}
         </div>
       </section>
-      </AnimatedSection>
 
-      {/* PROJETS EN COURS */}
-      <AnimatedSection direction="up" delay={0.6} duration={0.8}>
-      <section id="en-cours" className="max-w-6xl mx-auto px-4 py-8">
-        <div className="flex items-end justify-between gap-4 flex-wrap">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">Projets en cours</h2>
-            <p className="text-muted-foreground">Sélection de projets actuellement en développement.</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-          {projectsLoading ? (
-            <LoadingSpinner />
-          ) : (
-            (projects || []).filter(p => p.status === 'in_progress').slice(0, 3).map((m) => (
-              <MegaProjectCard key={m.id} project={m} currentLang={currentLang} t={t} />
-            ))
-          )}
-        </div>
-      </section>
-      </AnimatedSection>
 
-      {/* OBJECTIFS DE PRODUCTION */}
-      <AnimatedSection direction="up" delay={0.7} duration={0.8}>
-      <section id="objectifs" className="max-w-6xl mx-auto px-4 py-8">
-        <div className="flex items-end justify-between gap-4 flex-wrap">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">{t.productionGoals}</h2>
-            <p className="text-muted-foreground">{t.productionSubtitle}</p>
-          </div>
-        </div>
-        <div className="grid gap-4 mt-6">
-          {goalsLoading ? (
-            <LoadingSpinner />
-          ) : goalsError ? (
-            <ErrorMessage message={goalsError} />
-          ) : (
-            goals?.map((g) => {
-              const currentCount = projectCounts[g.category] || 0;
-              const value = g.target ? Math.min(100, Math.round((currentCount / g.target) * 100)) : 0;
-              return (
-                <Card key={g.id}>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base flex items-center justify-between">
-                      <span>{getLocalizedText(g, 'label', currentLang)}</span>
-                      <span className="text-sm text-muted-foreground">{currentCount} / {g.target}</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Progress value={value} />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {getLocalizedText(g, 'description', currentLang)}
-                    </p>
-                  </CardContent>
-                </Card>
-              );
-            })
-          )}
-        </div>
-      </section>
-      </AnimatedSection>
+
 
       {/* À PROPOS */}
-      <AnimatedSection direction="up" delay={0.8} duration={0.8}>
       <section id="apropos" className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2">
@@ -960,10 +899,8 @@ export default function Portfolio() {
           </Card>
         </div>
       </section>
-      </AnimatedSection>
 
       {/* CONTACT */}
-      <AnimatedSection direction="up" delay={0.9} duration={0.8}>
       <section id="contact" className="max-w-6xl mx-auto px-4 py-10">
         <div className="grid lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2">
@@ -1023,7 +960,6 @@ export default function Portfolio() {
           </Card>
         </div>
       </section>
-      </AnimatedSection>
 
       <footer className="py-10 border-t border-gray-200">
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
@@ -1073,6 +1009,8 @@ function SocialLink({ href, icon, label }) {
 }
 
 function MegaProjectCard({ project, currentLang, t }) {
+  const { getDirectionalClass, isRTL } = useDirectionalClasses();
+
   return (
     <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
       <Card className="h-full relative overflow-hidden">
@@ -1081,28 +1019,22 @@ function MegaProjectCard({ project, currentLang, t }) {
             <Badge variant="destructive" className="text-xs">MEGA</Badge>
           </div>
         )}
-        {/* Image du projet mega ou fond par défaut */}
-        <div className="h-48 rounded-t-xl overflow-hidden">
-          <ProjectImage
-            src={getPublicImageUrl(project.image_url)}
-            alt={getLocalizedText(project, 'title', currentLang)}
-            className="transition-transform duration-300 hover:scale-105"
-            fallbackGradient="from-gray-300 via-gray-200 to-gray-100"
-          />
-        </div>
-        <CardHeader className="pb-2">
-          <div className="flex items-start justify-between gap-2">
-            <div>
+        
+        <CardHeader className="pb-2 pt-6">
+          <div className={`${getDirectionalClass("flex items-start justify-between")} gap-2`}>
+            <div className="flex-1">
               <CardTitle className="text-lg">{getLocalizedText(project, 'title', currentLang)}</CardTitle>
-              <CardDescription className="line-clamp-2 min-h-[2.5rem] mb-2">{getLocalizedText(project, 'description', currentLang)}</CardDescription>
             </div>
+            {project.stars > 0 && (
             <div className="flex items-center text-sm text-muted-foreground">
               <Star className="h-4 w-4 mr-1" /> {project.stars}
             </div>
+            )}
           </div>
         </CardHeader>
+        
         <CardContent>
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className={`${getDirectionalClass("flex flex-wrap gap-2")} mb-4`}>
             {(Array.isArray(project.category) ? project.category : [project.category]).map((cat) => (
               <Badge key={`${project.id}-category-${cat}`} variant="default" className="rounded-full capitalize h-6 px-3 text-xs">{cat}</Badge>
             ))}
@@ -1110,10 +1042,21 @@ function MegaProjectCard({ project, currentLang, t }) {
               <Badge key={tag} variant="secondary" className="rounded-full h-6 px-3 text-xs">{tag}</Badge>
             ))}
           </div>
-          <div className="flex items-center justify-start">
-            <a href={project.link} target="_blank" rel="noreferrer">
-              <Button size="sm" variant="outline">{t.see} <ArrowUpRight className="ml-1 h-4 w-4" /></Button>
-            </a>
+          <div className={`${getDirectionalClass("flex items-center gap-2")} justify-start`}>
+            {project.link && project.link !== '#' && (
+              <a href={project.link} target="_blank" rel="noopener noreferrer">
+                <Button size="sm" variant="outline" className={getDirectionalClass("flex items-center")}>
+                  {t.see} <ArrowUpRight className={`${isRTL ? 'mr-1' : 'ml-1'} h-4 w-4 no-rtl-transform`} />
+                </Button>
+              </a>
+            )}
+            {project.github_url && (
+              <a href={project.github_url} target="_blank" rel="noopener noreferrer">
+                <Button variant="ghost" size="sm" className="no-rtl-transform">
+                  <Github className="w-4 h-4" />
+                </Button>
+              </a>
+            )}
           </div>
         </CardContent>
       </Card>
