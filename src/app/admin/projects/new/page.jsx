@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { createProject } from "@/lib/supabase";
+import { createProject, translateText, uploadImageAndGetPublicUrl } from "@/lib/supabase";
 import { ArrowLeft, Plus, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -55,6 +55,8 @@ export default function NewProject() {
   });
 
   const [newTag, setNewTag] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [translating, setTranslating] = useState(false);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -107,7 +109,19 @@ export default function NewProject() {
       return;
     }
 
-    const result = await createProject(formData);
+    // Upload image file if provided
+    let payload = { ...formData };
+    if (imageFile) {
+      const upload = await uploadImageAndGetPublicUrl({ bucket: 'images', folder: 'projects', file: imageFile });
+      if (!upload.success) {
+        setError(upload.error);
+        setLoading(false);
+        return;
+      }
+      payload.image_url = upload.url;
+    }
+
+    const result = await createProject(payload);
 
     if (result.success) {
       router.push('/admin/projects');
@@ -117,6 +131,27 @@ export default function NewProject() {
 
     setLoading(false);
   };
+
+  const handleAutoTranslate = async () => {
+    setTranslating(true)
+    try {
+      const targets = ['en','hi','ar']
+      const updates = {}
+      for (const lang of targets) {
+        if (!formData[`title_${lang}`] && formData.title_fr) {
+          const r = await translateText({ text: formData.title_fr, target: lang, source: 'fr' })
+          if (r.success) updates[`title_${lang}`] = r.text
+        }
+        if (!formData[`description_${lang}`] && formData.description_fr) {
+          const r2 = await translateText({ text: formData.description_fr, target: lang, source: 'fr' })
+          if (r2.success) updates[`description_${lang}`] = r2.text
+        }
+      }
+      if (Object.keys(updates).length) setFormData(prev => ({ ...prev, ...updates }))
+    } finally {
+      setTranslating(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -149,6 +184,11 @@ export default function NewProject() {
               <CardDescription>
                 Détails de base du projet
               </CardDescription>
+              <div className="mt-2">
+                <Button type="button" variant="outline" size="sm" onClick={handleAutoTranslate} disabled={translating}>
+                  {translating ? 'Traduction...' : 'Traduire automatiquement'}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -190,6 +230,7 @@ export default function NewProject() {
                   value={formData.title_hi}
                   onChange={(e) => handleInputChange('title_hi', e.target.value)}
                   placeholder="Nom du projet en hindi"
+                  disabled
                 />
               </div>
 
@@ -200,6 +241,7 @@ export default function NewProject() {
                   value={formData.title_ar}
                   onChange={(e) => handleInputChange('title_ar', e.target.value)}
                   placeholder="Nom du projet en arabe"
+                  disabled
                 />
               </div>
             </CardContent>
@@ -244,6 +286,7 @@ export default function NewProject() {
                   onChange={(e) => handleInputChange('description_hi', e.target.value)}
                   placeholder="Description du projet en hindi"
                   rows={3}
+                  disabled
                 />
               </div>
 
@@ -255,6 +298,7 @@ export default function NewProject() {
                   onChange={(e) => handleInputChange('description_ar', e.target.value)}
                   placeholder="Description du projet en arabe"
                   rows={3}
+                  disabled
                 />
               </div>
             </CardContent>
@@ -446,6 +490,15 @@ export default function NewProject() {
                   onChange={(e) => handleInputChange('image_url', e.target.value)}
                   placeholder="https://example.com/image.jpg"
                 />
+                <div className="grid gap-2">
+                  <Label htmlFor="image_file">ou téléverser une image</Label>
+                  <Input
+                    id="image_file"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>

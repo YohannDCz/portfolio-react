@@ -7,6 +7,7 @@ import {
     Award,
     FolderOpen,
     Globe,
+    Kanban,
     LayoutDashboard,
     Loader2,
     LogOut,
@@ -26,6 +27,7 @@ const navigation = [
   { name: 'Profil', href: '/admin/profile', icon: User },
   { name: 'Plateformes', href: '/admin/platforms', icon: Globe },
   { name: 'Messages', href: '/admin/contact', icon: Mail },
+  { name: 'Kanban', href: '/admin/kanban', icon: Kanban }
 ];
 
 export default function AdminLayout({ children }) {

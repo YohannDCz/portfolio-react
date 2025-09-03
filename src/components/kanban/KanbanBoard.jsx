@@ -148,7 +148,7 @@ export default function KanbanBoard() {
                 <SelectItem value="all">Tous les projets</SelectItem>
                 {projects?.map((project) => (
                   <SelectItem key={project.id} value={project.id}>
-                    {project.external_id ? `${project.external_id} - ${project.title_fr}` : project.title_fr}
+                    {project.title_fr}
                   </SelectItem>
                 ))}
               </SelectContent>

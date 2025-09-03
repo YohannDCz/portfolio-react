@@ -2,15 +2,15 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,16 +18,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  deleteCertification,
-  useCertifications
+    deleteCertification,
+    useCertifications
 } from "@/lib/supabase";
 import {
-  Edit,
-  ExternalLink,
-  Filter,
-  Plus,
-  Search,
-  Trash2
+    Edit,
+    ExternalLink,
+    Filter,
+    Plus,
+    Search,
+    Trash2
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -184,9 +184,10 @@ export default function CertificationsAdmin() {
                   <CardDescription>{cert.provider}</CardDescription>
                 </div>
                 <Badge 
-                  variant={
-                    cert.status === 'completed' ? 'default' : 
-                    cert.status === 'in_progress' ? 'secondary' : 'outline'
+                  className={
+                    cert.status === 'completed' ? 'bg-green-600 text-white' :
+                    cert.status === 'in_progress' ? 'bg-blue-600 text-white' :
+                    'bg-gray-200 text-gray-800'
                   }
                 >
                   {cert.status === 'completed' ? '✓ Obtenue' : 

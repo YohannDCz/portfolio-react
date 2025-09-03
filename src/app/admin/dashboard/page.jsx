@@ -4,25 +4,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  useCertifications,
-  useFreelancePlatforms,
-  useKanbanStats,
-  useKanbanTasks,
-  useProfile,
-  useProjects,
-  useSkills
+    useCertifications,
+    useFreelancePlatforms,
+    useProfile,
+    useProjects,
+    useSkills
 } from "@/lib/supabase";
 import {
-  AlertTriangle,
-  Award,
-  Calendar,
-  CheckSquare,
-  FolderOpen,
-  Kanban,
-  Plus,
-  Settings,
-  TrendingUp,
-  User
+    Award,
+    Calendar,
+    CheckSquare,
+    FolderOpen,
+    Kanban,
+    Plus,
+    Settings,
+    TrendingUp,
+    User
 } from "lucide-react";
 import Link from "next/link";
 
@@ -89,21 +86,22 @@ export default function AdminDashboard() {
   const { skills, loading: skillsLoading } = useSkills();
   const { platforms, loading: platformsLoading } = useFreelancePlatforms();
   const { profile, loading: profileLoading } = useProfile();
-  const { stats: kanbanStats, loading: kanbanStatsLoading } = useKanbanStats();
-  const { tasks: kanbanTasks, loading: kanbanTasksLoading } = useKanbanTasks();
+  // Suppression des hooks liés aux tâches Kanban
+  // const { stats: kanbanStats, loading: kanbanStatsLoading } = useKanbanStats();
+  // const { tasks: kanbanTasks, loading: kanbanTasksLoading } = useKanbanTasks();
 
   const megaProjects = projects?.filter(p => p.is_mega_project) || [];
   const completedProjects = projects?.filter(p => p.status === 'completed') || [];
   const completedCerts = certifications?.filter(c => c.status === 'completed') || [];
   
-  // Statistiques Kanban
-  const totalTasks = kanbanTasks?.length || 0;
-  const completedTasks = kanbanTasks?.filter(t => t.column?.name === 'Terminé').length || 0;
-  const urgentTasks = kanbanTasks?.filter(t => t.priority === 'urgent' && t.column?.name !== 'Terminé').length || 0;
-  const overdueTasks = kanbanTasks?.filter(t => {
-    if (!t.due_date || t.column?.name === 'Terminé') return false;
-    return new Date(t.due_date) < new Date();
-  }).length || 0;
+  // Suppression des statistiques Kanban
+  // const totalTasks = kanbanTasks?.length || 0;
+  // const completedTasks = kanbanTasks?.filter(t => t.column?.name === 'Terminé').length || 0;
+  // const urgentTasks = kanbanTasks?.filter(t => t.priority === 'urgent' && t.column?.name !== 'Terminé').length || 0;
+  // const overdueTasks = kanbanTasks?.filter(t => {
+  //   if (!t.due_date || t.column?.name === 'Terminé') return false;
+  //   return new Date(t.due_date) < new Date();
+  // }).length || 0;
 
   return (
     <div className="space-y-6">
@@ -140,22 +138,6 @@ export default function AdminDashboard() {
           icon={TrendingUp}
           href="/admin/projects"
           color="green"
-        />
-        <StatCard
-          title="Tâches Kanban"
-          value={kanbanTasksLoading ? "..." : totalTasks}
-          description={`${completedTasks} terminées`}
-          icon={CheckSquare}
-          href="/admin/kanban"
-          color="blue"
-        />
-        <StatCard
-          title="Tâches Urgentes"
-          value={kanbanTasksLoading ? "..." : urgentTasks}
-          description="À traiter rapidement"
-          icon={AlertTriangle}
-          href="/admin/kanban"
-          color="orange"
         />
         <StatCard
           title="Certifications"
@@ -280,11 +262,11 @@ export default function AdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {kanbanTasksLoading ? (
+            {/* kanbanTasksLoading ? (
               <p className="text-muted-foreground">Chargement...</p>
-            ) : kanbanTasks?.length > 0 ? (
+            ) : kanbanTasks?.length > 0 ? ( */}
               <div className="space-y-3">
-                {kanbanTasks
+                {/* {kanbanTasks
                   .filter(task => task.column?.name !== 'Terminé')
                   .sort((a, b) => {
                     // Tri par priorité puis par date d'échéance
@@ -317,7 +299,7 @@ export default function AdminDashboard() {
                               <>
                                 <span className="text-xs text-muted-foreground">•</span>
                                 <span className="text-xs text-muted-foreground">
-                                  {task.project.external_id || task.project.title_fr}
+                                  {task.project.title_fr}
                                 </span>
                               </>
                             )}
@@ -341,14 +323,14 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                     );
-                  })}
+                  })} */}
                 <Link href="/admin/kanban">
                   <Button variant="outline" className="w-full mt-4">
                     Voir toutes les tâches
                   </Button>
                 </Link>
               </div>
-            ) : (
+            {/* ) : (
               <div className="text-center py-6">
                 <CheckSquare className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">Aucune tâche</p>
@@ -356,7 +338,7 @@ export default function AdminDashboard() {
                   <Button className="mt-2">Créer la première tâche</Button>
                 </Link>
               </div>
-            )}
+            )} */}
           </CardContent>
         </Card>
 

@@ -1,5 +1,6 @@
 'use client';
 
+import ProjectImage from "@/components/ProjectImage";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import {
   getMegaProjects,
   getNormalProjects,
   getProjectsByCategory,
+  getPublicImageUrl,
   sendContactMessage,
   useCertifications,
   useFreelancePlatforms,
@@ -336,7 +338,7 @@ function ProjectCard({ project, currentLang, t }) {
         {project.image_url && (
           <div className="h-48 w-full overflow-hidden">
             <ProjectImage
-              src={project.image_url}
+              src={getPublicImageUrl(project.image_url)}
               alt={getLocalizedText(project, 'title', currentLang)}
               className="transition-transform duration-300 hover:scale-105"
             />
@@ -349,7 +351,7 @@ function ProjectCard({ project, currentLang, t }) {
               <CardTitle className="text-lg leading-tight">
                 {getLocalizedText(project, 'title', currentLang)}
               </CardTitle>
-              <CardDescription className="mt-1 line-clamp-2">
+              <CardDescription className="mt-1 mb-3 line-clamp-2">
                 {getLocalizedText(project, 'description', currentLang)}
               </CardDescription>
             </div>
@@ -365,7 +367,7 @@ function ProjectCard({ project, currentLang, t }) {
         <CardContent className="pt-0">
           <div className="space-y-3">
             {/* Catégories et tags */}
-            <div className={`${getDirectionalClass("flex flex-wrap gap-1")} ${isRTL ? 'justify-end' : 'justify-start'}`}>
+            <div className={`${getDirectionalClass("flex flex-wrap gap-1") } ${isRTL ? 'justify-end' : 'justify-start'}`}>
               {project.category?.map((cat) => (
                 <Badge key={cat} variant="outline" className="text-xs">
                   {cat}
@@ -384,7 +386,7 @@ function ProjectCard({ project, currentLang, t }) {
             </div>
 
             {/* Actions */}
-            <div className={getDirectionalClass("flex gap-2 pt-2 border-t")}>
+            <div className={getDirectionalClass("flex gap-2 pt-3 mt-1 border-t")}>
               {project.link && project.link !== '#' && (
                 <a href={project.link} target="_blank" rel="noopener noreferrer" className="flex-1">
                   <Button variant="outline" size="sm" className={`w-full ${getDirectionalClass("flex items-center justify-center")}`}>
@@ -557,12 +559,12 @@ export default function Portfolio() {
 
           <nav className={`hidden md:flex items-center gap-6 text-sm ${getDirectionalClass("flex-row")}`}>
             <a href="#projets" className="hover:opacity-80">{t.projects}</a>
-            <a href="#freelance" className="hover:opacity-80">{t.freelance}</a>
+            {/* freelance removed */}
             <a href="#cv" className="hover:opacity-80">{t.cv}</a>
-            <a href="#mega" className="hover:opacity-80">{t.megaProjects}</a>
+            {/* mega removed */}
             <a href="#objectifs" className="hover:opacity-80">{t.goals}</a>
             <a href="#apropos" className="hover:opacity-80">{t.about}</a>
-            <a href="#contact" className="hover:opacity-80">{t.contact}</a>
+            {/* contact removed */}
           </nav>
 
           <div className={getDirectionalClass("flex items-center gap-2")}>
@@ -686,11 +688,36 @@ export default function Portfolio() {
 
         <Tabs value={tab} onValueChange={setTab} className="mt-4">
           <TabsList className="grid grid-cols-5 bg-muted w-full md:w-[560px]">
-            <TabsTrigger value="tous" className="font-bold text-xs sm:text-sm">{t.all}</TabsTrigger>
-            <TabsTrigger value="web" className="font-bold text-xs sm:text-sm">{t.web}</TabsTrigger>
-            <TabsTrigger value="mobile" className="font-bold text-xs sm:text-sm">{t.mobile}</TabsTrigger>
-            <TabsTrigger value="design" className="font-bold text-xs sm:text-sm">{t.design}</TabsTrigger>
-            <TabsTrigger value="autre" className="font-bold text-xs sm:text-sm">{t.other}</TabsTrigger>
+            <TabsTrigger 
+              value="tous" 
+              className="font-bold text-xs sm:text-sm dark:text-white light:text-black"
+            >
+              {t.all}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="web" 
+              className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black"
+            >
+              {t.web}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="mobile" 
+              className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black"
+            >
+              {t.mobile}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="design" 
+              className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black"
+            >
+              {t.design}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="autre" 
+              className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black"
+            >
+              {t.other}
+            </TabsTrigger>
           </TabsList>
           <TabsContent value={tab} className="mt-6">
             {projectsLoading ? (
@@ -765,13 +792,25 @@ export default function Portfolio() {
               <Card key={c.id}>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg">{c.title}</CardTitle>
-                  <CardDescription>{c.provider || "Certification"}</CardDescription>
+                  <CardDescription className="mb-2">{c.provider || "Certification"}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between mb-2">
                     <Badge variant="secondary">{c.year || t.inProgress}</Badge>
-                    <Badge variant={c.status === 'completed' ? 'default' : 'outline'}>
-                      {c.status === 'completed' ? '✓' : c.status === 'in_progress' ? '⏳' : '📋'}
+                    <Badge 
+                      className={
+                        c.status === 'completed' 
+                          ? 'bg-green-600 text-white' 
+                          : c.status === 'in_progress' 
+                            ? 'bg-gray-300 text-gray-900 dark:bg-gray-700 dark:text-white' 
+                            : 'bg-gray-200 text-gray-800'
+                      }
+                    >
+                      {c.status === 'completed' 
+                        ? '✅' 
+                        : c.status === 'in_progress' 
+                          ? '⏳' 
+                          : '🗂️'}
                     </Badge>
                   </div>
                   {c.certificate_urls && (
@@ -797,32 +836,29 @@ export default function Portfolio() {
       </section>
       </AnimatedSection>
 
-      {/* MEGA PROJETS */}
+      {/* PROJETS EN COURS (ex-mega style) */}
       <AnimatedSection direction="up" delay={0.6} duration={0.8}>
-      <section id="mega" className="max-w-6xl mx-auto px-4 py-8">
+      <section id="en-cours" className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">{t.megaProjects}</h2>
-            <p className="text-muted-foreground">{t.strategicProjects}</p>
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">Projets en cours</h2>
+            <p className="text-muted-foreground">Sélection de projets actuellement en développement.</p>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
           {projectsLoading ? (
             <LoadingSpinner />
           ) : (
-            megaProjects.map((m) => (
+            (projects || []).filter(p => p.status === 'in_progress').slice(0, 8).map((m) => (
               <Card key={m.id} className="relative overflow-hidden">
-                <div className="absolute top-2 right-2">
-                  <Badge variant="destructive" className="text-xs">MEGA</Badge>
-                </div>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg">{getLocalizedText(m, 'title', currentLang)}</CardTitle>
-                  <CardDescription>Stack : {m.stack}</CardDescription>
+                  {m.stack && <CardDescription>Stack : {m.stack}</CardDescription>}
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-3">{getLocalizedText(m, 'description', currentLang)}</p>
                   <div className="flex items-center justify-between">
-                    <Badge variant="secondary">{t.vision}</Badge>
+                    <Badge variant="secondary">{t.inProgress}</Badge>
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Star className="h-4 w-4 mr-1" /> {m.stars}
                     </div>
@@ -1031,7 +1067,7 @@ function MegaProjectCard({ project, currentLang, t }) {
         {/* Image du projet mega ou fond par défaut */}
         <div className="h-48 rounded-t-xl overflow-hidden">
           <ProjectImage
-            src={project.image_url}
+            src={getPublicImageUrl(project.image_url)}
             alt={getLocalizedText(project, 'title', currentLang)}
             className="transition-transform duration-300 hover:scale-105"
             fallbackGradient="from-gray-300 via-gray-200 to-gray-100"
@@ -1041,7 +1077,7 @@ function MegaProjectCard({ project, currentLang, t }) {
           <div className="flex items-start justify-between gap-2">
             <div>
               <CardTitle className="text-lg">{getLocalizedText(project, 'title', currentLang)}</CardTitle>
-              <CardDescription className="line-clamp-2 min-h-[2.5rem]">{getLocalizedText(project, 'description', currentLang)}</CardDescription>
+              <CardDescription className="line-clamp-2 min-h-[2.5rem] mb-2">{getLocalizedText(project, 'description', currentLang)}</CardDescription>
             </div>
             <div className="flex items-center text-sm text-muted-foreground">
               <Star className="h-4 w-4 mr-1" /> {project.stars}

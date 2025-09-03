@@ -339,6 +339,24 @@ export const getNormalProjects = (projects) => {
 }
 
 // =====================================
+// SIMPLE TRANSLATION HELPER VIA API ROUTE
+// =====================================
+export const translateText = async ({ text, target, source = 'auto' }) => {
+  try {
+    const res = await fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, target, source })
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Translation failed')
+    return { success: true, text: data.translatedText }
+  } catch (err) {
+    return { success: false, error: err.message }
+  }
+}
+
+// =====================================
 // FONCTIONS CRUD POUR L'ADMIN
 // =====================================
 
@@ -611,7 +629,7 @@ export const useKanbanTasks = () => {
           .select(`
             *,
             column:kanban_columns(id, name, color),
-            project:projects(id, title_fr, external_id)
+            project:projects(id, title_fr)
           `)
           .order('position', { ascending: true })
 
@@ -679,7 +697,7 @@ export const createKanbanTask = async (taskData) => {
       .select(`
         *,
         column:kanban_columns(id, name, color),
-        project:projects(id, title_fr, external_id)
+        project:projects(id, title_fr)
       `)
 
     if (error) throw error
@@ -698,7 +716,7 @@ export const updateKanbanTask = async (id, taskData) => {
       .select(`
         *,
         column:kanban_columns(id, name, color),
-        project:projects(id, title_fr, external_id)
+        project:projects(id, title_fr)
       `)
 
     if (error) throw error
@@ -892,6 +910,53 @@ export const useAllProjectsProgress = () => {
   }, [projects])
 
   return { progressData, loading }
+}
+
+// =====================================
+// UPLOAD IMAGES TO SUPABASE STORAGE
+// =====================================
+
+// Helper to generate a unique file path
+const generateFilePath = (folder, fileName) => {
+  const ext = fileName.includes('.') ? fileName.split('.').pop() : 'png'
+  const base = fileName.replace(/\.[^/.]+$/, '')
+  const timestamp = Date.now()
+  return `${folder}/${base}-${timestamp}.${ext}`
+}
+
+// Upload a file to a storage bucket and return the public URL
+export const uploadImageAndGetPublicUrl = async ({ bucket = 'images', folder = 'projects', file }) => {
+  try {
+    if (!file) throw new Error('Aucun fichier fourni')
+    const path = generateFilePath(folder, file.name || 'image.png')
+
+    const { error: uploadError } = await supabase.storage.from(bucket).upload(path, file, {
+      upsert: false,
+      cacheControl: '3600',
+      contentType: file.type || 'image/png'
+    })
+    if (uploadError) throw uploadError
+
+    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+    const publicUrl = data?.publicUrl
+    if (!publicUrl) throw new Error('Impossible de générer l\'URL publique')
+
+    return { success: true, url: publicUrl, path }
+  } catch (err) {
+    return { success: false, error: err.message }
+  }
+}
+
+// Get a public URL for a storage object path or return the original URL if already absolute
+export const getPublicImageUrl = (pathOrUrl, bucket = 'images') => {
+  try {
+    if (!pathOrUrl) return ''
+    if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl
+    const { data } = supabase.storage.from(bucket).getPublicUrl(pathOrUrl)
+    return data?.publicUrl || ''
+  } catch (_) {
+    return ''
+  }
 }
 
 export { useEffect, useState } from 'react';

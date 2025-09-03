@@ -10,11 +10,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { getCertification, updateCertification } from "@/lib/supabase";
 import { ArrowLeft, Loader2, X } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function EditCertification({ params }) {
+export default function EditCertification() {
   const router = useRouter();
+  const params = useParams();
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [error, setError] = useState("");
@@ -47,7 +49,7 @@ export default function EditCertification({ params }) {
       setFetchLoading(true);
       setError("");
       
-      const result = await getCertification(params.id);
+      const result = await getCertification(id);
       
       if (result.success) {
         const cert = result.data;
@@ -81,10 +83,10 @@ export default function EditCertification({ params }) {
       setFetchLoading(false);
     };
 
-    if (params.id) {
+    if (id) {
       fetchCertification();
     }
-  }, [params.id]);
+  }, [id]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -132,7 +134,7 @@ export default function EditCertification({ params }) {
       certificate_urls: Object.keys(certificate_urls).length > 0 ? certificate_urls : null
     };
 
-    const result = await updateCertification(params.id, dataToSubmit);
+    const result = await updateCertification(id, dataToSubmit);
 
     if (result.success) {
       router.push('/admin/certifications');

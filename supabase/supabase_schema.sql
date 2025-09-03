@@ -38,6 +38,18 @@ CREATE TABLE profiles (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Tables de traductions (profil et projets)
+CREATE TABLE IF NOT EXISTS profile_translations (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+    lang TEXT NOT NULL CHECK (lang IN ('fr','en','hi','ar')),
+    title TEXT,
+    tagline TEXT,
+    availability_hours TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(profile_id, lang)
+);
+
 -- =====================================
 -- 2. TABLE SKILLS MULTILINGUE
 -- =====================================
@@ -82,6 +94,16 @@ CREATE TABLE projects (
     sort_order INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS project_translations (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
+    lang TEXT NOT NULL CHECK (lang IN ('fr','en','hi','ar')),
+    title TEXT,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(project_id, lang)
 );
 
 -- =====================================

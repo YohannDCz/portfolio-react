@@ -9,10 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { getProject, updateProject } from "@/lib/supabase";
+import { getProject, translateText, updateProject, uploadImageAndGetPublicUrl } from "@/lib/supabase";
 import { ArrowLeft, Loader2, Plus, X } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const CATEGORIES = ['web', 'mobile', 'design', 'autre'];
@@ -25,8 +25,10 @@ const TECH_TAGS = [
   'MySQL', 'Firebase', 'Supabase', 'Docker', 'AWS'
 ];
 
-export default function EditProject({ params }) {
+export default function EditProject() {
   const router = useRouter();
+  const params = useParams();
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [error, setError] = useState("");
@@ -57,6 +59,8 @@ export default function EditProject({ params }) {
   });
 
   const [newTag, setNewTag] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [translating, setTranslating] = useState(false);
 
   // Récupérer le projet à éditer
   useEffect(() => {
@@ -64,7 +68,7 @@ export default function EditProject({ params }) {
       setFetchLoading(true);
       setError("");
       
-      const result = await getProject(params.id);
+      const result = await getProject(id);
       
       if (result.success) {
         setProject(result.data);
@@ -97,10 +101,10 @@ export default function EditProject({ params }) {
       setFetchLoading(false);
     };
 
-    if (params.id) {
+    if (id) {
       fetchProject();
     }
-  }, [params.id]);
+  }, [id]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -153,7 +157,18 @@ export default function EditProject({ params }) {
       return;
     }
 
-    const result = await updateProject(params.id, formData);
+    let payload = { ...formData };
+    if (imageFile) {
+      const upload = await uploadImageAndGetPublicUrl({ bucket: 'images', folder: 'projects', file: imageFile });
+      if (!upload.success) {
+        setError(upload.error);
+        setLoading(false);
+        return;
+      }
+      payload.image_url = upload.url;
+    }
+
+    const result = await updateProject(id, payload);
 
     if (result.success) {
       router.push('/admin/projects');
@@ -163,6 +178,30 @@ export default function EditProject({ params }) {
 
     setLoading(false);
   };
+
+  const handleAutoTranslate = async () => {
+    setTranslating(true)
+    try {
+      // Translate FR -> EN, HI, AR for title and description
+      const targets = ['en','hi','ar']
+      const updates = {}
+      for (const lang of targets) {
+        if (!formData[`title_${lang}`] && formData.title_fr) {
+          const r = await translateText({ text: formData.title_fr, target: lang, source: 'fr' })
+          if (r.success) updates[`title_${lang}`] = r.text
+        }
+        if (!formData[`description_${lang}`] && formData.description_fr) {
+          const r2 = await translateText({ text: formData.description_fr, target: lang, source: 'fr' })
+          if (r2.success) updates[`description_${lang}`] = r2.text
+        }
+      }
+      if (Object.keys(updates).length) {
+        setFormData(prev => ({ ...prev, ...updates }))
+      }
+    } finally {
+      setTranslating(false)
+    }
+  }
 
   if (fetchLoading) {
     return (
@@ -256,6 +295,11 @@ export default function EditProject({ params }) {
               <CardDescription>
                 Détails de base du projet
               </CardDescription>
+              <div className="mt-2">
+                <Button type="button" variant="outline" size="sm" onClick={handleAutoTranslate} disabled={translating}>
+                  {translating ? 'Traduction...' : 'Traduire automatiquement'}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -297,6 +341,7 @@ export default function EditProject({ params }) {
                   value={formData.title_hi}
                   onChange={(e) => handleInputChange('title_hi', e.target.value)}
                   placeholder="Nom du projet en hindi"
+                  disabled
                 />
               </div>
 
@@ -307,6 +352,7 @@ export default function EditProject({ params }) {
                   value={formData.title_ar}
                   onChange={(e) => handleInputChange('title_ar', e.target.value)}
                   placeholder="Nom du projet en arabe"
+                  disabled
                 />
               </div>
             </CardContent>
@@ -351,6 +397,7 @@ export default function EditProject({ params }) {
                   onChange={(e) => handleInputChange('description_hi', e.target.value)}
                   placeholder="Description du projet en hindi"
                   rows={3}
+                  disabled
                 />
               </div>
 
@@ -362,6 +409,7 @@ export default function EditProject({ params }) {
                   onChange={(e) => handleInputChange('description_ar', e.target.value)}
                   placeholder="Description du projet en arabe"
                   rows={3}
+                  disabled
                 />
               </div>
             </CardContent>
@@ -553,6 +601,15 @@ export default function EditProject({ params }) {
                   onChange={(e) => handleInputChange('image_url', e.target.value)}
                   placeholder="https://example.com/image.jpg"
                 />
+                <div className="grid gap-2">
+                  <Label htmlFor="image_file">ou téléverser une image</Label>
+                  <Input
+                    id="image_file"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>

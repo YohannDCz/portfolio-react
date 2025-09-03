@@ -8,16 +8,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  updateProfile,
-  useProfile
+    translateText,
+    updateProfile,
+    uploadImageAndGetPublicUrl,
+    useProfile
 } from "@/lib/supabase";
 import {
-  Calendar,
-  Globe,
-  Plus,
-  Save,
-  User,
-  X
+    Calendar,
+    Globe,
+    Plus,
+    Save,
+    User,
+    X
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -67,6 +69,9 @@ export default function ProfileAdmin() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [saveSuccess, setSaveSuccess] = useState("");
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [coverFile, setCoverFile] = useState(null);
+  const [translating, setTranslating] = useState(false);
 
   // Charger les données du profil
   useEffect(() => {
@@ -149,7 +154,29 @@ export default function ProfileAdmin() {
       return;
     }
 
-    const result = await updateProfile(formData);
+    let payload = { ...formData };
+    // Upload avatar
+    if (avatarFile) {
+      const up = await uploadImageAndGetPublicUrl({ bucket: 'images', folder: 'avatars', file: avatarFile });
+      if (!up.success) {
+        setSaveError(up.error);
+        setSaving(false);
+        return;
+      }
+      payload.profile_image_url = up.url;
+    }
+    // Upload cover
+    if (coverFile) {
+      const up2 = await uploadImageAndGetPublicUrl({ bucket: 'images', folder: 'covers', file: coverFile });
+      if (!up2.success) {
+        setSaveError(up2.error);
+        setSaving(false);
+        return;
+      }
+      payload.cover_url = up2.url;
+    }
+
+    const result = await updateProfile(payload);
 
     if (result.success) {
       setSaveSuccess("Profil mis à jour avec succès !");
@@ -160,6 +187,31 @@ export default function ProfileAdmin() {
 
     setSaving(false);
   };
+
+  const handleAutoTranslate = async () => {
+    setTranslating(true)
+    try {
+      const targets = ['en','hi','ar']
+      const updates = {}
+      for (const lang of targets) {
+        if (!formData[`title_${lang}`] && formData.title_fr) {
+          const r = await translateText({ text: formData.title_fr, target: lang, source: 'fr' })
+          if (r.success) updates[`title_${lang}`] = r.text
+        }
+        if (!formData[`tagline_${lang}`] && formData.tagline_fr) {
+          const r2 = await translateText({ text: formData.tagline_fr, target: lang, source: 'fr' })
+          if (r2.success) updates[`tagline_${lang}`] = r2.text
+        }
+        if (!formData[`availability_hours_${lang}`] && formData.availability_hours_fr) {
+          const r3 = await translateText({ text: formData.availability_hours_fr, target: lang, source: 'fr' })
+          if (r3.success) updates[`availability_hours_${lang}`] = r3.text
+        }
+      }
+      if (Object.keys(updates).length) setFormData(prev => ({ ...prev, ...updates }))
+    } finally {
+      setTranslating(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -223,6 +275,11 @@ export default function ProfileAdmin() {
               <CardDescription>
                 Vos informations personnelles principales
               </CardDescription>
+              <div className="mt-2">
+                <Button type="button" variant="outline" size="sm" onClick={handleAutoTranslate} disabled={translating}>
+                  {translating ? 'Traduction...' : 'Traduire automatiquement'}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -245,6 +302,10 @@ export default function ProfileAdmin() {
                   onChange={(e) => handleInputChange('profile_image_url', e.target.value)}
                   placeholder="https://example.com/photo.jpg"
                 />
+                <div className="grid gap-2">
+                  <Label htmlFor="avatar_file">ou téléverser une image</Label>
+                  <Input id="avatar_file" type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files?.[0] || null)} />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -391,6 +452,7 @@ export default function ProfileAdmin() {
                   value={formData.title_hi}
                   onChange={(e) => handleInputChange('title_hi', e.target.value)}
                   placeholder="फुल स्टैक डेवलपर"
+                  disabled
                 />
               </div>
 
@@ -401,6 +463,7 @@ export default function ProfileAdmin() {
                   value={formData.title_ar}
                   onChange={(e) => handleInputChange('title_ar', e.target.value)}
                   placeholder="مطور ويب متكامل"
+                  disabled
                 />
               </div>
             </div>
@@ -447,6 +510,7 @@ export default function ProfileAdmin() {
                   onChange={(e) => handleInputChange('tagline_hi', e.target.value)}
                   placeholder="आधुनिक वेब एप्लिकेशन बनाने का जुनून..."
                   rows={3}
+                  disabled
                 />
               </div>
 
@@ -458,6 +522,7 @@ export default function ProfileAdmin() {
                   onChange={(e) => handleInputChange('tagline_ar', e.target.value)}
                   placeholder="شغوف بإنشاء تطبيقات ويب حديثة..."
                   rows={3}
+                  disabled
                 />
               </div>
             </div>

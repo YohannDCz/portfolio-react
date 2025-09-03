@@ -2,15 +2,15 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,19 +18,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  deleteProject,
-  useAllProjectsProgress,
-  useProjects
+    deleteProject,
+    useAllProjectsProgress,
+    useProjects
 } from "@/lib/supabase";
 import {
-  CheckSquare,
-  Edit,
-  ExternalLink,
-  Filter,
-  Plus,
-  Search,
-  Star,
-  Trash2
+    CheckSquare,
+    Edit,
+    ExternalLink,
+    Filter,
+    Plus,
+    Search,
+    Star,
+    Trash2
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -194,7 +194,7 @@ export default function ProjectsAdmin() {
                       </Badge>
                     )}
                   </CardTitle>
-                  <CardDescription className="line-clamp-2">
+                  <CardDescription className="line-clamp-2 mb-2">
                     {project.description_fr}
                   </CardDescription>
                 </div>
@@ -208,7 +208,7 @@ export default function ProjectsAdmin() {
             <CardContent>
               <div className="space-y-3">
                 {/* Catégories et tags */}
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1 mb-3">
                   {project.category?.map((cat) => (
                     <Badge key={cat} variant="outline" className="text-xs">
                       {cat}
@@ -227,12 +227,13 @@ export default function ProjectsAdmin() {
                 </div>
 
                 {/* Statut et Progression */}
-                <div className="space-y-2">
+                <div className="space-y-2 mt-auto">
                   <div className="flex items-center justify-between">
                     <Badge 
-                      variant={
-                        project.status === 'completed' ? 'default' : 
-                        project.status === 'in_progress' ? 'secondary' : 'outline'
+                      className={
+                        project.status === 'completed' ? 'bg-green-600 text-white' :
+                        project.status === 'in_progress' ? 'bg-yellow-500 text-black dark:text-white' :
+                        'bg-gray-200 text-gray-800'
                       }
                     >
                       {project.status === 'completed' ? 'Terminé' : 
@@ -255,9 +256,9 @@ export default function ProjectsAdmin() {
                         <CheckSquare className="w-3 h-3" />
                         <span>Progression: {progressData[project.id]}%</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                         <div 
-                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                          className="bg-blue-600 dark:bg-gray-300 h-2 rounded-full transition-all duration-300"
                           style={{ width: `${progressData[project.id]}%` }}
                         />
                       </div>
@@ -266,7 +267,7 @@ export default function ProjectsAdmin() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2 pt-2 border-t">
+                <div className="mt-3 pt-3 border-t flex gap-2">
                   <Link href={`/admin/projects/edit/${project.id}`} className="flex-1">
                     <Button variant="outline" size="sm" className="w-full">
                       <Edit className="w-4 h-4 mr-2" />
