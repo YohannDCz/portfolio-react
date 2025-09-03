@@ -33,7 +33,7 @@ export default function Banner() {
             <div className="flex items-center gap-2">
               <Info className="h-4 w-4" />
               <p>
-                Le site est en cours de refonte, il est possible que des projets soient manquants.
+                Le site est en cours de refonte, il est possible que des projets soient manquants. Revenez dans 1 semaine !
               </p>
             </div>
             <button
