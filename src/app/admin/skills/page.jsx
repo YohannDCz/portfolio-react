@@ -2,15 +2,15 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,20 +18,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAdminGuest } from "@/contexts/AdminGuestContext";
 import {
-  createSkill,
-  deleteSkill,
-  updateSkill,
-  useSkills
+    createSkill,
+    deleteSkill,
+    updateSkill,
+    useSkills
 } from "@/lib/supabase";
 import {
-  Code,
-  Edit,
-  Plus,
-  Save,
-  Search,
-  Trash2,
-  X
+    Code,
+    Edit,
+    Plus,
+    Save,
+    Search,
+    Trash2,
+    X
 } from "lucide-react";
 import { useState } from "react";
 
@@ -95,6 +96,7 @@ const PREDEFINED_SKILLS = [
 ];
 
 export default function SkillsAdmin() {
+  const { isGuest } = useAdminGuest();
   const { skills, loading, error } = useSkills();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -263,7 +265,9 @@ export default function SkillsAdmin() {
               behavior: 'smooth'
             });
           }
-        }}>
+        }}
+        disabled={isGuest}
+        >
           <Plus className="w-4 h-4 mr-2" />
           Nouvelle compétence
         </Button>
@@ -279,6 +283,7 @@ export default function SkillsAdmin() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <fieldset disabled={isGuest} className="space-y-4">
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
                   <Label htmlFor="name">Nom de la compétence *</Label>
@@ -321,7 +326,7 @@ export default function SkillsAdmin() {
               </div>
 
               <div className="flex gap-2">
-                <Button type="submit" disabled={actionLoading === 'create' || actionLoading === 'update'}>
+                <Button type="submit" disabled={actionLoading === 'create' || actionLoading === 'update' || isGuest}>
                   <Save className="w-4 h-4 mr-2" />
                   {actionLoading === 'create' || actionLoading === 'update' ? 'Sauvegarde...' : 
                    editingSkill ? 'Mettre à jour' : 'Ajouter'}
@@ -331,6 +336,7 @@ export default function SkillsAdmin() {
                   Annuler
                 </Button>
               </div>
+              </fieldset>
             </form>
           </CardContent>
         </Card>
@@ -353,7 +359,7 @@ export default function SkillsAdmin() {
                   variant="outline"
                   size="sm"
                   onClick={() => addPredefinedSkill(skill)}
-                  disabled={actionLoading === 'predefined'}
+                  disabled={actionLoading === 'predefined' || isGuest}
                 >
                   <Plus className="w-3 h-3 mr-1" />
                   {skill.name} ({skill.level}%)
@@ -473,6 +479,7 @@ export default function SkillsAdmin() {
                     size="sm" 
                     className="flex-1"
                     onClick={() => startEdit(skill)}
+                    disabled={isGuest}
                   >
                     <Edit className="w-4 h-4 mr-2" />
                     Modifier
@@ -484,6 +491,7 @@ export default function SkillsAdmin() {
                         variant="outline" 
                         size="sm"
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        disabled={isGuest}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -501,7 +509,7 @@ export default function SkillsAdmin() {
                         <AlertDialogAction
                           className="bg-red-600 hover:bg-red-700"
                           onClick={() => handleDelete(skill.id, skill.name)}
-                          disabled={actionLoading === skill.id}
+                          disabled={actionLoading === skill.id || isGuest}
                         >
                           {actionLoading === skill.id ? "Suppression..." : "Supprimer"}
                         </AlertDialogAction>
@@ -539,7 +547,9 @@ export default function SkillsAdmin() {
                   top: 0,
                   behavior: 'smooth'
                 });
-              }}>
+              }}
+              disabled={isGuest}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Nouvelle compétence
               </Button>

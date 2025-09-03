@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useAdminGuest } from "@/contexts/AdminGuestContext";
 import { getCertification, updateCertification } from "@/lib/supabase";
 import { ArrowLeft, Loader2, X } from "lucide-react";
 import Link from "next/link";
@@ -14,6 +15,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function EditCertification() {
+  const { isGuest } = useAdminGuest();
   const router = useRouter();
   const params = useParams();
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
@@ -229,6 +231,7 @@ export default function EditCertification() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        <fieldset disabled={isGuest} className="space-y-6">
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Informations générales */}
           <Card>
@@ -481,7 +484,7 @@ export default function EditCertification() {
                   Annuler
                 </Button>
               </Link>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading || isGuest}>
                 {loading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -494,6 +497,7 @@ export default function EditCertification() {
             </div>
           </CardContent>
         </Card>
+        </fieldset>
       </form>
     </div>
   );

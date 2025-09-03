@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAdminGuest } from "@/contexts/AdminGuestContext";
 import {
     deleteProject,
     useAllProjectsProgress,
@@ -36,6 +37,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 export default function ProjectsAdmin() {
+  const { isGuest } = useAdminGuest();
   const { projects, loading, error } = useProjects();
   const { progressData, loading: progressLoading } = useAllProjectsProgress();
   const [searchQuery, setSearchQuery] = useState("");
@@ -101,8 +103,8 @@ export default function ProjectsAdmin() {
             Gérez vos projets et réalisations
           </p>
         </div>
-        <Link href="/admin/projects/new">
-          <Button>
+        <Link href="/admin/projects/new" passHref>
+          <Button disabled={isGuest}>
             <Plus className="w-4 h-4 mr-2" />
             Nouveau projet
           </Button>
@@ -269,7 +271,7 @@ export default function ProjectsAdmin() {
                 {/* Actions */}
                 <div className="mt-3 pt-3 border-t flex gap-2">
                   <Link href={`/admin/projects/edit/${project.id}`} className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full">
+                    <Button variant="outline" size="sm" className="w-full" disabled={isGuest}>
                       <Edit className="w-4 h-4 mr-2" />
                       Modifier
                     </Button>
@@ -287,6 +289,7 @@ export default function ProjectsAdmin() {
                         variant="outline" 
                         size="sm"
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        disabled={isGuest}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -336,7 +339,7 @@ export default function ProjectsAdmin() {
                 }
               </p>
               <Link href="/admin/projects/new">
-                <Button>
+                <Button disabled={isGuest}>
                   <Plus className="w-4 h-4 mr-2" />
                   Nouveau projet
                 </Button>

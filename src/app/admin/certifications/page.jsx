@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAdminGuest } from "@/contexts/AdminGuestContext";
 import {
     deleteCertification,
     useCertifications
@@ -33,6 +34,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 export default function CertificationsAdmin() {
+  const { isGuest } = useAdminGuest();
   const { certifications, loading, error } = useCertifications();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -95,8 +97,8 @@ export default function CertificationsAdmin() {
             Gérez vos certifications et formations
           </p>
         </div>
-        <Link href="/admin/certifications/new">
-          <Button>
+        <Link href="/admin/certifications/new" passHref>
+          <Button disabled={isGuest}>
             <Plus className="w-4 h-4 mr-2" />
             Nouvelle certification
           </Button>
@@ -228,8 +230,8 @@ export default function CertificationsAdmin() {
 
                 {/* Actions */}
                 <div className="flex gap-2 pt-2 border-t">
-                  <Link href={`/admin/certifications/edit/${cert.id}`} className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full">
+                  <Link href={`/admin/certifications/edit/${cert.id}`} className="flex-1" passHref>
+                    <Button variant="outline" size="sm" className="w-full" disabled={isGuest}>
                       <Edit className="w-4 h-4 mr-2" />
                       Modifier
                     </Button>
@@ -241,6 +243,7 @@ export default function CertificationsAdmin() {
                         variant="outline" 
                         size="sm"
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        disabled={isGuest}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -289,8 +292,8 @@ export default function CertificationsAdmin() {
                   : "Commencez par ajouter votre première certification"
                 }
               </p>
-              <Link href="/admin/certifications/new">
-                <Button>
+              <Link href="/admin/certifications/new" passHref>
+                <Button disabled={isGuest}>
                   <Plus className="w-4 h-4 mr-2" />
                   Nouvelle certification
                 </Button>

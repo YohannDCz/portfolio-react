@@ -2,15 +2,15 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,22 +18,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useAdminGuest } from "@/contexts/AdminGuestContext";
 import {
-  createFreelancePlatform,
-  deleteFreelancePlatform,
-  updateFreelancePlatform,
-  useFreelancePlatforms
+    createFreelancePlatform,
+    deleteFreelancePlatform,
+    updateFreelancePlatform,
+    useFreelancePlatforms
 } from "@/lib/supabase";
 import {
-  Edit,
-  ExternalLink,
-  Globe,
-  Plus,
-  Save,
-  Search,
-  Star,
-  Trash2,
-  X
+    Edit,
+    ExternalLink,
+    Globe,
+    Plus,
+    Save,
+    Search,
+    Star,
+    Trash2,
+    X
 } from "lucide-react";
 import { useState } from "react";
 
@@ -81,6 +82,7 @@ const PREDEFINED_PLATFORMS = [
 ];
 
 export default function PlatformsAdmin() {
+  const { isGuest } = useAdminGuest();
   const { platforms, loading, error } = useFreelancePlatforms();
   const [searchQuery, setSearchQuery] = useState("");
   const [editingPlatform, setEditingPlatform] = useState(null);
@@ -268,7 +270,9 @@ export default function PlatformsAdmin() {
               behavior: 'smooth'
             });
           }
-        }}>
+        }}
+        disabled={isGuest}
+        >
           <Plus className="w-4 h-4 mr-2" />
           Nouvelle plateforme
         </Button>
@@ -284,6 +288,7 @@ export default function PlatformsAdmin() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <fieldset disabled={isGuest} className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="name">Nom de la plateforme *</Label>
@@ -383,7 +388,7 @@ export default function PlatformsAdmin() {
               </div>
 
               <div className="flex gap-2">
-                <Button type="submit" disabled={actionLoading === 'create' || actionLoading === 'update'}>
+                <Button type="submit" disabled={actionLoading === 'create' || actionLoading === 'update' || isGuest}>
                   <Save className="w-4 h-4 mr-2" />
                   {actionLoading === 'create' || actionLoading === 'update' ? 'Sauvegarde...' : 
                    editingPlatform ? 'Mettre à jour' : 'Ajouter'}
@@ -393,6 +398,7 @@ export default function PlatformsAdmin() {
                   Annuler
                 </Button>
               </div>
+              </fieldset>
             </form>
           </CardContent>
         </Card>
@@ -420,7 +426,7 @@ export default function PlatformsAdmin() {
                     variant="outline"
                     size="sm"
                     onClick={() => addPredefinedPlatform(platform)}
-                    disabled={actionLoading === 'predefined'}
+                    disabled={actionLoading === 'predefined' || isGuest}
                   >
                     <Plus className="w-4 h-4" />
                   </Button>
@@ -519,6 +525,7 @@ export default function PlatformsAdmin() {
                     size="sm" 
                     className="flex-1"
                     onClick={() => startEdit(platform)}
+                    disabled={isGuest}
                   >
                     <Edit className="w-4 h-4 mr-2" />
                     Modifier
@@ -530,6 +537,7 @@ export default function PlatformsAdmin() {
                         variant="outline" 
                         size="sm"
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        disabled={isGuest}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -585,7 +593,9 @@ export default function PlatformsAdmin() {
                   top: 0,
                   behavior: 'smooth'
                 });
-              }}>
+              }}
+              disabled={isGuest}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Nouvelle plateforme
               </Button>

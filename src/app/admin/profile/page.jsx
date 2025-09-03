@@ -7,19 +7,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useAdminGuest } from "@/contexts/AdminGuestContext";
 import {
-    translateText,
-    updateProfile,
-    uploadImageAndGetPublicUrl,
-    useProfile
+  translateText,
+  updateProfile,
+  uploadImageAndGetPublicUrl,
+  useProfile
 } from "@/lib/supabase";
 import {
-    Calendar,
-    Globe,
-    Plus,
-    Save,
-    User,
-    X
+  Calendar,
+  Globe,
+  Plus,
+  Save,
+  User,
+  X
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -31,6 +32,7 @@ const LANGUAGES = [
 ];
 
 export default function ProfileAdmin() {
+  const { isGuest } = useAdminGuest();
   const { profile, loading, error } = useProfile();
   const [formData, setFormData] = useState({
     name: '',
@@ -264,6 +266,7 @@ export default function ProfileAdmin() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        <fieldset disabled={isGuest}>
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Informations de base */}
           <Card>
@@ -697,13 +700,14 @@ export default function ProfileAdmin() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex gap-4 justify-end">
-              <Button type="submit" disabled={saving}>
+              <Button type="submit" disabled={saving || isGuest}>
                 <Save className="w-4 h-4 mr-2" />
                 {saving ? "Sauvegarde..." : "Sauvegarder le profil"}
               </Button>
             </div>
           </CardContent>
         </Card>
+        </fieldset>
       </form>
     </div>
   );

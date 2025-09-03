@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAdminGuest } from "@/contexts/AdminGuestContext";
 import {
     useCertifications,
     useFreelancePlatforms,
@@ -24,6 +25,7 @@ import {
 import Link from "next/link";
 
 function StatCard({ title, value, description, icon: Icon, href, color = "primary" }) {
+  const { isGuest } = useAdminGuest();
   const colorClasses = {
     primary: "text-primary",
     green: "text-green-600",
@@ -43,7 +45,7 @@ function StatCard({ title, value, description, icon: Icon, href, color = "primar
         <p className="text-xs text-muted-foreground">{description}</p>
         {href && (
           <Link href={href} className="mt-2 inline-block">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" disabled={isGuest}>
               Gérer
             </Button>
           </Link>
@@ -54,6 +56,7 @@ function StatCard({ title, value, description, icon: Icon, href, color = "primar
 }
 
 function QuickAction({ title, description, href, icon: Icon, color = "primary" }) {
+  const { isGuest } = useAdminGuest();
   const colorClasses = {
     primary: "bg-primary text-primary-foreground hover:bg-primary/90",
     green: "bg-green-600 text-white hover:bg-green-700",
@@ -61,9 +64,11 @@ function QuickAction({ title, description, href, icon: Icon, color = "primary" }
     purple: "bg-purple-600 text-white hover:bg-purple-700"
   };
 
+  const Component = isGuest ? 'div' : Link;
+
   return (
-    <Link href={href}>
-      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+    <Component href={href}>
+      <Card className={`hover:shadow-md transition-shadow ${isGuest ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
         <CardContent className="p-6">
           <div className="flex items-start space-x-4">
             <div className={`p-2 rounded-lg ${colorClasses[color]}`}>
@@ -76,7 +81,7 @@ function QuickAction({ title, description, href, icon: Icon, color = "primary" }
           </div>
         </CardContent>
       </Card>
-    </Link>
+    </Component>
   );
 }
 
@@ -243,7 +248,7 @@ export default function AdminDashboard() {
                 <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">Aucun projet</p>
                 <Link href="/admin/projects/new">
-                  <Button className="mt-2">Créer le premier projet</Button>
+                  <Button className="mt-2" disabled={isGuest}>Créer le premier projet</Button>
                 </Link>
               </div>
             )}
@@ -384,7 +389,7 @@ export default function AdminDashboard() {
                 <Award className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">Aucune certification</p>
                 <Link href="/admin/certifications/new">
-                  <Button className="mt-2">Ajouter une certification</Button>
+                  <Button className="mt-2" disabled={isGuest}>Ajouter une certification</Button>
                 </Link>
               </div>
             )}

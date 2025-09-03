@@ -37,6 +37,7 @@ import { useDirectionalClasses, useLanguage } from "@/contexts/LanguageContext";
 
 // Import des composants de chargement
 import AnimatedSection from "@/components/AnimatedSection";
+import Banner from "@/components/Banner";
 import LoadingScreen from "@/components/LoadingScreen";
 import Notification from "@/components/Notification";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
@@ -333,7 +334,7 @@ function ProjectCard({ project, currentLang, t }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className="h-full hover:shadow-lg transition-shadow overflow-hidden">
+      <Card className="h-full flex flex-col hover:shadow-lg transition-shadow overflow-hidden">
         {/* Image du projet */}
         {project.image_url && (
           <div className="h-48 w-full overflow-hidden">
@@ -345,29 +346,36 @@ function ProjectCard({ project, currentLang, t }) {
           </div>
         )}
         
-        <CardHeader className="pb-3">
-          <div className={getDirectionalClass("flex items-start justify-between")}>
-            <div className="flex-1">
-              <CardTitle className="text-lg leading-tight">
-                {getLocalizedText(project, 'title', currentLang)}
-              </CardTitle>
-              <CardDescription className="mt-1 mb-3 line-clamp-2">
-                {getLocalizedText(project, 'description', currentLang)}
-              </CardDescription>
-            </div>
-            {project.stars > 0 && (
-              <div className={`${getDirectionalClass("flex items-center gap-1")} ${isRTL ? 'mr-2' : 'ml-2'} text-sm text-muted-foreground`}>
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 no-rtl-transform" />
-                {project.stars}
+        <div className="flex flex-col flex-grow p-6 pt-0">
+          <div className="flex-grow">
+            <CardHeader className="pb-3 px-0 pt-4">
+              <div className={getDirectionalClass("flex items-start justify-between")}>
+                <div className="flex-1">
+                  <CardTitle className="text-lg leading-tight">
+                    {getLocalizedText(project, 'title', currentLang)}
+                  </CardTitle>
+                  <CardDescription className="mt-1 mb-3 line-clamp-2">
+                    {getLocalizedText(project, 'description', currentLang)}
+                  </CardDescription>
+                </div>
+                {project.stars > 0 && (
+                  <div className={`${getDirectionalClass("flex items-center gap-1")} ${isRTL ? 'mr-2' : 'ml-2'} text-sm text-muted-foreground`}>
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 no-rtl-transform" />
+                    {project.stars}
+                  </div>
+                )}
               </div>
-            )}
+            </CardHeader>
           </div>
-        </CardHeader>
-        
-        <CardContent className="pt-0">
-          <div className="space-y-3">
+          
+          <div className="space-y-3 pt-3 mt-auto border-t">
             {/* Catégories et tags */}
             <div className={`${getDirectionalClass("flex flex-wrap gap-1") } ${isRTL ? 'justify-end' : 'justify-start'}`}>
+              {project.status === 'in_progress' && (
+                <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700">
+                  {t.inProgress}
+                </Badge>
+              )}
               {project.category?.map((cat) => (
                 <Badge key={cat} variant="outline" className="text-xs">
                   {cat}
@@ -405,7 +413,7 @@ function ProjectCard({ project, currentLang, t }) {
               )}
             </div>
           </div>
-        </CardContent>
+        </div>
       </Card>
     </motion.div>
   );
@@ -541,6 +549,7 @@ export default function Portfolio() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
+      <Banner />
       {/* NAVBAR */}
       <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className={`max-w-6xl mx-auto px-4 py-3 ${getDirectionalClass("flex items-center justify-between")}`}>
@@ -559,12 +568,10 @@ export default function Portfolio() {
 
           <nav className={`hidden md:flex items-center gap-6 text-sm ${getDirectionalClass("flex-row")}`}>
             <a href="#projets" className="hover:opacity-80">{t.projects}</a>
-            {/* freelance removed */}
+            <a href="#mega-projets" className="hover:opacity-80">{t.megaProjects}</a>
             <a href="#cv" className="hover:opacity-80">{t.cv}</a>
-            {/* mega removed */}
             <a href="#objectifs" className="hover:opacity-80">{t.goals}</a>
             <a href="#apropos" className="hover:opacity-80">{t.about}</a>
-            {/* contact removed */}
           </nav>
 
           <div className={getDirectionalClass("flex items-center gap-2")}>
@@ -647,7 +654,7 @@ export default function Portfolio() {
                   </div>
                 </div>
                 <Separator className="my-6" />
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <Stat label={t.yearsExp} value={`${profile?.years_experience || 5}+`} />
                   <Stat label={t.projects} value={`${projects?.length || 0}+`} />
                   <Stat label={t.satisfaction} value={`${profile?.satisfaction_rate || 98}%`} />
@@ -736,6 +743,27 @@ export default function Portfolio() {
         </section>
       </AnimatedSection>
 
+      {/* MEGA PROJETS */}
+      <AnimatedSection direction="up" delay={0.4} duration={0.8}>
+        <section id="mega-projets" className="max-w-6xl mx-auto px-4 py-8">
+          <div className="flex items-end justify-between gap-4 flex-wrap">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">{t.megaProjects}</h2>
+              <p className="text-muted-foreground">{t.strategicProjects}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+            {projectsLoading ? (
+              <LoadingSpinner />
+            ) : (
+              megaProjects.map((p) => (
+                <MegaProjectCard key={p.id} project={p} currentLang={currentLang} t={t} />
+              ))
+            )}
+          </div>
+        </section>
+      </AnimatedSection>
+
       {/* FREELANCE */}
       <AnimatedSection direction="up" delay={0.4} duration={0.8}>
         <section id="freelance" className="max-w-6xl mx-auto px-4 py-8">
@@ -789,30 +817,30 @@ export default function Portfolio() {
             <ErrorMessage message={certificationsError} />
           ) : (
             certifications?.map((c) => (
-              <Card key={c.id}>
-                <CardHeader className="pb-2">
+              <Card key={c.id} className="relative pt-8">
+                <div className="absolute top-4 right-4">
+                  <Badge 
+                    className={`text-xs ${
+                      c.status === 'completed' 
+                        ? 'bg-green-100 text-green-800' 
+                        : c.status === 'in_progress' 
+                          ? 'bg-gray-200 text-gray-800 dark:bg-zinc-700 dark:text-zinc-200'
+                          : 'bg-gray-100 text-gray-700'
+                    }`}
+                  >
+                    {c.status === 'completed' 
+                      ? '✅' 
+                      : c.status === 'in_progress' 
+                        ? '⏳' 
+                        : '🗂️'}
+                    <span className="ml-1.5">{c.status === 'completed' ? t.completed : c.status === 'in_progress' ? t.inProgress : t.planned}</span>
+                  </Badge>
+                </div>
+                <CardHeader className="pb-2 pt-0">
                   <CardTitle className="text-lg">{c.title}</CardTitle>
                   <CardDescription className="mb-2">{c.provider || "Certification"}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="secondary">{c.year || t.inProgress}</Badge>
-                    <Badge 
-                      className={
-                        c.status === 'completed' 
-                          ? 'bg-green-600 text-white' 
-                          : c.status === 'in_progress' 
-                            ? 'bg-gray-300 text-gray-900 dark:bg-gray-700 dark:text-white' 
-                            : 'bg-gray-200 text-gray-800'
-                      }
-                    >
-                      {c.status === 'completed' 
-                        ? '✅' 
-                        : c.status === 'in_progress' 
-                          ? '⏳' 
-                          : '🗂️'}
-                    </Badge>
-                  </div>
                   {c.certificate_urls && (
                     <div className="flex flex-wrap gap-1 mt-2">
                       {Object.entries(c.certificate_urls).map(([type, url]) => (
@@ -836,7 +864,7 @@ export default function Portfolio() {
       </section>
       </AnimatedSection>
 
-      {/* PROJETS EN COURS (ex-mega style) */}
+      {/* PROJETS EN COURS */}
       <AnimatedSection direction="up" delay={0.6} duration={0.8}>
       <section id="en-cours" className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-end justify-between gap-4 flex-wrap">
@@ -845,26 +873,12 @@ export default function Portfolio() {
             <p className="text-muted-foreground">Sélection de projets actuellement en développement.</p>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
           {projectsLoading ? (
             <LoadingSpinner />
           ) : (
-            (projects || []).filter(p => p.status === 'in_progress').slice(0, 8).map((m) => (
-              <Card key={m.id} className="relative overflow-hidden">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">{getLocalizedText(m, 'title', currentLang)}</CardTitle>
-                  {m.stack && <CardDescription>Stack : {m.stack}</CardDescription>}
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-3">{getLocalizedText(m, 'description', currentLang)}</p>
-                  <div className="flex items-center justify-between">
-                    <Badge variant="secondary">{t.inProgress}</Badge>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Star className="h-4 w-4 mr-1" /> {m.stars}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            (projects || []).filter(p => p.status === 'in_progress').slice(0, 3).map((m) => (
+              <MegaProjectCard key={m.id} project={m} currentLang={currentLang} t={t} />
             ))
           )}
         </div>
@@ -1014,9 +1028,12 @@ export default function Portfolio() {
       <footer className="py-10 border-t border-gray-200">
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} {profile?.name || "Yohann Di Crescenzo"}. Tous droits réservés.</p>
-          <p>
-            {t.builtWith} <span className="font-medium">React</span> & <span className="font-medium">Tailwind</span> & <span className="font-medium">Supabase</span>
-          </p>
+          <div className="flex items-center gap-4">
+            <p>
+              {t.builtWith} <span className="font-medium">React</span> & <span className="font-medium">Tailwind</span> & <span className="font-medium">Supabase</span>
+            </p>
+            <a href="/admin" className="hover:text-primary transition-colors">Voir le site admin</a>
+          </div>
         </div>
       </footer>
 
@@ -1037,7 +1054,7 @@ export default function Portfolio() {
 // ——————————————————————————————————————————————
 function Stat({ label, value }) {
   return (
-    <div className="p-4 rounded-xl bg-muted/50">
+    <div className="p-4 rounded-xl bg-muted/50 text-center sm:text-left">
       <div className="text-2xl font-semibold leading-none">{value}</div>
       <div className="text-xs text-muted-foreground mt-1">{label}</div>
     </div>

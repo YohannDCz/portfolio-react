@@ -116,6 +116,19 @@ export default function AdminLogin() {
                 )}
               </Button>
             </form>
+
+            <div className="mt-4 text-center text-sm">
+              <Button 
+                variant="link" 
+                className="text-gray-600"
+                onClick={() => {
+                  localStorage.setItem('guestMode', 'true');
+                  router.push('/admin/dashboard');
+                }}
+              >
+                Voir en tant qu'invité
+              </Button>
+            </div>
           </CardContent>
         </Card>
 

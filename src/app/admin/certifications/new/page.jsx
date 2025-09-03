@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useAdminGuest } from "@/contexts/AdminGuestContext";
 import { createCertification } from "@/lib/supabase";
 import { ArrowLeft, X } from "lucide-react";
 import Link from "next/link";
@@ -14,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function NewCertification() {
+  const { isGuest } = useAdminGuest();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -119,6 +121,7 @@ export default function NewCertification() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        <fieldset disabled={isGuest} className="space-y-6">
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Informations générales */}
           <Card>
@@ -371,12 +374,13 @@ export default function NewCertification() {
                   Annuler
                 </Button>
               </Link>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading || isGuest}>
                 {loading ? "Création..." : "Créer la certification"}
               </Button>
             </div>
           </CardContent>
         </Card>
+        </fieldset>
       </form>
     </div>
   );

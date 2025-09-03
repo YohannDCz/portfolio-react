@@ -1,19 +1,21 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { AdminGuestProvider, useAdminGuest } from "@/contexts/AdminGuestContext";
 import { useAuth } from "@/lib/supabase";
 import {
-    Award,
-    FolderOpen,
-    Globe,
-    Kanban,
-    LayoutDashboard,
-    Loader2,
-    LogOut,
-    Mail,
-    Settings,
-    User
+  Award,
+  Eye,
+  FolderOpen,
+  Globe,
+  Kanban,
+  LayoutDashboard,
+  Loader2,
+  LogOut,
+  Mail,
+  Settings,
+  User
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -30,19 +32,24 @@ const navigation = [
   { name: 'Kanban', href: '/admin/kanban', icon: Kanban }
 ];
 
-export default function AdminLayout({ children }) {
+function AdminLayoutContent({ children }) {
   const { user, loading, signOut, isAuthenticated } = useAuth();
+  const { isGuest, logoutGuest } = useAdminGuest();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && !isAuthenticated && pathname !== '/admin') {
+    if (!loading && !isAuthenticated && !isGuest && pathname !== '/admin') {
       router.push('/admin');
     }
-  }, [loading, isAuthenticated, router, pathname]);
+  }, [loading, isAuthenticated, isGuest, router, pathname]);
 
   const handleSignOut = async () => {
-    await signOut();
+    if (isGuest) {
+      logoutGuest();
+    } else {
+      await signOut();
+    }
     router.push('/admin');
   };
 
@@ -55,7 +62,7 @@ export default function AdminLayout({ children }) {
   }
 
   // Page de connexion
-  if (!isAuthenticated || pathname === '/admin') {
+  if ((!isAuthenticated && !isGuest) || pathname === '/admin') {
     return children;
   }
 
@@ -107,15 +114,18 @@ export default function AdminLayout({ children }) {
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-gray-900 truncate">
-                    {user?.email}
+                    {isGuest ? "Invité" : user?.email}
                   </p>
-                  <p className="text-xs text-gray-500">Administrateur</p>
+                  <p className="text-xs text-gray-500">
+                    {isGuest ? "Lecture seule" : "Administrateur"}
+                  </p>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleSignOut}
                   className="ml-2"
+                  title={isGuest ? "Quitter le mode invité" : "Se déconnecter"}
                 >
                   <LogOut className="h-4 w-4" />
                 </Button>
@@ -128,10 +138,33 @@ export default function AdminLayout({ children }) {
       {/* Main content */}
       <div className="pl-64">
         <main className="p-6">
+          {isGuest && (
+            <Card className="mb-6 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800/30">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div className="flex items-center">
+                  <Eye className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-3" />
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    Vous êtes en mode visiteur. Bonne découverte ! 😉
+                  </p>
+                </div>
+                <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                  Quitter le mode visiteur
+                </Button>
+              </CardContent>
+            </Card>
+          )}
           {children}
         </main>
       </div>
     </div>
+  );
+}
+
+export default function AdminLayout({ children }) {
+  return (
+    <AdminGuestProvider>
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </AdminGuestProvider>
   );
 }
 
