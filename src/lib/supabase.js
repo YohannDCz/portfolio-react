@@ -225,7 +225,28 @@ export const useCertifications = () => {
           .order('created_at', { ascending: false })
 
         if (error) throw error
-        setCertifications(data)
+
+        // Sort by status priority: completed > to_deploy > in_progress > planned
+        const sortedData = data?.sort((a, b) => {
+          const statusPriority = {
+            'completed': 4,
+            'to_deploy': 3,
+            'in_progress': 2,
+            'planned': 1
+          }
+
+          const priorityA = statusPriority[a.status] || 0
+          const priorityB = statusPriority[b.status] || 0
+
+          if (priorityA !== priorityB) {
+            return priorityB - priorityA // Higher priority first
+          }
+
+          // If same status, sort by creation date (newest first)
+          return new Date(b.created_at) - new Date(a.created_at)
+        }) || []
+
+        setCertifications(sortedData)
       } catch (err) {
         setError(err.message)
       } finally {
@@ -481,14 +502,22 @@ export const deleteCertification = async (id) => {
 // Compétences
 export const createSkill = async (skillData) => {
   try {
+    console.log('Creating skill with data:', skillData)
+
     const { data, error } = await supabase
       .from('skills')
       .insert([skillData])
       .select()
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase error:', error)
+      throw error
+    }
+
+    console.log('Skill created successfully:', data[0])
     return { success: true, data: data[0] }
   } catch (err) {
+    console.error('Create skill error:', err)
     return { success: false, error: err.message }
   }
 }

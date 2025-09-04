@@ -19,7 +19,6 @@ import {
     Kanban,
     Plus,
     Settings,
-    TrendingUp,
     User
 } from "lucide-react";
 import Link from "next/link";
@@ -68,13 +67,13 @@ function QuickAction({ title, description, href, icon: Icon, color = "primary" }
 
   return (
     <Component href={href}>
-      <Card className={`hover:shadow-md transition-shadow ${isGuest ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
-        <CardContent className="p-6">
-          <div className="flex items-start space-x-4">
-            <div className={`p-2 rounded-lg ${colorClasses[color]}`}>
+      <Card className={`hover:shadow-md transition-shadow h-full ${isGuest ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+        <CardContent className="p-6 h-full flex items-start">
+          <div className="flex items-start space-x-4 w-full">
+            <div className={`p-2 rounded-lg ${colorClasses[color]} flex-shrink-0`}>
               <Icon className="h-6 w-6" />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 flex-1">
               <h3 className="font-semibold">{title}</h3>
               <p className="text-sm text-muted-foreground">{description}</p>
             </div>
@@ -95,7 +94,6 @@ export default function AdminDashboard() {
   // const { stats: kanbanStats, loading: kanbanStatsLoading } = useKanbanStats();
   // const { tasks: kanbanTasks, loading: kanbanTasksLoading } = useKanbanTasks();
 
-  const megaProjects = projects?.filter(p => p.is_mega_project) || [];
   const completedProjects = projects?.filter(p => p.status === 'completed') || [];
   const completedCerts = certifications?.filter(c => c.status === 'completed') || [];
   
@@ -137,14 +135,6 @@ export default function AdminDashboard() {
           color="primary"
         />
         <StatCard
-          title="Mega Projets"
-          value={projectsLoading ? "..." : megaProjects.length}
-          description="Projets stratégiques"
-          icon={TrendingUp}
-          href="/admin/projects"
-          color="green"
-        />
-        <StatCard
           title="Certifications"
           value={certsLoading ? "..." : certifications?.length || 0}
           description={`${completedCerts.length} obtenues`}
@@ -165,7 +155,7 @@ export default function AdminDashboard() {
       {/* Actions rapides */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Actions rapides</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 items-stretch">
           <QuickAction
             title="Tableau Kanban"
             description="Gérer vos tâches et workflow de projet"
@@ -220,16 +210,13 @@ export default function AdminDashboard() {
                       <h4 className="font-medium">{project.title_fr}</h4>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge 
-                          variant={project.status === 'completed' ? 'default' : 'secondary'}
-                          className="text-xs"
+                          variant={project.status === 'completed' ? 'default' : project.status === 'to_deploy' ? 'default' : 'secondary'}
+                          className={`text-xs ${project.status === 'to_deploy' ? 'bg-emerald-500 text-white hover:bg-emerald-600' : ''}`}
                         >
-                          {project.status}
+                          {project.status === 'completed' ? 'Terminé' : 
+                           project.status === 'to_deploy' ? 'À déployer' :
+                           project.status === 'in_progress' ? 'En cours' : 'Planifié'}
                         </Badge>
-                        {project.is_mega_project && (
-                          <Badge variant="destructive" className="text-xs">
-                            MEGA
-                          </Badge>
-                        )}
                       </div>
                     </div>
                     <div className="text-sm text-muted-foreground">
@@ -370,10 +357,11 @@ export default function AdminDashboard() {
                       <p className="text-sm text-muted-foreground">{cert.provider}</p>
                     </div>
                     <Badge 
-                      variant={cert.status === 'completed' ? 'default' : cert.status === 'in_progress' ? 'secondary' : 'outline'}
-                      className="text-xs"
+                      variant={cert.status === 'completed' ? 'default' : cert.status === 'to_deploy' ? 'default' : cert.status === 'in_progress' ? 'secondary' : 'outline'}
+                      className={`text-xs ${cert.status === 'to_deploy' ? 'bg-emerald-500 text-white hover:bg-emerald-600' : ''}`}
                     >
                       {cert.status === 'completed' ? 'Obtenue' : 
+                       cert.status === 'to_deploy' ? 'À déployer' :
                        cert.status === 'in_progress' ? 'En cours' : 'Planifiée'}
                     </Badge>
                   </div>

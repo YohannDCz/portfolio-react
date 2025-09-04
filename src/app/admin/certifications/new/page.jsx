@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useAdminGuest } from "@/contexts/AdminGuestContext";
+import { useTranslation } from "@/hooks/useTranslation";
 import { createCertification } from "@/lib/supabase";
 import { ArrowLeft, X } from "lucide-react";
 import Link from "next/link";
@@ -19,6 +20,7 @@ export default function NewCertification() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { translateFields, translating } = useTranslation();
   
   // État du formulaire
   const [formData, setFormData] = useState({
@@ -38,7 +40,8 @@ export default function NewCertification() {
     course: '',
     verification: '',
     documentation: '',
-    tutorials: ''
+    tutorials: '',
+    figma: ''
   });
 
   const handleInputChange = (field, value) => {
@@ -96,6 +99,30 @@ export default function NewCertification() {
     }
 
     setLoading(false);
+  };
+
+  const handleAutoTranslate = async () => {
+    const fieldMappings = [
+      {
+        sourceField: 'description_fr',
+        targetFields: ['description_en', 'description_hi', 'description_ar']
+      },
+      {
+        sourceField: 'description_en',
+        targetFields: ['description_fr', 'description_hi', 'description_ar']
+      }
+    ]
+
+    const result = await translateFields(formData, setFormData, fieldMappings, true)
+    
+    if (result.success) {
+      console.log(`✅ Successfully translated ${result.translated} field(s)`)
+      // Show temporary success message
+      setError("")
+    } else if (result.error) {
+      console.error('❌ Translation failed:', result.error)
+      setError(`Erreur de traduction: ${result.error}`)
+    }
   };
 
   return (
@@ -172,6 +199,7 @@ export default function NewCertification() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="completed">Obtenue</SelectItem>
+                      <SelectItem value="to_deploy">À déployer</SelectItem>
                       <SelectItem value="in_progress">En cours</SelectItem>
                       <SelectItem value="planned">Planifiée</SelectItem>
                     </SelectContent>
@@ -304,6 +332,29 @@ export default function NewCertification() {
                   )}
                 </div>
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="figma">Lien Figma</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="figma"
+                    type="url"
+                    value={urls.figma}
+                    onChange={(e) => handleUrlChange('figma', e.target.value)}
+                    placeholder="https://figma.com/design/..."
+                  />
+                  {urls.figma && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeUrl('figma')}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -315,6 +366,11 @@ export default function NewCertification() {
             <CardDescription>
               Descriptions de la certification dans différentes langues
             </CardDescription>
+            <div className="mt-2">
+              <Button type="button" variant="outline" size="sm" onClick={handleAutoTranslate} disabled={translating}>
+                {translating ? 'Traduction...' : '🌍 Traduire automatiquement'}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">

@@ -159,9 +159,9 @@ export default function ProjectsAdmin() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">
-              {projects?.filter(p => p.is_mega_project).length || 0}
+              {projects?.filter(p => p.featured).length || 0}
             </div>
-            <p className="text-xs text-muted-foreground">Mega projets</p>
+            <p className="text-xs text-muted-foreground">Projets mis en avant</p>
           </CardContent>
         </Card>
         <Card>
@@ -190,9 +190,9 @@ export default function ProjectsAdmin() {
                 <div className="flex-1">
                   <CardTitle className="text-lg flex items-center gap-2">
                     {project.title_fr}
-                    {project.is_mega_project && (
-                      <Badge variant="destructive" className="text-xs">
-                        MEGA
+                    {project.featured && (
+                      <Badge variant="secondary" className="text-xs">
+                        EN AVANT
                       </Badge>
                     )}
                   </CardTitle>
@@ -251,21 +251,6 @@ export default function ProjectsAdmin() {
                     )}
                   </div>
 
-                  {/* Barre de progression Kanban */}
-                  {!progressLoading && progressData[project.id] !== undefined && (
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <CheckSquare className="w-3 h-3" />
-                        <span>Progression: {progressData[project.id]}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div 
-                          className="bg-blue-600 dark:bg-gray-300 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${progressData[project.id]}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* Actions */}

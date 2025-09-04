@@ -5,17 +5,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AdminGuestProvider, useAdminGuest } from "@/contexts/AdminGuestContext";
 import { useAuth } from "@/lib/supabase";
 import {
-  Award,
-  Eye,
-  FolderOpen,
-  Globe,
-  Kanban,
-  LayoutDashboard,
-  Loader2,
-  LogOut,
-  Mail,
-  Settings,
-  User
+    Award,
+    Eye,
+    FolderOpen,
+    Globe,
+    Home,
+    Kanban,
+    LayoutDashboard,
+    Loader2,
+    LogOut,
+    Mail,
+    Settings,
+    User
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -76,10 +77,16 @@ function AdminLayoutContent({ children }) {
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
               <LayoutDashboard className="h-5 w-5 text-primary" />
             </div>
-            <div>
+            <div className="flex-1">
               <h1 className="text-lg font-semibold">Admin Portfolio</h1>
               <p className="text-xs text-gray-500">Panel d'administration</p>
             </div>
+            <Link href="/">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Home className="h-4 w-4" />
+                Accueil
+              </Button>
+            </Link>
           </div>
 
           {/* Navigation */}

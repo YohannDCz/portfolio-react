@@ -8,19 +8,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAdminGuest } from "@/contexts/AdminGuestContext";
+import { useTranslation } from "@/hooks/useTranslation";
 import {
-  translateText,
-  updateProfile,
-  uploadImageAndGetPublicUrl,
-  useProfile
+    updateProfile,
+    uploadImageAndGetPublicUrl,
+    useProfile
 } from "@/lib/supabase";
 import {
-  Calendar,
-  Globe,
-  Plus,
-  Save,
-  User,
-  X
+    Calendar,
+    Globe,
+    Plus,
+    Save,
+    User,
+    X
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -73,7 +73,7 @@ export default function ProfileAdmin() {
   const [saveSuccess, setSaveSuccess] = useState("");
   const [avatarFile, setAvatarFile] = useState(null);
   const [coverFile, setCoverFile] = useState(null);
-  const [translating, setTranslating] = useState(false);
+  const { translateFields, translating } = useTranslation();
 
   // Charger les données du profil
   useEffect(() => {
@@ -178,7 +178,7 @@ export default function ProfileAdmin() {
       payload.cover_url = up2.url;
     }
 
-    const result = await updateProfile(payload);
+    const result = await updateProfile(profile.id, payload);
 
     if (result.success) {
       setSaveSuccess("Profil mis à jour avec succès !");
@@ -191,27 +191,47 @@ export default function ProfileAdmin() {
   };
 
   const handleAutoTranslate = async () => {
-    setTranslating(true)
-    try {
-      const targets = ['en','hi','ar']
-      const updates = {}
-      for (const lang of targets) {
-        if (!formData[`title_${lang}`] && formData.title_fr) {
-          const r = await translateText({ text: formData.title_fr, target: lang, source: 'fr' })
-          if (r.success) updates[`title_${lang}`] = r.text
-        }
-        if (!formData[`tagline_${lang}`] && formData.tagline_fr) {
-          const r2 = await translateText({ text: formData.tagline_fr, target: lang, source: 'fr' })
-          if (r2.success) updates[`tagline_${lang}`] = r2.text
-        }
-        if (!formData[`availability_hours_${lang}`] && formData.availability_hours_fr) {
-          const r3 = await translateText({ text: formData.availability_hours_fr, target: lang, source: 'fr' })
-          if (r3.success) updates[`availability_hours_${lang}`] = r3.text
-        }
+    const fieldMappings = [
+      {
+        sourceField: 'title_fr',
+        targetFields: ['title_en', 'title_hi', 'title_ar']
+      },
+      {
+        sourceField: 'title_en', 
+        targetFields: ['title_fr', 'title_hi', 'title_ar']
+      },
+      {
+        sourceField: 'tagline_fr',
+        targetFields: ['tagline_en', 'tagline_hi', 'tagline_ar']
+      },
+      {
+        sourceField: 'tagline_en',
+        targetFields: ['tagline_fr', 'tagline_hi', 'tagline_ar'] 
+      },
+      {
+        sourceField: 'bio_fr',
+        targetFields: ['bio_en', 'bio_hi', 'bio_ar']
+      },
+      {
+        sourceField: 'bio_en',
+        targetFields: ['bio_fr', 'bio_hi', 'bio_ar']
+      },
+      {
+        sourceField: 'availability_hours_fr',
+        targetFields: ['availability_hours_en', 'availability_hours_hi', 'availability_hours_ar']
+      },
+      {
+        sourceField: 'availability_hours_en',
+        targetFields: ['availability_hours_fr', 'availability_hours_hi', 'availability_hours_ar']
       }
-      if (Object.keys(updates).length) setFormData(prev => ({ ...prev, ...updates }))
-    } finally {
-      setTranslating(false)
+    ]
+
+    const result = await translateFields(formData, setFormData, fieldMappings, true)
+    
+    if (result.success) {
+      console.log(`✅ Translated ${result.translated} fields - Page will refresh soon!`)
+    } else if (result.error) {
+      console.error('❌ Translation failed:', result.error)
     }
   }
 
@@ -280,7 +300,7 @@ export default function ProfileAdmin() {
               </CardDescription>
               <div className="mt-2">
                 <Button type="button" variant="outline" size="sm" onClick={handleAutoTranslate} disabled={translating}>
-                  {translating ? 'Traduction...' : 'Traduire automatiquement'}
+                  {translating ? 'Traduction...' : '🌍 Traduire automatiquement'}
                 </Button>
               </div>
             </CardHeader>
@@ -448,14 +468,13 @@ export default function ProfileAdmin() {
                 />
               </div>
 
-              <div className="space-y-2">
+                              <div className="space-y-2">
                 <Label htmlFor="title_hi">Titre (Hindi)</Label>
                 <Input
                   id="title_hi"
                   value={formData.title_hi}
                   onChange={(e) => handleInputChange('title_hi', e.target.value)}
                   placeholder="फुल स्टैक डेवलपर"
-                  disabled
                 />
               </div>
 
@@ -466,7 +485,6 @@ export default function ProfileAdmin() {
                   value={formData.title_ar}
                   onChange={(e) => handleInputChange('title_ar', e.target.value)}
                   placeholder="مطور ويب متكامل"
-                  disabled
                 />
               </div>
             </div>
@@ -513,7 +531,6 @@ export default function ProfileAdmin() {
                   onChange={(e) => handleInputChange('tagline_hi', e.target.value)}
                   placeholder="आधुनिक वेब एप्लिकेशन बनाने का जुनून..."
                   rows={3}
-                  disabled
                 />
               </div>
 
@@ -525,7 +542,6 @@ export default function ProfileAdmin() {
                   onChange={(e) => handleInputChange('tagline_ar', e.target.value)}
                   placeholder="شغوف بإنشاء تطبيقات ويب حديثة..."
                   rows={3}
-                  disabled
                 />
               </div>
             </div>

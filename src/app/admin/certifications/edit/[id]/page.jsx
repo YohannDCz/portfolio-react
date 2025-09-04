@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useAdminGuest } from "@/contexts/AdminGuestContext";
+import { useTranslation } from "@/hooks/useTranslation";
 import { getCertification, updateCertification } from "@/lib/supabase";
 import { ArrowLeft, Loader2, X } from "lucide-react";
 import Link from "next/link";
@@ -23,6 +24,7 @@ export default function EditCertification() {
   const [fetchLoading, setFetchLoading] = useState(true);
   const [error, setError] = useState("");
   const [certification, setCertification] = useState(null);
+  const { translateFields, translating } = useTranslation();
   
   // État du formulaire
   const [formData, setFormData] = useState({
@@ -42,7 +44,8 @@ export default function EditCertification() {
     course: '',
     verification: '',
     documentation: '',
-    tutorials: ''
+    tutorials: '',
+    figma: ''
   });
 
   // Récupérer la certification à éditer
@@ -75,7 +78,8 @@ export default function EditCertification() {
             course: cert.certificate_urls.course || '',
             verification: cert.certificate_urls.verification || '',
             documentation: cert.certificate_urls.documentation || '',
-            tutorials: cert.certificate_urls.tutorials || ''
+            tutorials: cert.certificate_urls.tutorials || '',
+            figma: cert.certificate_urls.figma || ''
           });
         }
       } else {
@@ -145,6 +149,30 @@ export default function EditCertification() {
     }
 
     setLoading(false);
+  };
+
+  const handleAutoTranslate = async () => {
+    const fieldMappings = [
+      {
+        sourceField: 'description_fr',
+        targetFields: ['description_en', 'description_hi', 'description_ar']
+      },
+      {
+        sourceField: 'description_en',
+        targetFields: ['description_fr', 'description_hi', 'description_ar']
+      }
+    ]
+
+    const result = await translateFields(formData, setFormData, fieldMappings, true)
+    
+    if (result.success) {
+      console.log(`✅ Successfully translated ${result.translated} field(s)`)
+      // Show temporary success message
+      setError("")
+    } else if (result.error) {
+      console.error('❌ Translation failed:', result.error)
+      setError(`Erreur de traduction: ${result.error}`)
+    }
   };
 
   if (fetchLoading) {
@@ -414,6 +442,29 @@ export default function EditCertification() {
                   )}
                 </div>
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="figma">Lien Figma</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="figma"
+                    type="url"
+                    value={urls.figma}
+                    onChange={(e) => handleUrlChange('figma', e.target.value)}
+                    placeholder="https://figma.com/design/..."
+                  />
+                  {urls.figma && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeUrl('figma')}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -425,6 +476,11 @@ export default function EditCertification() {
             <CardDescription>
               Descriptions de la certification dans différentes langues
             </CardDescription>
+            <div className="mt-2">
+              <Button type="button" variant="outline" size="sm" onClick={handleAutoTranslate} disabled={translating}>
+                {translating ? 'Traduction...' : '🌍 Traduire automatiquement'}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">

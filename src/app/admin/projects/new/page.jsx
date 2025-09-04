@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useAdminGuest } from "@/contexts/AdminGuestContext";
-import { createProject, translateText, uploadImageAndGetPublicUrl } from "@/lib/supabase";
+import { useTranslation } from "@/hooks/useTranslation";
+import { createProject, uploadImageAndGetPublicUrl } from "@/lib/supabase";
 import { ArrowLeft, Plus, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -48,9 +49,9 @@ export default function NewProject() {
     stars: 0,
     link: '',
     github_url: '',
+    figma_url: '',
     image_url: '',
     status: 'completed',
-    is_mega_project: false,
     stack: '',
     priority: 1,
     sort_order: 0
@@ -58,7 +59,7 @@ export default function NewProject() {
 
   const [newTag, setNewTag] = useState('');
   const [imageFile, setImageFile] = useState(null);
-  const [translating, setTranslating] = useState(false);
+  const { translateFields, translating } = useTranslation();
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -135,23 +136,31 @@ export default function NewProject() {
   };
 
   const handleAutoTranslate = async () => {
-    setTranslating(true)
-    try {
-      const targets = ['en','hi','ar']
-      const updates = {}
-      for (const lang of targets) {
-        if (!formData[`title_${lang}`] && formData.title_fr) {
-          const r = await translateText({ text: formData.title_fr, target: lang, source: 'fr' })
-          if (r.success) updates[`title_${lang}`] = r.text
-        }
-        if (!formData[`description_${lang}`] && formData.description_fr) {
-          const r2 = await translateText({ text: formData.description_fr, target: lang, source: 'fr' })
-          if (r2.success) updates[`description_${lang}`] = r2.text
-        }
+    const fieldMappings = [
+      {
+        sourceField: 'title_fr',
+        targetFields: ['title_en', 'title_hi', 'title_ar']
+      },
+      {
+        sourceField: 'title_en',
+        targetFields: ['title_fr', 'title_hi', 'title_ar']
+      },
+      {
+        sourceField: 'description_fr',
+        targetFields: ['description_en', 'description_hi', 'description_ar']
+      },
+      {
+        sourceField: 'description_en',
+        targetFields: ['description_fr', 'description_hi', 'description_ar']
       }
-      if (Object.keys(updates).length) setFormData(prev => ({ ...prev, ...updates }))
-    } finally {
-      setTranslating(false)
+    ]
+
+    const result = await translateFields(formData, setFormData, fieldMappings, true)
+    
+    if (result.success) {
+      console.log(`✅ Translated ${result.translated} fields - Page will refresh soon!`)
+    } else if (result.error) {
+      console.error('❌ Translation failed:', result.error)
     }
   }
 
@@ -189,7 +198,7 @@ export default function NewProject() {
                 </CardDescription>
                 <div className="mt-2">
                   <Button type="button" variant="outline" size="sm" onClick={handleAutoTranslate} disabled={translating}>
-                    {translating ? 'Traduction...' : 'Traduire automatiquement'}
+                    {translating ? 'Traduction...' : '🌍 Traduire automatiquement'}
                   </Button>
                 </div>
               </CardHeader>
@@ -233,7 +242,6 @@ export default function NewProject() {
                     value={formData.title_hi}
                     onChange={(e) => handleInputChange('title_hi', e.target.value)}
                     placeholder="Nom du projet en hindi"
-                    disabled
                   />
                 </div>
 
@@ -244,7 +252,6 @@ export default function NewProject() {
                     value={formData.title_ar}
                     onChange={(e) => handleInputChange('title_ar', e.target.value)}
                     placeholder="Nom du projet en arabe"
-                    disabled
                   />
                 </div>
               </CardContent>
@@ -289,7 +296,6 @@ export default function NewProject() {
                     onChange={(e) => handleInputChange('description_hi', e.target.value)}
                     placeholder="Description du projet en hindi"
                     rows={3}
-                    disabled
                   />
                 </div>
 
@@ -301,7 +307,6 @@ export default function NewProject() {
                     onChange={(e) => handleInputChange('description_ar', e.target.value)}
                     placeholder="Description du projet en arabe"
                     rows={3}
-                    disabled
                   />
                 </div>
               </CardContent>
@@ -408,6 +413,7 @@ export default function NewProject() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="completed">Terminé</SelectItem>
+                      <SelectItem value="to_deploy">À déployer</SelectItem>
                       <SelectItem value="in_progress">En cours</SelectItem>
                       <SelectItem value="planned">Planifié</SelectItem>
                     </SelectContent>

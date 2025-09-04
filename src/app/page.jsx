@@ -338,8 +338,6 @@ function ProjectCard({ project, currentLang, t }) {
         {/* Image du projet */}
         <div className="h-48 rounded-t-xl overflow-hidden bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100">
           <div className="w-full h-full relative">
-            {/* Placeholder dégradé gris */}
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100" />
             {/* Image décalée d'un tiers */}
             <div className="absolute inset-0 transform -translate-y-10">
             <ProjectImage
