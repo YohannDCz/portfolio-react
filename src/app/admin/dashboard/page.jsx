@@ -5,21 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAdminGuest } from "@/contexts/AdminGuestContext";
 import {
-    useCertifications,
-    useFreelancePlatforms,
-    useProfile,
-    useProjects,
-    useSkills
+  useCertifications,
+  useFreelancePlatforms,
+  useProfile,
+  useProjects,
+  useSkills
 } from "@/lib/supabase";
 import {
-    Award,
-    Calendar,
-    CheckSquare,
-    FolderOpen,
-    Kanban,
-    Plus,
-    Settings,
-    User
+  Award,
+  Calendar,
+  CheckSquare,
+  FolderOpen,
+  Kanban,
+  Plus,
+  Settings,
+  User
 } from "lucide-react";
 import Link from "next/link";
 
@@ -406,7 +406,7 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Projets récents et tâches en cours */}
+      {/* Projets récents et compétences */}
       <div className="grid gap-6 lg:grid-cols-3">
         <Card>
           <CardHeader>
@@ -467,15 +467,15 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Tâches Kanban en cours */}
+        {/* Compétences */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckSquare className="h-5 w-5" />
-              Tâches en cours
+              Compétences
             </CardTitle>
             <CardDescription>
-              Vos tâches actuelles et prioritaires
+              Vos compétences durement acquises
             </CardDescription>
           </CardHeader>
           <CardContent>

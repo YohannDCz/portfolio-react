@@ -1,26 +1,24 @@
 'use client';
 
-import ProjectImage from "@/components/ProjectImage";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
+import ProjectCard from "@/components/ProjectCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
-import { ArrowUpRight, ExternalLink, Github, Globe, Linkedin, Mail, Moon, Star, Sun } from "lucide-react";
+import { ArrowUpRight, ExternalLink, Github, Globe, Linkedin, Mail, Moon, Sun } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-
 // Import des hooks Supabase
 import {
   getLocalizedText,
   getProjectsByCategory,
-  getPublicImageUrl,
   sendContactMessage,
   useAuth,
   useCertifications,
@@ -35,7 +33,7 @@ import LanguageSelector from "@/components/LanguageSelector";
 import { useDirectionalClasses, useLanguage } from "@/contexts/LanguageContext";
 
 // Import du contexte d'authentification pour les boutons d'édition
-import AdminEditButton, { AuthStatusIndicator, ProjectEditButton } from "@/components/AdminEditButton";
+import AdminEditButton, { AuthStatusIndicator } from "@/components/AdminEditButton";
 import ProfileImageModal from '@/components/ProfileImageModal';
 import { AdminGuestProvider, useAdminGuest } from "@/contexts/AdminGuestContext";
 
@@ -45,270 +43,29 @@ import LoadingScreen from "@/components/LoadingScreen";
 import Notification from "@/components/Notification";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
 
-// ——————————————————————————————————————————————
-// TRADUCTIONS STATIQUES
-// ——————————————————————————————————————————————
-const TRANSLATIONS = {
-  fr: {
-    portfolio: "Portfolio",
-    projects: "Projets",
-    freelance: "Freelance",
-    cv: "Curriculum",
-    certifications: "Certifications",
-    about: "À propos",
-    contact: "Contact",
-    goals: "Objectifs",
-    projectSelection: "Sélection de projets",
-    projectFilter: "Filtrez par type, triez et cherchez.",
-    searchPlaceholder: "Rechercher un projet…",
-    sort: "Trier",
-    popular: "Populaire",
-    alphabetical: "A → Z",
-    all: "Tous",
-    web: "Web",
-    mobile: "Mobile",
-    design: "Design",
-    other: "Autre",
-    see: "Voir",
-    open: "Ouvrir",
-    availableForMissions: "Disponible pour mission",
-    availableForInternship: "Disponible pour stage",
-    contactMe: "Me contacter",
-    seeWebsite: "Voir mon site",
-    yearsExp: "Années d'exp.",
-    satisfaction: "Satisfaction",
-    mainPlatforms: "Présence sur les principales plateformes.",
-    courseAndSkills: "Parcours et compétences validées.",
-    inProgress: "En cours",
-    completed: "Terminé",
-    planned: "Planifié",
-    toDeploy: "À déployer",
-    strategicProjects: "Chantiers stratégiques long terme.",
-    vision: "Vision",
-    productionGoals: "Objectifs de production",
-    productionSubtitle: "100 sites React/Node • 100 apps React Native • 100 apps Flutter.",
-    aboutApproach: "Approche produit et méthode.",
-    aboutDescription: "De la recherche utilisateur au prototypage haute fidélité, jusqu'à l'implémentation full-stack et mobile (accessibilité, micro‑interactions, performance, maintenance).",
-    quickInfo: "Infos rapides",
-    quickInfoSubtitle: "Ce que vous devez savoir.",
-    basedIn: "Basé à :",
-    availability: "Dispo :",
-    languages: "Langues :",
-    preferredStack: "Stack préférée :",
-    workTogether: "Travaillons ensemble",
-    workTogetherSubtitle: "Dites‑moi en quelques mots votre besoin.",
-    networks: "Réseaux",
-    networksSubtitle: "Retrouvez‑moi en ligne.",
-    send: "Envoyer",
-    sending: "Envoi...",
-    messageSent: "Message envoyé !",
-    messageError: "Erreur lors de l'envoi",
-    directEmail: "Ou écrivez‑moi directement",
-    builtWith: "Construit avec",
-    loading: "Chargement...",
-    error: "Erreur de chargement"
-  },
-  en: {
-    portfolio: "Portfolio",
-    projects: "Projects",
-    freelance: "Freelance",
-    cv: "Curriculum",
-    certifications: "Certifications",
-    about: "About",
-    contact: "Contact",
-    goals: "Goals",
-    projectSelection: "Project Selection",
-    projectFilter: "Filter by type, sort and search.",
-    searchPlaceholder: "Search a project…",
-    sort: "Sort",
-    popular: "Popular",
-    alphabetical: "A → Z",
-    all: "All",
-    web: "Web",
-    mobile: "Mobile",
-    design: "Design",
-    other: "Other",
-    see: "See",
-    open: "Open",
-    availableForMissions: "Available for mission",
-    availableForInternship: "Available for internship",
-    contactMe: "Contact me",
-    seeWebsite: "See my website",
-    yearsExp: "Years exp.",
-    satisfaction: "Satisfaction",
-    mainPlatforms: "Presence on main platforms.",
-    courseAndSkills: "Course and validated skills.",
-    inProgress: "In progress",
-    completed: "Completed",
-    planned: "Planned",
-    toDeploy: "To deploy",
-    strategicProjects: "Long-term strategic projects.",
-    vision: "Vision",
-    productionGoals: "Production Goals",
-    productionSubtitle: "100 React/Node sites • 100 React Native apps • 100 Flutter apps.",
-    aboutApproach: "Product approach and method.",
-    aboutDescription: "From user research to high-fidelity prototyping, to full-stack and mobile implementation (accessibility, micro-interactions, performance, maintenance).",
-    quickInfo: "Quick Info",
-    quickInfoSubtitle: "What you need to know.",
-    basedIn: "Based in:",
-    availability: "Available:",
-    languages: "Languages:",
-    preferredStack: "Preferred stack:",
-    workTogether: "Let's work together",
-    workTogetherSubtitle: "Tell me about your needs in a few words.",
-    networks: "Networks",
-    networksSubtitle: "Find me online.",
-    send: "Send",
-    sending: "Sending...",
-    messageSent: "Message sent!",
-    messageError: "Error sending",
-    directEmail: "Or write me directly",
-    builtWith: "Built with",
-    loading: "Loading...",
-    error: "Loading error"
-  },
-  hi: {
-    portfolio: "पोर्टफोलियो",
-    projects: "प्रोजेक्ट्स",
-    freelance: "फ्रीलांस",
-    cv: "सीवी",
-    certifications: "प्रमाणपत्र",
-    about: "के बारे में",
-    contact: "संपर्क",
-    goals: "लक्ष्य",
-    projectSelection: "प्रोजेक्ट चयन",
-    projectFilter: "प्रकार के अनुसार फ़िल्टर करें, सॉर्ट करें और खोजें।",
-    searchPlaceholder: "एक प्रोजेक्ट खोजें…",
-    sort: "सॉर्ट",
-    popular: "लोकप्रिय",
-    alphabetical: "A → Z",
-    all: "सभी",
-    web: "वेब",
-    mobile: "मोबाइल",
-    design: "डिज़ाइन",
-    other: "अन्य",
-    see: "देखें",
-    open: "खोलें",
-    availableForMissions: "मिशन के लिए उपलब्ध",
-    availableForInternship: "इंटर्नशिप के लिए उपलब्ध",
-    contactMe: "मुझसे संपर्क करें",
-    seeWebsite: "मेरी वेबसाइट देखें",
-    yearsExp: "वर्षों का अनुभव",
-    satisfaction: "संतुष्टि",
-    mainPlatforms: "मुख्य प्लेटफॉर्म पर उपस्थिति।",
-    courseAndSkills: "कोर्स और सत्यापित कौशल।",
-    inProgress: "प्रगति में",
-    completed: "पूर्ण",
-    planned: "नियोजित",
-    toDeploy: "तैनात करना",
-    strategicProjects: "दीर्घकालिक रणनीतिक परियोजनाएं।",
-    vision: "दृष्टि",
-    productionGoals: "उत्पादन लक्ष्य",
-    productionSubtitle: "100 React/Node साइटें • 100 React Native ऐप्स • 100 Flutter ऐप्स।",
-    aboutApproach: "उत्पाद दृष्टिकोण और विधि।",
-    aboutDescription: "उपयोगकर्ता अनुसंधान से उच्च-फिडेलिटी प्रोटोटाइपिंग तक, फुल-स्टैक और मोबाइल कार्यान्वयन तक।",
-    quickInfo: "त्वरित जानकारी",
-    quickInfoSubtitle: "आपको जो जानना चाहिए।",
-    basedIn: "स्थित:",
-    availability: "उपलब्ध:",
-    languages: "भाषाएं:",
-    preferredStack: "पसंदीदा स्टैक:",
-    workTogether: "आइए मिलकर काम करते हैं",
-    workTogetherSubtitle: "कुछ शब्दों में अपनी आवश्यकताओं के बारे में बताएं।",
-    networks: "नेटवर्क",
-    networksSubtitle: "मुझे ऑनलाइन खोजें।",
-    send: "भेजें",
-    sending: "भेजा जा रहा है...",
-    messageSent: "संदेश भेजा गया!",
-    messageError: "भेजने में त्रुटि",
-    directEmail: "या मुझे सीधे लिखें",
-    builtWith: "के साथ निर्मित",
-    loading: "लोड हो रहा है...",
-    error: "लोडिंग त्रुटि"
-  },
-  ar: {
-    portfolio: "محفظة الأعمال",
-    projects: "المشاريع",
-    freelance: "العمل الحر",
-    cv: "السيرة الذاتية",
-    certifications: "الشهادات",
-    about: "حول",
-    contact: "اتصال",
-    goals: "الأهداف",
-    projectSelection: "اختيار المشاريع",
-    projectFilter: "تصفية حسب النوع، ترتيب وبحث.",
-    searchPlaceholder: "البحث عن مشروع…",
-    sort: "ترتيب",
-    popular: "شائع",
-    alphabetical: "أ → ي",
-    all: "الكل",
-    web: "ويب",
-    mobile: "محمول",
-    design: "تصميم",
-    other: "أخرى",
-    see: "مشاهدة",
-    open: "فتح",
-    availableForMissions: "متاح للمهمة",
-    availableForInternship: "متاح للتدريب",
-    contactMe: "اتصل بي",
-    seeWebsite: "مشاهدة موقعي",
-    yearsExp: "سنوات الخبرة",
-    satisfaction: "الرضا",
-    mainPlatforms: "الحضور على المنصات الرئيسية.",
-    courseAndSkills: "الدورة والمهارات المعتمدة.",
-    inProgress: "قيد التقدم",
-    completed: "مكتمل",
-    planned: "مخطط",
-    toDeploy: "للنشر",
-    strategicProjects: "مشاريع استراتيجية طويلة المدى.",
-    vision: "رؤية",
-    productionGoals: "أهداف الإنتاج",
-    productionSubtitle: "100 موقع React/Node • 100 تطبيق React Native • 100 تطبيق Flutter.",
-    aboutApproach: "نهج المنتج والطريقة.",
-    aboutDescription: "من بحث المستخدم إلى النماذج الأولية عالية الدقة، إلى التنفيذ الكامل والمحمول.",
-    quickInfo: "معلومات سريعة",
-    quickInfoSubtitle: "ما تحتاج لمعرفته.",
-    basedIn: "مقره في:",
-    availability: "متاح:",
-    languages: "اللغات:",
-    preferredStack: "المكدس المفضل:",
-    workTogether: "لنعمل معًا",
-    workTogetherSubtitle: "أخبرني عن احتياجاتك في كلمات قليلة.",
-    networks: "الشبكات",
-    networksSubtitle: "ابحث عني عبر الإنترنت.",
-    send: "إرسال",
-    sending: "جاري الإرسال...",
-    messageSent: "تم إرسال الرسالة!",
-    messageError: "خطأ في الإرسال",
-    directEmail: "أو اكتب لي مباشرة",
-    builtWith: "مبني باستخدام",
-    loading: "جاري التحميل...",
-    error: "خطأ في التحميل"
-  }
-};
+import { TRANSLATIONS } from "@/app/assets/translations";
+  // ——————————————————————————————————————————————
+  // Thème (clair/sombre)
+  // ——————————————————————————————————————————————
+  function useTheme() {
+    const prefersDark = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const [dark, setDark] = useState(prefersDark);
+    useEffect(() => {
+      const root = document.documentElement;
 
-// ——————————————————————————————————————————————
-// Thème (clair/sombre)
-// ——————————————————————————————————————————————
-function useTheme() {
-  const prefersDark = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const [dark, setDark] = useState(prefersDark);
-  useEffect(() => {
-    const root = document.documentElement;
-    
-    // Désactiver temporairement les transitions
-    root.classList.add("disable-transitions");
-    
-    if (dark) root.classList.add("dark");
-    else root.classList.remove("dark");
-    
-    // Réactiver les transitions après un court délai
-    setTimeout(() => {
-      root.classList.remove("disable-transitions");
-    }, 1);
-  }, [dark]);
-  return { dark, setDark };
-}
+      // Désactiver temporairement les transitions
+      root.classList.add("disable-transitions");
+
+      if (dark) root.classList.add("dark");
+      else root.classList.remove("dark");
+
+      // Réactiver les transitions après un court délai
+      setTimeout(() => {
+        root.classList.remove("disable-transitions");
+      }, 1);
+    }, [dark]);
+    return { dark, setDark };
+  };
 
 // ——————————————————————————————————————————————
 // Composant Loading
@@ -329,118 +86,6 @@ function ErrorMessage({ message }) {
   );
 }
 
-// ——————————————————————————————————————————————
-// Composant ProjectCard avec support RTL
-// ——————————————————————————————————————————————
-function ProjectCard({ project, currentLang, t, isAdminMode = false }) {
-  const { getDirectionalClass, isRTL } = useDirectionalClasses();
-  
-
-  return (
-    <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-      <Card className="h-full relative overflow-hidden">
-        {/* Admin Edit Button - Only show in admin mode */}
-        {isAdminMode && <ProjectEditButton projectId={project.id} />}
-        
-        {project.status === 'in_progress' && (
-          <div className="absolute top-2 left-2 z-10">
-            <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700">
-              {t.inProgress}
-            </Badge>
-          </div>
-        )}
-        {project.status === 'to_deploy' && (
-          <div className="absolute top-2 left-2 z-10">
-            <Badge variant="outline" className="text-xs bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700">
-              {t.toDeploy}
-            </Badge>
-          </div>
-        )}
-        {/* Image du projet */}
-        <div className="h-48 rounded-t-xl overflow-hidden bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100">
-          <div className="w-full h-full relative">
-            {/* Image décalée d'un tiers */}
-            <div className="absolute inset-0 transform -translate-y-10">
-            <ProjectImage
-              src={getPublicImageUrl(project.image_url)}
-              alt={getLocalizedText(project, 'title', currentLang)}
-                className="object-cover rounded-lg shadow-md transition-transform duration-300 hover:scale-105"
-                fallbackGradient="from-primary/20 to-primary/10"
-            />
-          </div>
-          </div>
-        </div>
-        <CardHeader className="pb-2">
-          <div className={`${getDirectionalClass("flex items-start justify-between")} gap-2`}>
-                <div className="flex-1">
-              <CardTitle className="text-lg">{getLocalizedText(project, 'title', currentLang)}</CardTitle>
-              <CardDescription className="line-clamp-2 min-h-[2.5rem] mb-2">{getLocalizedText(project, 'description', currentLang)}</CardDescription>
-                </div>
-                {project.stars > 0 && (
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Star className="h-4 w-4 mr-1" /> {project.stars}
-                  </div>
-                )}
-              </div>
-            </CardHeader>
-        <CardContent className="flex flex-col h-full">
-          <div className={`${getDirectionalClass("flex flex-wrap gap-1.5")} mb-4 min-h-[3.5rem] content-start flex-1`}>
-            {(Array.isArray(project.category) ? project.category : [project.category]).map((cat) => (
-              <Badge key={`${project.id}-category-${cat}`} variant="default" className="rounded-full capitalize h-6 px-2.5 text-xs flex-shrink-0">{cat}</Badge>
-            ))}
-            {project.tags?.slice(0, 8).map((tag) => (
-              <Badge key={tag} variant="secondary" className="rounded-full h-6 px-2.5 text-xs flex-shrink-0 max-w-[120px] truncate">{tag}</Badge>
-            ))}
-            {project.tags?.length > 8 && (
-              <Badge variant="outline" className="rounded-full h-6 px-2.5 text-xs flex-shrink-0">
-                +{project.tags.length - 8}
-              </Badge>
-            )}
-          </div>
-          <div className={`${getDirectionalClass("flex gap-2")} mt-auto pt-3 border-t bg-red-100 p-2`}>
-              {/* Voir button - always displayed, takes full width */}
-              <a 
-                href={project.link && project.link !== '#' ? project.link : '#'} 
-                target={project.link && project.link !== '#' ? "_blank" : "_self"} 
-                rel="noopener noreferrer" 
-                className="flex-1"
-              >
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className={`w-full ${getDirectionalClass("flex items-center justify-center")}`}
-                  disabled={!project.link || project.link === '#'}
-                >
-                  <Globe className={`${isRTL ? 'ml-2' : 'mr-2'} w-4 h-4 no-rtl-transform`} />
-                  {t.see}
-                </Button>
-              </a>
-              
-              {/* GitHub icon - only when github_url exists */}
-              {project.github_url && (
-                <a href={project.github_url} target="_blank" rel="noopener noreferrer">
-                  <Button variant="ghost" size="sm" className="no-rtl-transform px-3">
-                    <Github className="w-4 h-4" />
-                  </Button>
-                </a>
-              )}
-              
-              {/* Figma icon - only when figma_url exists */}
-              {project.figma_url && (
-                <a href={project.figma_url} target="_blank" rel="noopener noreferrer">
-                  <Button variant="ghost" size="sm" className="no-rtl-transform px-3">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M15.852 8.981h-4.588V0h4.588c2.476 0 4.49 2.014 4.49 4.49s-2.014 4.491-4.49 4.491zM12.735 7.51h3.117c1.665 0 3.019-1.355 3.019-3.019s-1.354-3.019-3.019-3.019h-3.117V7.51zm0 1.471H8.148c-2.476 0-4.49-2.015-4.49-4.491S5.672 0 8.148 0h4.588v8.981zm-4.587-7.51c-1.665 0-3.019 1.355-3.019 3.019s1.354 3.02 3.019 3.02h3.117V1.471H8.148zm4.587 15.019H8.148c-2.476 0-4.49-2.014-4.49-4.49s2.014-4.49 4.49-4.49h4.588v8.98zM8.148 8.981c-1.665 0-3.019 1.355-3.019 3.019s1.355 3.019 3.019 3.019h3.117V8.981H8.148zM8.172 24c-2.489 0-4.515-2.014-4.515-4.49s2.014-4.49 4.49-4.49h4.588v4.441c0 2.503-2.047 4.539-4.563 4.539zm-.024-7.51a3.023 3.023 0 0 0-3.019 3.019c0 1.665 1.365 3.019 3.044 3.019 1.705 0 3.093-1.376 3.093-3.068V16.49H8.148zM24 12.981c0 2.476-2.014 4.49-4.49 4.49s-4.49-2.014-4.49-4.49 2.014-4.49 4.49-4.49 4.49 2.014 4.49 4.49zm-4.49-3.019c-1.665 0-3.019 1.355-3.019 3.019s1.354 3.019 3.019 3.019 3.019-1.355 3.019-3.019-1.354-3.019-3.019-3.019z"/>
-                    </svg>
-                  </Button>
-                </a>
-              )}
-            </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-}
 
 // ——————————————————————————————————————————————
 // Composant principal
@@ -580,10 +225,10 @@ function PortfolioContent() {
   const paginatedProjects = useMemo(() => {
     if (query) {
       // Si recherche active, pas de pagination
-      return allProjects.filter(p => p.status !== 'to_deploy');
+      return allProjects;
     }
     
-    const filteredForPagination = allProjects.filter(p => p.status !== 'to_deploy');
+    const filteredForPagination = allProjects;
     const startIndex = (currentPage - 1) * projectsPerPage;
     const endIndex = startIndex + projectsPerPage;
     return filteredForPagination.slice(startIndex, endIndex);
@@ -852,25 +497,7 @@ function PortfolioContent() {
           </div>
         </div>
 
-        {/* Section Projets à déployer - Masquée lors de la recherche */}
-        {!query && allProjects.filter(p => p.status === 'to_deploy').length > 0 && (
-          <div className="mt-8 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="h-6 w-1 bg-emerald-500 rounded-full"></div>
-              <h3 className="text-xl font-semibold text-emerald-700 dark:text-emerald-300">
-                {t.toDeploy}
-              </h3>
-              <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/50 dark:text-emerald-300">
-                {allProjects.filter(p => p.status === 'to_deploy').length}
-              </Badge>
-            </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {allProjects.filter(p => p.status === 'to_deploy').map((p) => (
-                <ProjectCard key={`to-deploy-${p.id}`} project={p} currentLang={currentLang} t={t} isAdminMode={isAdminMode} />
-              ))}
-            </div>
-          </div>
-        )}
+
 
 
         {/* Affichage conditionnel selon la recherche */}

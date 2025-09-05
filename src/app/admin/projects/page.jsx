@@ -1,16 +1,17 @@
 'use client';
 
+import { TRANSLATIONS } from "@/app/assets/translations";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,20 +19,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAdminGuest } from "@/contexts/AdminGuestContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
-    deleteProject,
-    useAllProjectsProgress,
-    useProjects
+  deleteProject,
+  useAllProjectsProgress,
+  useCertifications,
+  useProjects
 } from "@/lib/supabase";
 import {
-    CheckSquare,
-    Edit,
-    ExternalLink,
-    Filter,
-    Plus,
-    Search,
-    Star,
-    Trash2
+  CheckSquare,
+  Edit,
+  ExternalLink,
+  Filter,
+  Plus,
+  Search,
+  Star,
+  Trash2
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -44,6 +47,13 @@ export default function ProjectsAdmin() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [deleteLoading, setDeleteLoading] = useState("");
   const [deleteError, setDeleteError] = useState("");
+  const { currentLang, isRTL } = useLanguage();
+  const t = TRANSLATIONS[currentLang];
+
+  const { certifications, loading: certsLoading } = useCertifications();
+
+  const toDeployProjects = projects?.filter(p => p.status === 'to_deploy') || [];
+  const inProgressProjects = projects?.filter(p => p.status === 'in_progress') || [];
 
   const handleDelete = async (projectId, projectTitle) => {
     setDeleteLoading(projectId);
@@ -156,20 +166,20 @@ export default function ProjectsAdmin() {
             <p className="text-xs text-muted-foreground">Terminés</p>
           </CardContent>
         </Card>
-        <Card className="bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800">
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-orange-700 dark:text-orange-300">
-              {projects?.filter(p => p.status === 'in_progress').length || 0}
-            </div>
-            <p className="text-xs text-orange-600 dark:text-orange-400">En cours</p>
-          </CardContent>
-        </Card>
-        <Card>
+        <Card className="">
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">
-              {projects?.filter(p => p.featured).length || 0}
+              {projects?.filter(p => p.status === 'to_deploy').length || 0}
             </div>
-            <p className="text-xs text-muted-foreground">Mis en avant</p>
+            <p className="text-xs">À déployer</p>
+          </CardContent>
+        </Card>
+        <Card className="">
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold">
+              {projects?.filter(p => p.status === 'in_progress').length || 0}
+            </div>
+            <p className="text-xs">En cours</p>
           </CardContent>
         </Card>
         <Card>
@@ -189,88 +199,77 @@ export default function ProjectsAdmin() {
         </Alert>
       )}
 
-      {/* Section Projets en cours */}
-      {projects?.filter(p => p.status === 'in_progress').length > 0 && (
+ {/* Section Projets à déployer */}
+      {toDeployProjects.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="h-6 w-1 bg-orange-500 rounded-full"></div>
-            <h2 className="text-xl font-semibold text-orange-700 dark:text-orange-300">
-              Projets en cours
+            <div className="h-6 w-1 bg-emerald-500 rounded-full"></div>
+            <h2 className="text-xl font-semibold text-emerald-700 dark:text-emerald-300">
+              Projets à déployer
             </h2>
-            <Badge className="bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/50 dark:text-orange-300">
-              {projects?.filter(p => p.status === 'in_progress').length}
+            <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/50 dark:text-emerald-300">
+              {toDeployProjects.length}
             </Badge>
           </div>
           
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {projects?.filter(p => p.status === 'in_progress').map((project) => (
-              <Card key={`in-progress-${project.id}`} className="border-orange-200 bg-orange-50/50 dark:bg-orange-900/10 dark:border-orange-800">
+            {toDeployProjects.slice(0, 6).map((project) => (
+              <Card key={`to-deploy-${project.id}`} className="border-emerald-200 bg-emerald-50/50 dark:bg-emerald-900/10 dark:border-emerald-800">
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className="text-lg flex items-center gap-2">
-                        {project.title_fr}
+                        <span className="truncate">{project.title_fr}</span>
                         {project.featured && (
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge variant="secondary" className="text-xs flex-shrink-0">
                             EN AVANT
                           </Badge>
                         )}
-                        <Badge className="bg-orange-500 text-white text-xs">
-                          ⏳ En cours
-                        </Badge>
                       </CardTitle>
-                      <CardDescription className="line-clamp-2 mb-2">
+                      <div className="flex items-center gap-2 mt-1 mb-2">
+                        <Badge className="bg-emerald-500 text-white text-xs">
+                          🚀 À déployer
+                        </Badge>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          ⭐ {project.stars}
+                        </div>
+                      </div>
+                      <CardDescription className="line-clamp-2">
                         {project.description_fr}
                       </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Star className="w-4 h-4" />
-                      {project.stars}
                     </div>
                   </div>
                 </CardHeader>
                 
-                <CardContent>
+                <CardContent className="pt-0">
                   <div className="space-y-3">
                     {/* Catégories et tags */}
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {project.category?.map((cat) => (
-                        <Badge key={cat} variant="outline" className="text-xs border-orange-300 text-orange-700">
-                          {cat}
-                        </Badge>
-                      ))}
-                      {project.tags?.slice(0, 3).map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                      {project.tags?.length > 3 && (
-                        <Badge variant="secondary" className="text-xs">
-                          +{project.tags.length - 3}
-                        </Badge>
-                      )}
-                    </div>
-
+                    {project.category?.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {project.category.slice(0, 3).map((cat) => (
+                          <Badge key={cat} variant="outline" className="text-xs border-emerald-300 text-emerald-700">
+                            {cat}
+                          </Badge>
+                        ))}
+                        {project.category.length > 3 && (
+                          <Badge variant="outline" className="text-xs border-emerald-300 text-emerald-700">
+                            +{project.category.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
 
                     {/* Actions */}
-                    <div className="mt-3 pt-3 border-t flex gap-2">
+                    <div className="flex gap-2 pt-2 border-t border-emerald-200">
                       <Link href={`/admin/projects/edit/${project.id}`} className="flex-1">
-                        <Button variant="outline" size="sm" className="w-full border-orange-300 text-orange-700 hover:bg-orange-50" disabled={isGuest}>
-                          <Edit className="w-4 h-4 mr-2" />
-                          Modifier
+                        <Button variant="outline" size="sm" className="w-full border-emerald-300 text-emerald-700 hover:bg-emerald-50">
+                          Éditer
                         </Button>
                       </Link>
-                      
-                      <Link href={`/admin/kanban?project=${project.id}`}>
-                        <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white" title="Gérer les tâches">
-                          <CheckSquare className="w-4 h-4" />
-                        </Button>
-                      </Link>
-                      
-                      {project.link && project.link !== '#' && (
-                        <a href={project.link} target="_blank" rel="noopener noreferrer">
-                          <Button variant="outline" size="sm" className="border-orange-300 text-orange-700">
-                            <ExternalLink className="w-4 h-4" />
+                      {project.live_url && (
+                        <a href={project.live_url} target="_blank" rel="noopener noreferrer">
+                          <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                            Déployer
                           </Button>
                         </a>
                       )}
@@ -280,6 +279,102 @@ export default function ProjectsAdmin() {
               </Card>
             ))}
           </div>
+          
+          {toDeployProjects.length > 6 && (
+            <div className="text-center">
+              <Link href="/admin/projects">
+                <Button variant="outline" className="border-emerald-300 text-emerald-700 hover:bg-emerald-50">
+                  Voir tous les projets à déployer ({toDeployProjects.length})
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Section Projets en cours */}
+      {inProgressProjects.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="h-6 w-1 bg-orange-500 rounded-full"></div>
+            <h2 className="text-xl font-semibold text-orange-700 dark:text-orange-300">
+              Projets en cours
+            </h2>
+            <Badge className="bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/50 dark:text-orange-300">
+              {inProgressProjects.length}
+            </Badge>
+          </div>
+          
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {inProgressProjects.slice(0, 6).map((project) => (
+              <Card key={`in-progress-${project.id}`} className="border-orange-200 bg-orange-50/50 dark:bg-orange-900/10 dark:border-orange-800">
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <span className="truncate">{project.title_fr}</span>
+                        {project.featured && (
+                          <Badge variant="secondary" className="text-xs flex-shrink-0">
+                            EN AVANT
+                          </Badge>
+                        )}
+                      </CardTitle>
+                      <div className="flex items-center gap-2 mt-1 mb-2">
+                        <Badge className="bg-orange-500 text-white text-xs">
+                          ⏳ En cours
+                        </Badge>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          ⭐ {project.stars}
+                        </div>
+                      </div>
+                      <CardDescription className="line-clamp-2">
+                        {project.description_fr}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="pt-0">
+                  <div className="space-y-3">
+                    {/* Catégories et tags */}
+                    {project.category?.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {project.category.slice(0, 3).map((cat) => (
+                          <Badge key={cat} variant="outline" className="text-xs border-orange-300 text-orange-700">
+                            {cat}
+                          </Badge>
+                        ))}
+                        {project.category.length > 3 && (
+                          <Badge variant="outline" className="text-xs border-orange-300 text-orange-700">
+                            +{project.category.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="flex gap-2 pt-2 border-t border-orange-200">
+                      <Link href={`/admin/projects/edit/${project.id}`} className="flex-1">
+                        <Button variant="outline" size="sm" className="w-full border-orange-300 text-orange-700 hover:bg-orange-50">
+                          Éditer
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          
+          {inProgressProjects.length > 6 && (
+            <div className="text-center">
+              <Link href="/admin/projects">
+                <Button variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-50">
+                  Voir tous les projets en cours ({inProgressProjects.length})
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       )}
 
@@ -341,13 +436,15 @@ export default function ProjectsAdmin() {
                   <div className="flex items-center justify-between">
                     <Badge 
                       className={
-                        project.status === 'completed' ? 'bg-green-600 text-white' :
-                        project.status === 'in_progress' ? 'bg-yellow-500 text-black dark:text-white' :
+                        project.status === 'completed' ? 'bg-black text-white' :
+                        project.status == 'to_deploy'? 'bg-green-600 text-white' :
+                        project.status === 'in_progress' ? 'bg-orange-600 text-white dark:text-white' :
                         'bg-gray-200 text-gray-800'
                       }
                     >
                       {project.status === 'completed' ? 'Terminé' : 
-                       project.status === 'in_progress' ? 'En cours' : 'Planifié'}
+                      project.status == 'to_deploy'? 'À déployer' :
+                       project.status === 'in_progress' ? 'En cours' : 'Terminé'}
                     </Badge>
                     
                     {project.link && project.link !== '#' && (
