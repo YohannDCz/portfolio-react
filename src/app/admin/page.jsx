@@ -123,10 +123,10 @@ export default function AdminLogin() {
                 className="text-gray-600"
                 onClick={() => {
                   localStorage.setItem('guestMode', 'true');
-                  router.push('/admin/dashboard');
+                  router.push('/');
                 }}
               >
-                Voir en tant qu'invité
+                Retour sur le site
               </Button>
             </div>
           </CardContent>
