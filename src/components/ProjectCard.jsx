@@ -1,4 +1,14 @@
-// ——————————————————————————————————————————————
+import { ProjectEditButton } from "@/components/AdminEditButton";
+import ProjectImage from "@/components/ProjectImage";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useDirectionalClasses } from "@/contexts/LanguageContext";
+import { getLocalizedText, getPublicImageUrl } from "@/lib/supabase";
+import { motion } from "framer-motion";
+import { Github, Globe, Star } from "lucide-react";
+
+  // ——————————————————————————————————————————————
 // Composant ProjectCard avec support RTL
 // ——————————————————————————————————————————————
 function ProjectCard({ project, currentLang, t, isAdminMode = false }) {
@@ -110,3 +120,5 @@ function ProjectCard({ project, currentLang, t, isAdminMode = false }) {
     </motion.div>
   );
 }
+
+export default ProjectCard;

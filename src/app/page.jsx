@@ -755,44 +755,44 @@ function PortfolioContent() {
 
               {/* Pagination pour les certifications - Seulement si plusieurs pages */}
               {totalCertPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-8">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentCertPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentCertPage === 1}
-                    className="flex items-center gap-2"
-                  >
-                    ←
-                    <span className="hidden sm:inline">{currentLang === 'ar' ? 'السابق' : currentLang === 'hi' ? 'पिछला' : 'Précédent'}</span>
-                  </Button>
-                  
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: totalCertPages }, (_, i) => i + 1).map((page) => (
+                    <div className="flex items-center justify-center gap-2 mt-8">
                       <Button
-                        key={page}
-                        variant={page === currentCertPage ? "default" : "outline"}
+                        variant="outline"
                         size="sm"
-                        onClick={() => setCurrentCertPage(page)}
-                        className="w-10 h-10"
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentCertPage === 1}
+                        className="flex items-center gap-2"
                       >
-                        {page}
+                        ←
+                        <span className="hidden sm:inline">{currentLang === 'ar' ? 'السابق' : currentLang === 'hi' ? 'पिछला' : 'Précédent'}</span>
                       </Button>
-                    ))}
-                  </div>
+                      
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: totalCertPages }, (_, i) => i + 1).map((page) => (
+                          <Button
+                            key={page}
+                            variant={page === currentCertPage ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setCurrentPage(page)}
+                            className="w-10 h-10"
+                          >
+                            {page}
+                          </Button>
+                        ))}
+                      </div>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentCertPage(prev => Math.min(prev + 1, totalCertPages))}
-                    disabled={currentCertPage === totalCertPages}
-                    className="flex items-center gap-2"
-                  >
-                    <span className="hidden sm:inline">{currentLang === 'ar' ? 'التالي' : currentLang === 'hi' ? 'अगला' : 'Suivant'}</span>
-                    →
-                  </Button>
-                </div>
-              )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentCertPage(prev => Math.min(prev + 1, totalCertPages))}
+                        disabled={currentCertPage === totalCertPages}
+                        className="flex items-center gap-2"
+                      >
+                        <span className="hidden sm:inline">{currentLang === 'ar' ? 'التالي' : currentLang === 'hi' ? 'अगला' : 'Suivant'}</span>
+                        →
+                      </Button>
+                    </div>
+                  )}
 
               {/* Message si aucune certification */}
               {paginatedCertifications.length === 0 && !certificationsLoading && (
@@ -901,7 +901,7 @@ function PortfolioContent() {
             <CardContent className="grid gap-3">
               <SocialLink href={profile?.github_url} icon={<Github className="h-4 w-4" />} label="GitHub" />
               <SocialLink href={profile?.linkedin_url} icon={<Linkedin className="h-4 w-4" />} label="LinkedIn" />
-              <Link href={"/not-found"}><SocialLink href={"profile?.website"} icon={<Globe className="h-4 w-4" />} label="Site web" /></Link>
+              <SocialLink  href={"/not-found"} icon={<Globe className="h-4 w-4" />} label="Site web" />
               <SocialLink href={`mailto:${profile?.email || 'YohannDCz@gmail.com'}`} icon={<Mail className="h-4 w-4" />} label={profile?.email || 'YohannDCz@gmail.com'} />
             </CardContent>
           </Card>
