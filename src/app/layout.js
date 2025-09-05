@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Yohann Di Cresceno's Portfolio",
+  title: "Yohann Di Crescenzo's Portfolio",
   description: "Portfolio complet avec support RTL pour l'arabe",
 };
 
