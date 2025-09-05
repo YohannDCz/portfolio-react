@@ -6,6 +6,7 @@ import { AdminGuestProvider, useAdminGuest } from "@/contexts/AdminGuestContext"
 import { useAuth } from "@/lib/supabase";
 import {
     Award,
+    ExternalLink,
     Eye,
     FolderOpen,
     Globe,
@@ -30,7 +31,7 @@ const navigation = [
   { name: 'Profil', href: '/admin/profile', icon: User },
   { name: 'Plateformes', href: '/admin/platforms', icon: Globe },
   { name: 'Messages', href: '/admin/contact', icon: Mail },
-  { name: 'Kanban', href: '/admin/kanban', icon: Kanban }
+  { name: 'Kanban', href: 'https://github.com/YohannDCz/kanban-react', icon: Kanban, external: true }
 ];
 
 function AdminLayoutContent({ children }) {
@@ -92,7 +93,25 @@ function AdminLayoutContent({ children }) {
           <nav className="flex-1 px-4 py-6">
             <ul className="space-y-2">
               {navigation.map((item) => {
-                const isActive = pathname === item.href;
+                const isActive = pathname === item.href && !item.external;
+                
+                if (item.external) {
+                  return (
+                    <li key={item.name}>
+                      <a
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-gray-700 hover:bg-gray-100"
+                      >
+                        <item.icon className="h-5 w-5" />
+                        {item.name}
+                        <ExternalLink className="h-4 w-4 ml-auto" />
+                      </a>
+                    </li>
+                  );
+                }
+                
                 return (
                   <li key={item.name}>
                     <Link
@@ -115,7 +134,7 @@ function AdminLayoutContent({ children }) {
           </nav>
 
           {/* Homepage button at bottom of sidebar, above user info */}
-          <div className="px-4 pb-4">
+          <div className="px-4 pb-4 border-t">
             <Link href="/">
               <Button className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground">
                 <Home className="h-4 w-4" />
@@ -125,7 +144,7 @@ function AdminLayoutContent({ children }) {
           </div>
 
           {/* User info et déconnexion */}
-          <div className="px-4 py-4 border-t">
+          <div className="px-4 py-4">
             <Card className="p-3">
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">

@@ -122,7 +122,9 @@ export default function AdminLogin() {
                 variant="link" 
                 className="text-gray-600"
                 onClick={() => {
-                  localStorage.setItem('guestMode', 'true');
+                  // Clear guest mode completely when returning to public site
+                  localStorage.removeItem('guestMode');
+                  localStorage.removeItem('wasVisitor');
                   router.push('/');
                 }}
               >

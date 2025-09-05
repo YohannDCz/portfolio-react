@@ -21,6 +21,7 @@ import {
   getProjectsByCategory,
   getPublicImageUrl,
   sendContactMessage,
+  useAuth,
   useCertifications,
   useFreelancePlatforms,
   useProfile,
@@ -35,7 +36,7 @@ import { useDirectionalClasses, useLanguage } from "@/contexts/LanguageContext";
 // Import du contexte d'authentification pour les boutons d'édition
 import AdminEditButton, { AuthStatusIndicator, ProjectEditButton } from "@/components/AdminEditButton";
 import ProfileImageModal from '@/components/ProfileImageModal';
-import { AdminGuestProvider } from "@/contexts/AdminGuestContext";
+import { AdminGuestProvider, useAdminGuest } from "@/contexts/AdminGuestContext";
 
 // Import des composants de chargement
 import AnimatedSection from "@/components/AnimatedSection";
@@ -331,14 +332,14 @@ function ErrorMessage({ message }) {
 // ——————————————————————————————————————————————
 // Composant ProjectCard avec support RTL
 // ——————————————————————————————————————————————
-function ProjectCard({ project, currentLang, t }) {
+function ProjectCard({ project, currentLang, t, isAdminMode = false }) {
   const { getDirectionalClass, isRTL } = useDirectionalClasses();
 
   return (
     <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
       <Card className="h-full relative overflow-hidden">
-        {/* Admin Edit Button */}
-        <ProjectEditButton projectId={project.id} />
+        {/* Admin Edit Button - Only show in admin mode */}
+        {isAdminMode && <ProjectEditButton projectId={project.id} />}
         
         {project.status === 'in_progress' && (
           <div className="absolute top-2 left-2 z-10">
@@ -447,6 +448,9 @@ function PortfolioContent() {
   const { dark, setDark } = useTheme();
   const { currentLang, isRTL } = useLanguage();
   const { getDirectionalClass, getFlexDirection, getTextAlign } = useDirectionalClasses();
+  const { isAuthenticated } = useAuth();
+  const { isGuest } = useAdminGuest();
+  const isAdminMode = isAuthenticated || isGuest;
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState("tous");
   const [sort, setSort] = useState("popular");
@@ -455,8 +459,23 @@ function PortfolioContent() {
   const [showNotification, setShowNotification] = useState(false);
   const [notificationData, setNotificationData] = useState({});
   const [activeSection, setActiveSection] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [currentCertPage, setCurrentCertPage] = useState(1);
 
   const t = TRANSLATIONS[currentLang];
+
+  // Hook pour détecter la taille d'écran
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024); // lg breakpoint
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Hook de chargement global
   const { isLoading, registerLoading } = useGlobalLoading();
@@ -552,6 +571,52 @@ function PortfolioContent() {
 
   // Tous les projets (normaux et mega) ensemble
   const allProjects = filtered;
+
+  // Configuration de la pagination
+  const projectsPerPage = isMobile ? 3 : 6; // 3 sur mobile, 6 sur desktop (2 rangées × 3 colonnes)
+  
+  // Projets paginés
+  const paginatedProjects = useMemo(() => {
+    if (query) {
+      // Si recherche active, pas de pagination
+      return allProjects.filter(p => p.status !== 'to_deploy');
+    }
+    
+    const filteredForPagination = allProjects.filter(p => p.status !== 'to_deploy');
+    const startIndex = (currentPage - 1) * projectsPerPage;
+    const endIndex = startIndex + projectsPerPage;
+    return filteredForPagination.slice(startIndex, endIndex);
+  }, [allProjects, currentPage, projectsPerPage, query]);
+
+  // Nombre total de pages
+  const totalPages = useMemo(() => {
+    if (query) return 1; // Pas de pagination en mode recherche
+    const filteredForPagination = allProjects.filter(p => p.status !== 'to_deploy');
+    return Math.ceil(filteredForPagination.length / projectsPerPage);
+  }, [allProjects, projectsPerPage, query]);
+
+  // Reset de la page quand on change d'onglet ou de recherche
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [tab, query]);
+
+  // Configuration de la pagination pour les certifications
+  const certificationsPerPage = isMobile ? 3 : 6; // 3 sur mobile, 6 sur desktop (2 rangées × 3 colonnes)
+  
+  // Certifications paginées
+  const paginatedCertifications = useMemo(() => {
+    if (!certifications) return [];
+    
+    const startIndex = (currentCertPage - 1) * certificationsPerPage;
+    const endIndex = startIndex + certificationsPerPage;
+    return certifications.slice(startIndex, endIndex);
+  }, [certifications, currentCertPage, certificationsPerPage]);
+
+  // Nombre total de pages pour les certifications
+  const totalCertPages = useMemo(() => {
+    if (!certifications) return 1;
+    return Math.ceil(certifications.length / certificationsPerPage);
+  }, [certifications, certificationsPerPage]);
 
   // Gestion du formulaire de contact
   const handleContactSubmit = async (e) => {
@@ -787,53 +852,156 @@ function PortfolioContent() {
           </div>
         </div>
 
-        <Tabs value={tab} onValueChange={setTab} className="mt-4">
-          <TabsList className="grid grid-cols-5 bg-muted w-full md:w-[560px]">
-            <TabsTrigger 
-              value="tous" 
-              className="font-bold text-xs sm:text-sm dark:text-white light:text-black"
-            >
-              {t.all}
-            </TabsTrigger>
-            <TabsTrigger 
-              value="web" 
-              className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black"
-            >
-              {t.web}
-            </TabsTrigger>
-            <TabsTrigger 
-              value="mobile" 
-              className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black"
-            >
-              {t.mobile}
-            </TabsTrigger>
-            <TabsTrigger 
-              value="design" 
-              className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black"
-            >
-              {t.design}
-            </TabsTrigger>
-            <TabsTrigger 
-              value="autre" 
-              className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black"
-            >
-              {t.other}
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value={tab} className="mt-6">
+        {/* Section Projets à déployer - Masquée lors de la recherche */}
+        {!query && allProjects.filter(p => p.status === 'to_deploy').length > 0 && (
+          <div className="mt-8 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="h-6 w-1 bg-emerald-500 rounded-full"></div>
+              <h3 className="text-xl font-semibold text-emerald-700 dark:text-emerald-300">
+                {t.toDeploy}
+              </h3>
+              <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/50 dark:text-emerald-300">
+                {allProjects.filter(p => p.status === 'to_deploy').length}
+              </Badge>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {allProjects.filter(p => p.status === 'to_deploy').map((p) => (
+                <ProjectCard key={`to-deploy-${p.id}`} project={p} currentLang={currentLang} t={t} isAdminMode={isAdminMode} />
+              ))}
+            </div>
+          </div>
+        )}
+
+
+        {/* Affichage conditionnel selon la recherche */}
+        {query ? (
+          /* Résultats de recherche - sans sections */
+          <div className="mt-6">
+            <div className="mb-4">
+              <p className="text-muted-foreground">
+                {allProjects.filter(p => p.status !== 'to_deploy').length} {allProjects.filter(p => p.status !== 'to_deploy').length === 1 ? 'résultat trouvé' : 'résultats trouvés'} pour "{query}"
+              </p>
+            </div>
             {projectsLoading ? (
               <LoadingSpinner />
             ) : projectsError ? (
               <ErrorMessage message={projectsError} />
-            ) : (
+            ) : allProjects.filter(p => p.status !== 'to_deploy').length > 0 ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {allProjects.map((p) => (
-                  <ProjectCard key={p.id} project={p} currentLang={currentLang} t={t} />
+                {allProjects.filter(p => p.status !== 'to_deploy').map((p) => (
+                  <ProjectCard key={p.id} project={p} currentLang={currentLang} t={t} isAdminMode={isAdminMode} />
                 ))}
               </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Aucun projet trouvé pour "{query}"</p>
+              </div>
             )}
-          </TabsContent>
-        </Tabs>
+          </div>
+        ) : (
+          /* Navigation par onglets - affichage normal */
+          <Tabs value={tab} onValueChange={setTab} className="mt-4">
+            <TabsList className="grid grid-cols-5 bg-muted w-full md:w-[560px]">
+              <TabsTrigger 
+                value="tous" 
+                className="font-bold text-xs sm:text-sm dark:text-white light:text-black"
+              >
+                {t.all}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="web" 
+                className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black"
+              >
+                {t.web}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="mobile" 
+                className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black"
+              >
+                {t.mobile}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="design" 
+                className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black"
+              >
+                {t.design}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="autre" 
+                className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black"
+              >
+                {t.other}
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value={tab} className="mt-6">
+              {projectsLoading ? (
+                <LoadingSpinner />
+              ) : projectsError ? (
+                <ErrorMessage message={projectsError} />
+              ) : (
+                <div className="space-y-6">
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {paginatedProjects.map((p) => (
+                      <ProjectCard key={p.id} project={p} currentLang={currentLang} t={t} isAdminMode={isAdminMode} />
+                    ))}
+                  </div>
+
+                  {/* Pagination - Seulement si pas de recherche et plusieurs pages */}
+                  {!query && totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 mt-8">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="flex items-center gap-2"
+                      >
+                        ←
+                        <span className="hidden sm:inline">{currentLang === 'ar' ? 'السابق' : currentLang === 'hi' ? 'पिछला' : 'Précédent'}</span>
+                      </Button>
+                      
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                          <Button
+                            key={page}
+                            variant={page === currentPage ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setCurrentPage(page)}
+                            className="w-10 h-10"
+                          >
+                            {page}
+                          </Button>
+                        ))}
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className="flex items-center gap-2"
+                      >
+                        <span className="hidden sm:inline">{currentLang === 'ar' ? 'التالي' : currentLang === 'hi' ? 'अगला' : 'Suivant'}</span>
+                        →
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Message si aucun projet */}
+                  {paginatedProjects.length === 0 && !projectsLoading && (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground">
+                        {currentLang === 'ar' ? 'لا توجد مشاريع في هذه الفئة' : 
+                         currentLang === 'hi' ? 'इस श्रेणी में कोई प्रोजेक्ट नहीं है' : 
+                         'Aucun projet dans cette catégorie'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        )}
         </section>
 
       {/* FREELANCE */}
@@ -890,96 +1058,126 @@ function PortfolioContent() {
             <p className="text-muted-foreground">{t.courseAndSkills}</p>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+        <div className="space-y-6 mt-6">
           {certificationsLoading ? (
             <LoadingSpinner />
           ) : certificationsError ? (
             <ErrorMessage message={certificationsError} />
           ) : (
-            certifications?.map((c) => (
-              <Card key={c.id} className="relative pt-8">
-                {/* Admin Edit Button */}
-                <AdminEditButton 
-                  href={`/admin/certifications/edit/${c.id}`} 
-                  className="absolute top-2 left-2 z-10"
-                />
-                
-                <div className="absolute top-4 right-4">
-                  <Badge 
-                    className={`text-xs ${
-                      c.status === 'completed' 
-                        ? 'bg-green-100 text-green-800' 
-                        : c.status === 'in_progress' 
-                          ? 'bg-gray-200 text-gray-800 dark:bg-zinc-700 dark:text-zinc-200'
-                          : c.status === 'to_deploy'
-                            ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    {c.status === 'completed' 
-                      ? '✅' 
-                      : c.status === 'in_progress' 
-                        ? '⏳' 
-                        : c.status === 'to_deploy'
-                          ? '🚀'
-                        : '🗂️'}
-                    <span className="ml-1.5">{c.status === 'completed' ? t.completed : c.status === 'in_progress' ? t.inProgress : c.status === 'to_deploy' ? t.toDeploy : t.planned}</span>
-                  </Badge>
-                </div>
-                <CardHeader className="pb-2 pt-0">
-                  <CardTitle className="text-lg">{c.title}</CardTitle>
-                  <CardDescription className="mb-2">{c.provider || "Certification"}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col h-full">
-                  <div className="flex-1">
-                    {c.certificate_urls && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {Object.entries(c.certificate_urls).map(([type, url]) => (
-                          <a key={type} href={url} target="_blank" rel="noreferrer">
-                            <Button size="sm" variant="ghost" className="h-6 px-2 text-xs">
-                              <ExternalLink className="h-3 w-3 mr-1" />
-                              {type}
-                            </Button>
-                          </a>
-                        ))}
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {paginatedCertifications.map((c) => (
+                  <Card key={c.id} className="relative pt-8">
+                    {/* Admin Edit Button - Only show in admin mode */}
+                    {isAdminMode && (
+                      <AdminEditButton 
+                        href={`/admin/certifications/edit/${c.id}`} 
+                        className="absolute top-2 left-2 z-10"
+                      />
+                    )}
+                    
+                    <div className="absolute top-4 right-4">
+                      <Badge 
+                        className={`text-xs ${
+                          c.status === 'completed' 
+                            ? 'bg-green-100 text-green-800' 
+                            : c.status === 'in_progress' 
+                              ? 'bg-gray-200 text-gray-800 dark:bg-zinc-700 dark:text-zinc-200'
+                              : c.status === 'to_deploy'
+                                ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-700'
+                        }`}
+                      >
+                        {c.status === 'completed' 
+                          ? '✅' 
+                          : c.status === 'in_progress' 
+                            ? '⏳' 
+                            : c.status === 'to_deploy'
+                              ? '🚀'
+                            : '🗂️'}
+                        <span className="ml-1.5">{c.status === 'completed' ? t.completed : c.status === 'in_progress' ? t.inProgress : c.status === 'to_deploy' ? t.toDeploy : t.planned}</span>
+                      </Badge>
+                    </div>
+                    <CardHeader className="pb-2 pt-0">
+                      <CardTitle className="text-lg">{c.title}</CardTitle>
+                      <CardDescription className="mb-2">{c.provider || "Certification"}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col h-full">
+                      <div className="flex-1">
+                        {c.certificate_urls && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {Object.entries(c.certificate_urls).map(([type, url]) => (
+                              <a key={type} href={url} target="_blank" rel="noreferrer">
+                                <Button size="sm" variant="ghost" className="h-6 px-2 text-xs">
+                                  <ExternalLink className="h-3 w-3 mr-1" />
+                                  {type}
+                                </Button>
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {getLocalizedText(c, 'description', currentLang)}
+                        </p>
                       </div>
-                    )}
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {getLocalizedText(c, 'description', currentLang)}
-                    </p>
-                  </div>
+                    
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Pagination pour les certifications - Seulement si plusieurs pages */}
+              {totalCertPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-8">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentCertPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentCertPage === 1}
+                    className="flex items-center gap-2"
+                  >
+                    ←
+                    <span className="hidden sm:inline">{currentLang === 'ar' ? 'السابق' : currentLang === 'hi' ? 'पिछला' : 'Précédent'}</span>
+                  </Button>
                   
-                  {/* Buttons row at bottom */}
-                  <div className={`${getDirectionalClass("flex gap-2")} mt-auto pt-3 border-t`}>
-                    {/* Voir button - always displayed */}
-                    <Button size="sm" variant="outline" className={`flex-1 ${getDirectionalClass("flex items-center justify-center")}`}>
-                      <Globe className={`${isRTL ? 'ml-2' : 'mr-2'} w-4 h-4 no-rtl-transform`} />
-                      {t.see}
-                    </Button>
-                    
-                    {/* GitHub button - only if github_url exists */}
-                    {c.github_url && (
-                      <a href={c.github_url} target="_blank" rel="noopener noreferrer">
-                        <Button variant="ghost" size="sm" className="no-rtl-transform px-3">
-                          <Github className="w-4 h-4" />
-                        </Button>
-                      </a>
-                    )}
-                    
-                    {/* Figma button - only if figma_url exists */}
-                    {c.figma_url && (
-                      <a href={c.figma_url} target="_blank" rel="noopener noreferrer">
-                        <Button variant="ghost" size="sm" className="no-rtl-transform px-3">
-                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M15.852 8.981h-4.588V0h4.588c2.476 0 4.49 2.014 4.49 4.49s-2.014 4.491-4.49 4.491zM12.735 7.51h3.117c1.665 0 3.019-1.355 3.019-3.019s-1.354-3.019-3.019-3.019h-3.117V7.51zm0 1.471H8.148c-2.476 0-4.49-2.015-4.49-4.491S5.672 0 8.148 0h4.588v8.981zm-4.587-7.51c-1.665 0-3.019 1.355-3.019 3.019s1.354 3.02 3.019 3.02h3.117V1.471H8.148zm4.587 15.019H8.148c-2.476 0-4.49-2.014-4.49-4.49s2.014-4.49 4.49-4.49h4.588v8.98zM8.148 8.981c-1.665 0-3.019 1.355-3.019 3.019s1.355 3.019 3.019 3.019h3.117V8.981H8.148zM8.172 24c-2.489 0-4.515-2.014-4.515-4.49s2.014-4.49 4.49-4.49h4.588v4.441c0 2.503-2.047 4.539-4.563 4.539zm-.024-7.51a3.023 3.023 0 0 0-3.019 3.019c0 1.665 1.365 3.019 3.044 3.019 1.705 0 3.093-1.376 3.093-3.068V16.49H8.148zM24 12.981c0 2.476-2.014 4.49-4.49 4.49s-4.49-2.014-4.49-4.49 2.014-4.49 4.49-4.49 4.49 2.014 4.49 4.49zm-4.49-3.019c-1.665 0-3.019 1.355-3.019 3.019s1.354 3.019 3.019 3.019 3.019-1.355 3.019-3.019-1.354-3.019-3.019-3.019z"/>
-                          </svg>
-                        </Button>
-                      </a>
-                    )}
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalCertPages }, (_, i) => i + 1).map((page) => (
+                      <Button
+                        key={page}
+                        variant={page === currentCertPage ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setCurrentCertPage(page)}
+                        className="w-10 h-10"
+                      >
+                        {page}
+                      </Button>
+                    ))}
                   </div>
-                </CardContent>
-              </Card>
-            ))
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentCertPage(prev => Math.min(prev + 1, totalCertPages))}
+                    disabled={currentCertPage === totalCertPages}
+                    className="flex items-center gap-2"
+                  >
+                    <span className="hidden sm:inline">{currentLang === 'ar' ? 'التالي' : currentLang === 'hi' ? 'अगला' : 'Suivant'}</span>
+                    →
+                  </Button>
+                </div>
+              )}
+
+              {/* Message si aucune certification */}
+              {paginatedCertifications.length === 0 && !certificationsLoading && (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">
+                    {currentLang === 'ar' ? 'لا توجد شهادات' : 
+                     currentLang === 'hi' ? 'कोई सर्टिफिकेशन नहीं है' : 
+                     'Aucune certification'}
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
@@ -1083,7 +1281,7 @@ function PortfolioContent() {
         </div>
       </section>
 
-      <footer className="py-10 border-t border-gray-200">
+      <footer className="py-10 border-t border-gray-200 dark:border-gray-700">
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} {profile?.name || "Yohann Di Crescenzo"}. Tous droits réservés.</p>
           <div className="flex items-center gap-4">

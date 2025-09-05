@@ -54,7 +54,7 @@ function StatCard({ title, value, description, icon: Icon, href, color = "primar
   );
 }
 
-function QuickAction({ title, description, href, icon: Icon, color = "primary" }) {
+function QuickAction({ title, description, href, icon: Icon, color = "primary", external = false }) {
   const { isGuest } = useAdminGuest();
   const colorClasses = {
     primary: "bg-primary text-primary-foreground hover:bg-primary/90",
@@ -63,11 +63,9 @@ function QuickAction({ title, description, href, icon: Icon, color = "primary" }
     purple: "bg-purple-600 text-white hover:bg-purple-700"
   };
 
-  const Component = isGuest ? 'div' : Link;
-
-  return (
-    <Component href={href}>
-      <Card className={`hover:shadow-md transition-shadow h-full ${isGuest ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+  if (isGuest) {
+    return (
+      <Card className="hover:shadow-md transition-shadow h-full cursor-not-allowed opacity-60">
         <CardContent className="p-6 h-full flex items-start">
           <div className="flex items-start space-x-4 w-full h-full">
             <div className={`p-2 rounded-lg ${colorClasses[color]} flex-shrink-0`}>
@@ -80,11 +78,50 @@ function QuickAction({ title, description, href, icon: Icon, color = "primary" }
           </div>
         </CardContent>
       </Card>
-    </Component>
+    );
+  }
+
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer">
+        <Card className="hover:shadow-md transition-shadow h-full cursor-pointer">
+          <CardContent className="p-6 h-full flex items-start">
+            <div className="flex items-start space-x-4 w-full h-full">
+              <div className={`p-2 rounded-lg ${colorClasses[color]} flex-shrink-0`}>
+                <Icon className="h-6 w-6" />
+              </div>
+              <div className="space-y-1 flex-1 flex flex-col justify-center h-full min-h-[60px]">
+                <h3 className="font-semibold leading-tight">{title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </a>
+    );
+  }
+
+  return (
+    <Link href={href}>
+      <Card className="hover:shadow-md transition-shadow h-full cursor-pointer">
+        <CardContent className="p-6 h-full flex items-start">
+          <div className="flex items-start space-x-4 w-full h-full">
+            <div className={`p-2 rounded-lg ${colorClasses[color]} flex-shrink-0`}>
+              <Icon className="h-6 w-6" />
+            </div>
+            <div className="space-y-1 flex-1 flex flex-col justify-center h-full min-h-[60px]">
+              <h3 className="font-semibold leading-tight">{title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
 
 export default function AdminDashboard() {
+  const { isGuest } = useAdminGuest();
   const { projects, loading: projectsLoading } = useProjects();
   const { certifications, loading: certsLoading } = useCertifications();
   const { skills, loading: skillsLoading } = useSkills();
@@ -95,6 +132,8 @@ export default function AdminDashboard() {
   // const { tasks: kanbanTasks, loading: kanbanTasksLoading } = useKanbanTasks();
 
   const completedProjects = projects?.filter(p => p.status === 'completed') || [];
+  const toDeployProjects = projects?.filter(p => p.status === 'to_deploy') || [];
+  const inProgressProjects = projects?.filter(p => p.status === 'in_progress') || [];
   const completedCerts = certifications?.filter(c => c.status === 'completed') || [];
   
   // Suppression des statistiques Kanban
@@ -158,10 +197,11 @@ export default function AdminDashboard() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 items-stretch auto-rows-fr">
           <QuickAction
             title="Tableau Kanban"
-            description="Gérer vos tâches et workflow de projet"
-            href="/admin/kanban"
+            description="Gérer vos tâches et workflow de projet (projet externe)"
+            href="https://github.com/YohannDCz/kanban-react"
             icon={Kanban}
             color="primary"
+            external={true}
           />
           <QuickAction
             title="Nouveau Projet"
@@ -187,35 +227,209 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* Section Projets à déployer */}
+      {toDeployProjects.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="h-6 w-1 bg-emerald-500 rounded-full"></div>
+            <h2 className="text-xl font-semibold text-emerald-700 dark:text-emerald-300">
+              Projets à déployer
+            </h2>
+            <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/50 dark:text-emerald-300">
+              {toDeployProjects.length}
+            </Badge>
+          </div>
+          
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {toDeployProjects.slice(0, 6).map((project) => (
+              <Card key={`to-deploy-${project.id}`} className="border-emerald-200 bg-emerald-50/50 dark:bg-emerald-900/10 dark:border-emerald-800">
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <span className="truncate">{project.title_fr}</span>
+                        {project.featured && (
+                          <Badge variant="secondary" className="text-xs flex-shrink-0">
+                            EN AVANT
+                          </Badge>
+                        )}
+                      </CardTitle>
+                      <div className="flex items-center gap-2 mt-1 mb-2">
+                        <Badge className="bg-emerald-500 text-white text-xs">
+                          🚀 À déployer
+                        </Badge>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          ⭐ {project.stars}
+                        </div>
+                      </div>
+                      <CardDescription className="line-clamp-2">
+                        {project.description_fr}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="pt-0">
+                  <div className="space-y-3">
+                    {/* Catégories et tags */}
+                    {project.category?.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {project.category.slice(0, 3).map((cat) => (
+                          <Badge key={cat} variant="outline" className="text-xs border-emerald-300 text-emerald-700">
+                            {cat}
+                          </Badge>
+                        ))}
+                        {project.category.length > 3 && (
+                          <Badge variant="outline" className="text-xs border-emerald-300 text-emerald-700">
+                            +{project.category.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="flex gap-2 pt-2 border-t border-emerald-200">
+                      <Link href={`/admin/projects/edit/${project.id}`} className="flex-1">
+                        <Button variant="outline" size="sm" className="w-full border-emerald-300 text-emerald-700 hover:bg-emerald-50">
+                          Éditer
+                        </Button>
+                      </Link>
+                      {project.live_url && (
+                        <a href={project.live_url} target="_blank" rel="noopener noreferrer">
+                          <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                            Déployer
+                          </Button>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          
+          {toDeployProjects.length > 6 && (
+            <div className="text-center">
+              <Link href="/admin/projects">
+                <Button variant="outline" className="border-emerald-300 text-emerald-700 hover:bg-emerald-50">
+                  Voir tous les projets à déployer ({toDeployProjects.length})
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Section Projets en cours */}
+      {inProgressProjects.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="h-6 w-1 bg-orange-500 rounded-full"></div>
+            <h2 className="text-xl font-semibold text-orange-700 dark:text-orange-300">
+              Projets en cours
+            </h2>
+            <Badge className="bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/50 dark:text-orange-300">
+              {inProgressProjects.length}
+            </Badge>
+          </div>
+          
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {inProgressProjects.slice(0, 6).map((project) => (
+              <Card key={`in-progress-${project.id}`} className="border-orange-200 bg-orange-50/50 dark:bg-orange-900/10 dark:border-orange-800">
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <span className="truncate">{project.title_fr}</span>
+                        {project.featured && (
+                          <Badge variant="secondary" className="text-xs flex-shrink-0">
+                            EN AVANT
+                          </Badge>
+                        )}
+                      </CardTitle>
+                      <div className="flex items-center gap-2 mt-1 mb-2">
+                        <Badge className="bg-orange-500 text-white text-xs">
+                          ⏳ En cours
+                        </Badge>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          ⭐ {project.stars}
+                        </div>
+                      </div>
+                      <CardDescription className="line-clamp-2">
+                        {project.description_fr}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="pt-0">
+                  <div className="space-y-3">
+                    {/* Catégories et tags */}
+                    {project.category?.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {project.category.slice(0, 3).map((cat) => (
+                          <Badge key={cat} variant="outline" className="text-xs border-orange-300 text-orange-700">
+                            {cat}
+                          </Badge>
+                        ))}
+                        {project.category.length > 3 && (
+                          <Badge variant="outline" className="text-xs border-orange-300 text-orange-700">
+                            +{project.category.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="flex gap-2 pt-2 border-t border-orange-200">
+                      <Link href={`/admin/projects/edit/${project.id}`} className="flex-1">
+                        <Button variant="outline" size="sm" className="w-full border-orange-300 text-orange-700 hover:bg-orange-50">
+                          Éditer
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          
+          {inProgressProjects.length > 6 && (
+            <div className="text-center">
+              <Link href="/admin/projects">
+                <Button variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-50">
+                  Voir tous les projets en cours ({inProgressProjects.length})
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Projets récents et tâches en cours */}
       <div className="grid gap-6 lg:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <FolderOpen className="h-5 w-5" />
-              Projets récents
+              <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+              Projets à déployer
             </CardTitle>
             <CardDescription>
-              Derniers projets ajoutés ou modifiés
+              Projets prêts pour le déploiement
             </CardDescription>
           </CardHeader>
           <CardContent>
             {projectsLoading ? (
               <p className="text-muted-foreground">Chargement...</p>
-            ) : projects?.length > 0 ? (
+            ) : toDeployProjects?.length > 0 ? (
               <div className="space-y-3">
-                {projects.slice(0, 5).map((project) => (
+                {toDeployProjects.slice(0, 5).map((project) => (
                   <div key={project.id} className="flex items-center justify-between py-2 border-b last:border-0">
                     <div className="flex-1">
                       <h4 className="font-medium">{project.title_fr}</h4>
                       <div className="flex items-center gap-2 mt-1">
-                        <Badge 
-                          variant={project.status === 'completed' ? 'default' : project.status === 'to_deploy' ? 'default' : 'secondary'}
-                          className={`text-xs ${project.status === 'to_deploy' ? 'bg-emerald-500 text-white hover:bg-emerald-600' : ''}`}
-                        >
-                          {project.status === 'completed' ? 'Terminé' : 
-                           project.status === 'to_deploy' ? 'À déployer' :
-                           project.status === 'in_progress' ? 'En cours' : 'Planifié'}
+                        <Badge className="text-xs bg-emerald-500 text-white hover:bg-emerald-600">
+                          🚀 À déployer
                         </Badge>
                       </div>
                     </div>
@@ -224,18 +438,29 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 ))}
-                <Link href="/admin/projects">
-                  <Button variant="outline" className="w-full mt-4">
-                    Voir tous les projets
-                  </Button>
-                </Link>
+                <div className="flex gap-2 mt-4">
+                  <Link href="/admin/projects" className="flex-1">
+                    <Button variant="outline" className="w-full">
+                      Voir tous
+                    </Button>
+                  </Link>
+                  {toDeployProjects[0]?.live_url && (
+                    <a href={toDeployProjects[0].live_url} target="_blank" rel="noopener noreferrer">
+                      <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                        Déployer
+                      </Button>
+                    </a>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="text-center py-6">
-                <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">Aucun projet</p>
+                <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-emerald-100 dark:bg-emerald-900/20 flex items-center justify-center">
+                  <div className="text-2xl">🚀</div>
+                </div>
+                <p className="text-muted-foreground">Aucun projet à déployer</p>
                 <Link href="/admin/projects/new">
-                  <Button className="mt-2" disabled={isGuest}>Créer le premier projet</Button>
+                  <Button className="mt-2" disabled={isGuest}>Créer un projet</Button>
                 </Link>
               </div>
             )}
@@ -316,19 +541,19 @@ export default function AdminDashboard() {
                       </div>
                     );
                   })} */}
-                <Link href="/admin/kanban">
+                <a href="https://github.com/YohannDCz/kanban-react" target="_blank" rel="noopener noreferrer">
                   <Button variant="outline" className="w-full mt-4">
-                    Voir toutes les tâches
+                    Voir le projet Kanban (externe)
                   </Button>
-                </Link>
+                </a>
               </div>
             {/* ) : (
               <div className="text-center py-6">
                 <CheckSquare className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">Aucune tâche</p>
-                <Link href="/admin/kanban">
-                  <Button className="mt-2">Créer la première tâche</Button>
-                </Link>
+                <a href="https://github.com/YohannDCz/kanban-react" target="_blank" rel="noopener noreferrer">
+                  <Button className="mt-2">Voir le projet Kanban</Button>
+                </a>
               </div>
             )} */}
           </CardContent>
