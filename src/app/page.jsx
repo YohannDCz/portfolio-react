@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
 import { ArrowUpRight, ExternalLink, Github, Globe, Linkedin, Mail, Moon, Star, Sun } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 // Import des hooks Supabase
@@ -37,6 +38,7 @@ import { useDirectionalClasses, useLanguage } from "@/contexts/LanguageContext";
 import AdminEditButton, { AuthStatusIndicator, ProjectEditButton } from "@/components/AdminEditButton";
 import ProfileImageModal from '@/components/ProfileImageModal';
 import { AdminGuestProvider, useAdminGuest } from "@/contexts/AdminGuestContext";
+import { useRouter } from "next/navigation";
 
 // Import des composants de chargement
 import AnimatedSection from "@/components/AnimatedSection";
@@ -334,6 +336,7 @@ function ErrorMessage({ message }) {
 // ——————————————————————————————————————————————
 function ProjectCard({ project, currentLang, t, isAdminMode = false }) {
   const { getDirectionalClass, isRTL } = useDirectionalClasses();
+  
 
   return (
     <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
@@ -445,6 +448,7 @@ function ProjectCard({ project, currentLang, t, isAdminMode = false }) {
 // Composant principal
 // ——————————————————————————————————————————————
 function PortfolioContent() {
+  const router = useRouter();
   const { dark, setDark } = useTheme();
   const { currentLang, isRTL } = useLanguage();
   const { getDirectionalClass, getFlexDirection, getTextAlign } = useDirectionalClasses();
@@ -771,9 +775,9 @@ function PortfolioContent() {
                   <ArrowUpRight className={`${isRTL ? 'mr-2' : 'ml-2'} h-4 w-4 no-rtl-transform`} />
                 </Button>
               </a>
-              <a href={profile?.website} target="_blank" rel="noreferrer">
-                <Button variant="outline">{t.seeWebsite}</Button>
-              </a>
+              <Link href={"/not-found"} target="_blank" rel="noreferrer">
+                <Button onClick={router.push("/not-found")} variant="outline">{t.seeWebsite}</Button>
+              </Link>
             </div>
             <div className="mt-8 flex flex-wrap gap-2">
               {skillsLoading ? (
@@ -1274,7 +1278,7 @@ function PortfolioContent() {
             <CardContent className="grid gap-3">
               <SocialLink href={profile?.github_url} icon={<Github className="h-4 w-4" />} label="GitHub" />
               <SocialLink href={profile?.linkedin_url} icon={<Linkedin className="h-4 w-4" />} label="LinkedIn" />
-              <SocialLink href={profile?.website} icon={<Globe className="h-4 w-4" />} label="Site web" />
+              <Link href={"/not-found"}><SocialLink href={"profile?.website"} icon={<Globe className="h-4 w-4" />} label="Site web" /></Link>
               <SocialLink href={`mailto:${profile?.email || 'YohannDCz@gmail.com'}`} icon={<Mail className="h-4 w-4" />} label={profile?.email || 'YohannDCz@gmail.com'} />
             </CardContent>
           </Card>
