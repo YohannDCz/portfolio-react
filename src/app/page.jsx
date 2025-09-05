@@ -41,7 +41,6 @@ import { AdminGuestProvider, useAdminGuest } from "@/contexts/AdminGuestContext"
 
 // Import des composants de chargement
 import AnimatedSection from "@/components/AnimatedSection";
-import Banner from "@/components/Banner";
 import LoadingScreen from "@/components/LoadingScreen";
 import Notification from "@/components/Notification";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
@@ -679,7 +678,6 @@ function PortfolioContent() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
-      <Banner />
       {/* NAVBAR */}
       <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className={`max-w-6xl mx-auto px-4 py-3 ${getDirectionalClass("flex items-center justify-between")}`}>
