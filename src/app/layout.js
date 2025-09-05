@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Portfolio Multilingue",
-  description: "Portfolio avec support RTL pour l'arabe",
+  title: "Yohann Di Cresceno's Portfolio",
+  description: "Portfolio complet avec support RTL pour l'arabe",
 };
 
 export default function RootLayout({ children }) {
