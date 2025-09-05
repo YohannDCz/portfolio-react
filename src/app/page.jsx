@@ -38,7 +38,6 @@ import { useDirectionalClasses, useLanguage } from "@/contexts/LanguageContext";
 import AdminEditButton, { AuthStatusIndicator, ProjectEditButton } from "@/components/AdminEditButton";
 import ProfileImageModal from '@/components/ProfileImageModal';
 import { AdminGuestProvider, useAdminGuest } from "@/contexts/AdminGuestContext";
-import { useRouter } from "next/navigation";
 
 // Import des composants de chargement
 import AnimatedSection from "@/components/AnimatedSection";
@@ -448,7 +447,6 @@ function ProjectCard({ project, currentLang, t, isAdminMode = false }) {
 // Composant principal
 // ——————————————————————————————————————————————
 function PortfolioContent() {
-  const router = useRouter();
   const { dark, setDark } = useTheme();
   const { currentLang, isRTL } = useLanguage();
   const { getDirectionalClass, getFlexDirection, getTextAlign } = useDirectionalClasses();
@@ -776,7 +774,7 @@ function PortfolioContent() {
                 </Button>
               </a>
               <Link href={"/not-found"} target="_blank" rel="noreferrer">
-                <Button onClick={router.push("/not-found")} variant="outline">{t.seeWebsite}</Button>
+                <Button variant="outline">{t.seeWebsite}</Button>
               </Link>
             </div>
             <div className="mt-8 flex flex-wrap gap-2">
