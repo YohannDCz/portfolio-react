@@ -2,12 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useLanguage, useDirectionalClasses } from "@/contexts/LanguageContext";
+import { useDirectionalClasses, useLanguage } from "@/contexts/LanguageContext";
 import { ChevronDown, Globe } from "lucide-react";
 
 export default function LanguageSelector({ variant = "default" }) {
@@ -45,8 +45,8 @@ export default function LanguageSelector({ variant = "default" }) {
           <DropdownMenuItem
             key={language.code}
             onClick={() => switchLanguage(language.code)}
-            className={`${getDirectionalClass("flex items-center gap-3 cursor-pointer")} ${
-              currentLang === language.code ? "bg-accent" : ""
+            className={`${getDirectionalClass("flex items-center gap-3 cursor-pointer")} hover:bg-accent/50 dark:hover:bg-accent/20 ${
+              currentLang === language.code ? "bg-accent text-white dark:text-white" : ""
             }`}
           >
             <span className="text-lg no-rtl-transform">{language.flag}</span>

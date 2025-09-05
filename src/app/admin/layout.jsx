@@ -35,7 +35,7 @@ const navigation = [
 
 function AdminLayoutContent({ children }) {
   const { user, loading, signOut, isAuthenticated } = useAuth();
-  const { isGuest, logoutGuest } = useAdminGuest();
+  const { isGuest, logoutGuest, transitionToAdmin } = useAdminGuest();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -43,7 +43,12 @@ function AdminLayoutContent({ children }) {
     if (!loading && !isAuthenticated && !isGuest && pathname !== '/admin') {
       router.push('/admin');
     }
-  }, [loading, isAuthenticated, isGuest, router, pathname]);
+    
+    // Handle visitor to admin transition
+    if (!loading && isAuthenticated && isGuest) {
+      transitionToAdmin();
+    }
+  }, [loading, isAuthenticated, isGuest, router, pathname, transitionToAdmin]);
 
   const handleSignOut = async () => {
     if (isGuest) {
@@ -81,14 +86,8 @@ function AdminLayoutContent({ children }) {
               <h1 className="text-lg font-semibold">Admin Portfolio</h1>
               <p className="text-xs text-gray-500">Panel d'administration</p>
             </div>
-            <Link href="/">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Home className="h-4 w-4" />
-                Accueil
-              </Button>
-            </Link>
           </div>
-
+          
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6">
             <ul className="space-y-2">
@@ -114,6 +113,16 @@ function AdminLayoutContent({ children }) {
               })}
             </ul>
           </nav>
+
+          {/* Homepage button at bottom of sidebar, above user info */}
+          <div className="px-4 pb-4">
+            <Link href="/">
+              <Button className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground">
+                <Home className="h-4 w-4" />
+                Retour Accueil
+              </Button>
+            </Link>
+          </div>
 
           {/* User info et déconnexion */}
           <div className="px-4 py-4 border-t">

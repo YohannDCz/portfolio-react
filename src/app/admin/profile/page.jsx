@@ -178,6 +178,16 @@ export default function ProfileAdmin() {
       payload.cover_url = up2.url;
     }
 
+    // Debug profile ID
+    console.log('Profile ID:', profile?.id);
+    console.log('Payload:', payload);
+    
+    if (!profile?.id) {
+      setSaveError("Profil non trouvé - impossible de mettre à jour");
+      setSaving(false);
+      return;
+    }
+
     const result = await updateProfile(profile.id, payload);
 
     if (result.success) {
@@ -215,6 +225,14 @@ export default function ProfileAdmin() {
       {
         sourceField: 'bio_en',
         targetFields: ['bio_fr', 'bio_hi', 'bio_ar']
+      },
+      {
+        sourceField: 'availability_fr',
+        targetFields: ['availability_en', 'availability_hi', 'availability_ar']
+      },
+      {
+        sourceField: 'availability_en',
+        targetFields: ['availability_fr', 'availability_hi', 'availability_ar']
       },
       {
         sourceField: 'availability_hours_fr',
@@ -640,6 +658,26 @@ export default function ProfileAdmin() {
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="availability_hi">Disponibilité (Hindi)</Label>
+                  <Input
+                    id="availability_hi"
+                    value={formData.availability_hi}
+                    onChange={(e) => handleInputChange('availability_hi', e.target.value)}
+                    placeholder="परियोजनाओं के लिए उपलब्ध"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="availability_ar">Disponibilité (Arabe)</Label>
+                  <Input
+                    id="availability_ar"
+                    value={formData.availability_ar}
+                    onChange={(e) => handleInputChange('availability_ar', e.target.value)}
+                    placeholder="متاح للمشاريع"
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="availability_hours_fr">Horaires (Français)</Label>
                   <Input
                     id="availability_hours_fr"
@@ -656,6 +694,26 @@ export default function ProfileAdmin() {
                     value={formData.availability_hours_en}
                     onChange={(e) => handleInputChange('availability_hours_en', e.target.value)}
                     placeholder="9am-6pm CET"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="availability_hours_hi">Horaires (Hindi)</Label>
+                  <Input
+                    id="availability_hours_hi"
+                    value={formData.availability_hours_hi}
+                    onChange={(e) => handleInputChange('availability_hours_hi', e.target.value)}
+                    placeholder="सुबह 9-शाम 6 CET"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="availability_hours_ar">Horaires (Arabe)</Label>
+                  <Input
+                    id="availability_hours_ar"
+                    value={formData.availability_hours_ar}
+                    onChange={(e) => handleInputChange('availability_hours_ar', e.target.value)}
+                    placeholder="9 صباحاً-6 مساءً CET"
                   />
                 </div>
               </div>

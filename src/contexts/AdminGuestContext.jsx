@@ -33,8 +33,16 @@ export function AdminGuestProvider({ children }) {
     setWasVisitor(false);
   };
 
+  const transitionToAdmin = () => {
+    // If user was visitor and now logs in as admin, clear visitor mode immediately
+    if (wasVisitor && isGuest) {
+      localStorage.removeItem('guestMode');
+      setIsGuest(false);
+    }
+  };
+
   return (
-    <AdminGuestContext.Provider value={{ isGuest, wasVisitor, loginGuest, logoutGuest, clearVisitorSession }}>
+    <AdminGuestContext.Provider value={{ isGuest, wasVisitor, loginGuest, logoutGuest, clearVisitorSession, transitionToAdmin }}>
       {children}
     </AdminGuestContext.Provider>
   );

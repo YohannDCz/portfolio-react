@@ -539,7 +539,16 @@ export default function EditProject() {
                     type="number"
                     min="0"
                     value={formData.stars}
-                    onChange={(e) => handleInputChange('stars', parseInt(e.target.value) || 0)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Handle empty string or non-numeric input
+                      if (value === '' || value === null || value === undefined) {
+                        handleInputChange('stars', 0);
+                      } else {
+                        const numValue = parseInt(value, 10);
+                        handleInputChange('stars', isNaN(numValue) ? 0 : numValue);
+                      }
+                    }}
                     placeholder="0"
                   />
                 </div>
@@ -600,6 +609,17 @@ export default function EditProject() {
                     value={formData.github_url}
                     onChange={(e) => handleInputChange('github_url', e.target.value)}
                     placeholder="https://github.com/username/repo"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="figma_url">Lien Figma</Label>
+                  <Input
+                    id="figma_url"
+                    type="url"
+                    value={formData.figma_url}
+                    onChange={(e) => handleInputChange('figma_url', e.target.value)}
+                    placeholder="https://figma.com/file/..."
                   />
                 </div>
 

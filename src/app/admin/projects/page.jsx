@@ -141,7 +141,7 @@ export default function ProjectsAdmin() {
       </Card>
 
       {/* Statistiques */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">{projects?.length || 0}</div>
@@ -156,12 +156,20 @@ export default function ProjectsAdmin() {
             <p className="text-xs text-muted-foreground">Terminés</p>
           </CardContent>
         </Card>
+        <Card className="bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800">
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold text-orange-700 dark:text-orange-300">
+              {projects?.filter(p => p.status === 'in_progress').length || 0}
+            </div>
+            <p className="text-xs text-orange-600 dark:text-orange-400">En cours</p>
+          </CardContent>
+        </Card>
         <Card>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">
               {projects?.filter(p => p.featured).length || 0}
             </div>
-            <p className="text-xs text-muted-foreground">Projets mis en avant</p>
+            <p className="text-xs text-muted-foreground">Mis en avant</p>
           </CardContent>
         </Card>
         <Card>
@@ -181,7 +189,107 @@ export default function ProjectsAdmin() {
         </Alert>
       )}
 
-      {/* Liste des projets */}
+      {/* Section Projets en cours */}
+      {projects?.filter(p => p.status === 'in_progress').length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="h-6 w-1 bg-orange-500 rounded-full"></div>
+            <h2 className="text-xl font-semibold text-orange-700 dark:text-orange-300">
+              Projets en cours
+            </h2>
+            <Badge className="bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/50 dark:text-orange-300">
+              {projects?.filter(p => p.status === 'in_progress').length}
+            </Badge>
+          </div>
+          
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {projects?.filter(p => p.status === 'in_progress').map((project) => (
+              <Card key={`in-progress-${project.id}`} className="border-orange-200 bg-orange-50/50 dark:bg-orange-900/10 dark:border-orange-800">
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        {project.title_fr}
+                        {project.featured && (
+                          <Badge variant="secondary" className="text-xs">
+                            EN AVANT
+                          </Badge>
+                        )}
+                        <Badge className="bg-orange-500 text-white text-xs">
+                          ⏳ En cours
+                        </Badge>
+                      </CardTitle>
+                      <CardDescription className="line-clamp-2 mb-2">
+                        {project.description_fr}
+                      </CardDescription>
+                    </div>
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <Star className="w-4 h-4" />
+                      {project.stars}
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent>
+                  <div className="space-y-3">
+                    {/* Catégories et tags */}
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {project.category?.map((cat) => (
+                        <Badge key={cat} variant="outline" className="text-xs border-orange-300 text-orange-700">
+                          {cat}
+                        </Badge>
+                      ))}
+                      {project.tags?.slice(0, 3).map((tag) => (
+                        <Badge key={tag} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                      {project.tags?.length > 3 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{project.tags.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+
+
+                    {/* Actions */}
+                    <div className="mt-3 pt-3 border-t flex gap-2">
+                      <Link href={`/admin/projects/edit/${project.id}`} className="flex-1">
+                        <Button variant="outline" size="sm" className="w-full border-orange-300 text-orange-700 hover:bg-orange-50" disabled={isGuest}>
+                          <Edit className="w-4 h-4 mr-2" />
+                          Modifier
+                        </Button>
+                      </Link>
+                      
+                      <Link href={`/admin/kanban?project=${project.id}`}>
+                        <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white" title="Gérer les tâches">
+                          <CheckSquare className="w-4 h-4" />
+                        </Button>
+                      </Link>
+                      
+                      {project.link && project.link !== '#' && (
+                        <a href={project.link} target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="sm" className="border-orange-300 text-orange-700">
+                            <ExternalLink className="w-4 h-4" />
+                          </Button>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Liste des projets complète */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="h-6 w-1 bg-primary rounded-full"></div>
+          <h2 className="text-xl font-semibold">Tous les projets</h2>
+        </div>
+        
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredProjects.map((project) => (
           <Card key={project.id} className="hover:shadow-md transition-shadow">
@@ -304,6 +412,7 @@ export default function ProjectsAdmin() {
             </CardContent>
           </Card>
         ))}
+        </div>
       </div>
 
       {/* État vide */}

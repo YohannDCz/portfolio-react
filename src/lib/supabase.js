@@ -222,12 +222,19 @@ export const useCertifications = () => {
         const { data, error } = await supabase
           .from('certifications')
           .select('*')
+          .order('display_order', { ascending: true })
           .order('created_at', { ascending: false })
 
         if (error) throw error
 
-        // Sort by status priority: completed > to_deploy > in_progress > planned
+        // Use display_order first, then fallback to status priority for items with same order
         const sortedData = data?.sort((a, b) => {
+          // First, sort by display_order (ascending)
+          if (a.display_order !== b.display_order) {
+            return (a.display_order || 0) - (b.display_order || 0)
+          }
+
+          // If same display_order, use status priority
           const statusPriority = {
             'completed': 4,
             'to_deploy': 3,
@@ -494,6 +501,31 @@ export const deleteCertification = async (id) => {
 
     if (error) throw error
     return { success: true }
+  } catch (err) {
+    return { success: false, error: err.message }
+  }
+}
+
+// Reorder certifications after drag and drop
+export const reorderCertifications = async (certifications) => {
+  try {
+    // Update display_order for each certification
+    const updates = certifications.map((cert, index) => ({
+      id: cert.id,
+      display_order: index
+    }));
+
+    // Batch update all certifications
+    const { data, error } = await supabase
+      .from('certifications')
+      .upsert(updates, {
+        onConflict: 'id',
+        ignoreDuplicates: false
+      })
+      .select();
+
+    if (error) throw error
+    return { success: true, data }
   } catch (err) {
     return { success: false, error: err.message }
   }

@@ -32,6 +32,11 @@ import {
 import LanguageSelector from "@/components/LanguageSelector";
 import { useDirectionalClasses, useLanguage } from "@/contexts/LanguageContext";
 
+// Import du contexte d'authentification pour les boutons d'édition
+import AdminEditButton, { AuthStatusIndicator, ProjectEditButton } from "@/components/AdminEditButton";
+import ProfileImageModal from '@/components/ProfileImageModal';
+import { AdminGuestProvider } from "@/contexts/AdminGuestContext";
+
 // Import des composants de chargement
 import AnimatedSection from "@/components/AnimatedSection";
 import Banner from "@/components/Banner";
@@ -47,11 +52,10 @@ const TRANSLATIONS = {
     portfolio: "Portfolio",
     projects: "Projets",
     freelance: "Freelance",
-    cv: "CV",
+    cv: "Curriculum",
     certifications: "Certifications",
     about: "À propos",
     contact: "Contact",
-    megaProjects: "Mega projets",
     goals: "Objectifs",
     projectSelection: "Sélection de projets",
     projectFilter: "Filtrez par type, triez et cherchez.",
@@ -66,7 +70,8 @@ const TRANSLATIONS = {
     other: "Autre",
     see: "Voir",
     open: "Ouvrir",
-    availableForMissions: "Disponible pour missions",
+    availableForMissions: "Disponible pour mission",
+    availableForInternship: "Disponible pour stage",
     contactMe: "Me contacter",
     seeWebsite: "Voir mon site",
     yearsExp: "Années d'exp.",
@@ -76,6 +81,7 @@ const TRANSLATIONS = {
     inProgress: "En cours",
     completed: "Terminé",
     planned: "Planifié",
+    toDeploy: "À déployer",
     strategicProjects: "Chantiers stratégiques long terme.",
     vision: "Vision",
     productionGoals: "Objectifs de production",
@@ -105,11 +111,10 @@ const TRANSLATIONS = {
     portfolio: "Portfolio",
     projects: "Projects",
     freelance: "Freelance",
-    cv: "CV",
+    cv: "Curriculum",
     certifications: "Certifications",
     about: "About",
     contact: "Contact",
-    megaProjects: "Mega Projects",
     goals: "Goals",
     projectSelection: "Project Selection",
     projectFilter: "Filter by type, sort and search.",
@@ -124,7 +129,8 @@ const TRANSLATIONS = {
     other: "Other",
     see: "See",
     open: "Open",
-    availableForMissions: "Available for missions",
+    availableForMissions: "Available for mission",
+    availableForInternship: "Available for internship",
     contactMe: "Contact me",
     seeWebsite: "See my website",
     yearsExp: "Years exp.",
@@ -134,6 +140,7 @@ const TRANSLATIONS = {
     inProgress: "In progress",
     completed: "Completed",
     planned: "Planned",
+    toDeploy: "To deploy",
     strategicProjects: "Long-term strategic projects.",
     vision: "Vision",
     productionGoals: "Production Goals",
@@ -167,7 +174,6 @@ const TRANSLATIONS = {
     certifications: "प्रमाणपत्र",
     about: "के बारे में",
     contact: "संपर्क",
-    megaProjects: "मेगा प्रोजेक्ट्स",
     goals: "लक्ष्य",
     projectSelection: "प्रोजेक्ट चयन",
     projectFilter: "प्रकार के अनुसार फ़िल्टर करें, सॉर्ट करें और खोजें।",
@@ -183,6 +189,7 @@ const TRANSLATIONS = {
     see: "देखें",
     open: "खोलें",
     availableForMissions: "मिशन के लिए उपलब्ध",
+    availableForInternship: "इंटर्नशिप के लिए उपलब्ध",
     contactMe: "मुझसे संपर्क करें",
     seeWebsite: "मेरी वेबसाइट देखें",
     yearsExp: "वर्षों का अनुभव",
@@ -192,6 +199,7 @@ const TRANSLATIONS = {
     inProgress: "प्रगति में",
     completed: "पूर्ण",
     planned: "नियोजित",
+    toDeploy: "तैनात करना",
     strategicProjects: "दीर्घकालिक रणनीतिक परियोजनाएं।",
     vision: "दृष्टि",
     productionGoals: "उत्पादन लक्ष्य",
@@ -225,7 +233,6 @@ const TRANSLATIONS = {
     certifications: "الشهادات",
     about: "حول",
     contact: "اتصال",
-    megaProjects: "المشاريع الضخمة",
     goals: "الأهداف",
     projectSelection: "اختيار المشاريع",
     projectFilter: "تصفية حسب النوع، ترتيب وبحث.",
@@ -240,7 +247,8 @@ const TRANSLATIONS = {
     other: "أخرى",
     see: "مشاهدة",
     open: "فتح",
-    availableForMissions: "متاح للمهام",
+    availableForMissions: "متاح للمهمة",
+    availableForInternship: "متاح للتدريب",
     contactMe: "اتصل بي",
     seeWebsite: "مشاهدة موقعي",
     yearsExp: "سنوات الخبرة",
@@ -250,6 +258,7 @@ const TRANSLATIONS = {
     inProgress: "قيد التقدم",
     completed: "مكتمل",
     planned: "مخطط",
+    toDeploy: "للنشر",
     strategicProjects: "مشاريع استراتيجية طويلة المدى.",
     vision: "رؤية",
     productionGoals: "أهداف الإنتاج",
@@ -328,10 +337,20 @@ function ProjectCard({ project, currentLang, t }) {
   return (
     <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
       <Card className="h-full relative overflow-hidden">
+        {/* Admin Edit Button */}
+        <ProjectEditButton projectId={project.id} />
+        
         {project.status === 'in_progress' && (
-          <div className="absolute top-2 right-2 z-10">
+          <div className="absolute top-2 left-2 z-10">
             <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700">
               {t.inProgress}
+            </Badge>
+          </div>
+        )}
+        {project.status === 'to_deploy' && (
+          <div className="absolute top-2 left-2 z-10">
+            <Badge variant="outline" className="text-xs bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700">
+              {t.toDeploy}
             </Badge>
           </div>
         )}
@@ -362,29 +381,55 @@ function ProjectCard({ project, currentLang, t }) {
                 )}
               </div>
             </CardHeader>
-        <CardContent>
-          <div className={`${getDirectionalClass("flex flex-wrap gap-2")} mb-4`}>
+        <CardContent className="flex flex-col h-full">
+          <div className={`${getDirectionalClass("flex flex-wrap gap-1.5")} mb-4 min-h-[3.5rem] content-start flex-1`}>
             {(Array.isArray(project.category) ? project.category : [project.category]).map((cat) => (
-              <Badge key={`${project.id}-category-${cat}`} variant="default" className="rounded-full capitalize h-6 px-3 text-xs">{cat}</Badge>
+              <Badge key={`${project.id}-category-${cat}`} variant="default" className="rounded-full capitalize h-6 px-2.5 text-xs flex-shrink-0">{cat}</Badge>
             ))}
-            {project.tags?.map((tag) => (
-              <Badge key={tag} variant="secondary" className="rounded-full h-6 px-3 text-xs">{tag}</Badge>
+            {project.tags?.slice(0, 8).map((tag) => (
+              <Badge key={tag} variant="secondary" className="rounded-full h-6 px-2.5 text-xs flex-shrink-0 max-w-[120px] truncate">{tag}</Badge>
             ))}
-            </div>
-                    <div className={`${getDirectionalClass("flex flex-col gap-2")}`}>
-              {project.link && project.link !== '#' && (
-              <a href={project.link} target="_blank" rel="noopener noreferrer" className="w-full">
-                <Button size="sm" variant="outline" className={`w-full ${getDirectionalClass("flex items-center justify-center")}`}>
+            {project.tags?.length > 8 && (
+              <Badge variant="outline" className="rounded-full h-6 px-2.5 text-xs flex-shrink-0">
+                +{project.tags.length - 8}
+              </Badge>
+            )}
+          </div>
+          <div className={`${getDirectionalClass("flex gap-2")} mt-auto pt-3 border-t bg-red-100 p-2`}>
+              {/* Voir button - always displayed, takes full width */}
+              <a 
+                href={project.link && project.link !== '#' ? project.link : '#'} 
+                target={project.link && project.link !== '#' ? "_blank" : "_self"} 
+                rel="noopener noreferrer" 
+                className="flex-1"
+              >
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className={`w-full ${getDirectionalClass("flex items-center justify-center")}`}
+                  disabled={!project.link || project.link === '#'}
+                >
                   <Globe className={`${isRTL ? 'ml-2' : 'mr-2'} w-4 h-4 no-rtl-transform`} />
-                    {t.see}
+                  {t.see}
+                </Button>
+              </a>
+              
+              {/* GitHub icon - only when github_url exists */}
+              {project.github_url && (
+                <a href={project.github_url} target="_blank" rel="noopener noreferrer">
+                  <Button variant="ghost" size="sm" className="no-rtl-transform px-3">
+                    <Github className="w-4 h-4" />
                   </Button>
                 </a>
               )}
-              {project.github_url && (
-              <a href={project.github_url} target="_blank" rel="noopener noreferrer" className="w-full">
-                <Button variant="ghost" size="sm" className={`w-full ${getDirectionalClass("flex items-center justify-center")} no-rtl-transform`}>
-                  <Github className={`${isRTL ? 'ml-2' : 'mr-2'} w-4 h-4`} />
-                  GitHub
+              
+              {/* Figma icon - only when figma_url exists */}
+              {project.figma_url && (
+                <a href={project.figma_url} target="_blank" rel="noopener noreferrer">
+                  <Button variant="ghost" size="sm" className="no-rtl-transform px-3">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M15.852 8.981h-4.588V0h4.588c2.476 0 4.49 2.014 4.49 4.49s-2.014 4.491-4.49 4.491zM12.735 7.51h3.117c1.665 0 3.019-1.355 3.019-3.019s-1.354-3.019-3.019-3.019h-3.117V7.51zm0 1.471H8.148c-2.476 0-4.49-2.015-4.49-4.491S5.672 0 8.148 0h4.588v8.981zm-4.587-7.51c-1.665 0-3.019 1.355-3.019 3.019s1.354 3.02 3.019 3.02h3.117V1.471H8.148zm4.587 15.019H8.148c-2.476 0-4.49-2.014-4.49-4.49s2.014-4.49 4.49-4.49h4.588v8.98zM8.148 8.981c-1.665 0-3.019 1.355-3.019 3.019s1.355 3.019 3.019 3.019h3.117V8.981H8.148zM8.172 24c-2.489 0-4.515-2.014-4.515-4.49s2.014-4.49 4.49-4.49h4.588v4.441c0 2.503-2.047 4.539-4.563 4.539zm-.024-7.51a3.023 3.023 0 0 0-3.019 3.019c0 1.665 1.365 3.019 3.044 3.019 1.705 0 3.093-1.376 3.093-3.068V16.49H8.148zM24 12.981c0 2.476-2.014 4.49-4.49 4.49s-4.49-2.014-4.49-4.49 2.014-4.49 4.49-4.49 4.49 2.014 4.49 4.49zm-4.49-3.019c-1.665 0-3.019 1.355-3.019 3.019s1.354 3.019 3.019 3.019 3.019-1.355 3.019-3.019-1.354-3.019-3.019-3.019z"/>
+                    </svg>
                   </Button>
                 </a>
               )}
@@ -398,7 +443,7 @@ function ProjectCard({ project, currentLang, t }) {
 // ——————————————————————————————————————————————
 // Composant principal
 // ——————————————————————————————————————————————
-export default function Portfolio() {
+function PortfolioContent() {
   const { dark, setDark } = useTheme();
   const { currentLang, isRTL } = useLanguage();
   const { getDirectionalClass, getFlexDirection, getTextAlign } = useDirectionalClasses();
@@ -434,21 +479,39 @@ export default function Portfolio() {
 
   // Scroll spy pour navigation active
   const handleScroll = useCallback(() => {
-    const sections = ['projets', 'cv', 'contact'];
-    const scrollPosition = window.scrollY + 100;
-
-    for (const section of sections) {
-      const element = document.getElementById(section);
-      if (element) {
-        const offsetTop = element.offsetTop;
-        const offsetBottom = offsetTop + element.offsetHeight;
-        
-        if (scrollPosition >= offsetTop && scrollPosition < offsetBottom) {
-          setActiveSection(section);
-          break;
-        }
-      }
+    const scrollPosition = window.scrollY + 150; // Base offset for all sections
+    
+    // Get all section elements with their positions
+    const projetsEl = document.getElementById('projets');
+    const cvEl = document.getElementById('cv');
+    const aproposEl = document.getElementById('apropos');
+    const contactEl = document.getElementById('contact');
+    
+    // Debug logging (remove in production)
+    if (aproposEl) {
+      console.log('Scroll Debug:', {
+        scrollPosition: scrollPosition - 150,
+        aproposTop: aproposEl.offsetTop,
+        aproposTrigger: aproposEl.offsetTop - 100,
+        shouldTriggerContact: scrollPosition >= aproposEl.offsetTop - 100
+      });
     }
+    
+    // Determine which section is currently active
+    let currentSection = '';
+    
+    if (contactEl && scrollPosition >= contactEl.offsetTop) {
+      currentSection = 'contact';
+    } else if (aproposEl && scrollPosition >= aproposEl.offsetTop - 100) {
+      // Trigger contact navbar earlier when reaching à propos section
+      currentSection = 'contact';
+    } else if (cvEl && scrollPosition >= cvEl.offsetTop) {
+      currentSection = 'cv';
+    } else if (projetsEl && scrollPosition >= projetsEl.offsetTop) {
+      currentSection = 'projets';
+    }
+    
+    setActiveSection(currentSection);
   }, []);
 
   useEffect(() => {
@@ -555,10 +618,16 @@ export default function Portfolio() {
         <div className={`max-w-6xl mx-auto px-4 py-3 ${getDirectionalClass("flex items-center justify-between")}`}>
           <div className={getDirectionalClass("flex items-center gap-3")}>
             <div className="h-9 w-9 rounded-2xl bg-gradient-to-br from-primary/80 to-primary/30 grid place-items-center shadow-sm">
+               <ProfileImageModal 
+                 src={profile?.avatar_url || "profile.png"} 
+                 alt="Profile photo" 
+                 fallback="YOU"
+               >
                <Avatar className="ring-4 ring-background">
                     <AvatarImage alt="avatar" src={profile?.avatar_url || "profile.png"} />
                     <AvatarFallback>YOU</AvatarFallback>
                   </Avatar>
+               </ProfileImageModal>
             </div>
             <div className={getTextAlign("text-start")}>
               <p className="text-sm text-muted-foreground leading-none">{t.portfolio}</p>
@@ -619,9 +688,10 @@ export default function Portfolio() {
         <section className="max-w-6xl mx-auto px-4 pt-12 pb-8">
           <div className="grid md:grid-cols-[1.1fr_0.9fr] gap-8 items-center">
             <div>
-              <div className="flex gap-2 mb-4">
+              <div className="flex gap-2 mb-4 flex-wrap">
               <Badge>🎯 {currentLang === 'fr' ? 'Viser le millénaire' : currentLang === 'en' ? 'Aim for millennium' : currentLang === 'hi' ? 'सहस्राब्दी का लक्ष्य' : 'استهداف الألفية'}</Badge>
               <Badge variant="secondary">{t.availableForMissions}</Badge>
+              <Badge variant="outline">{t.availableForInternship}</Badge>
             </div>
             <h1 className="text-3xl md:text-5xl font-semibold tracking-tight">
               {profileLoading ? t.loading : getLocalizedText(profile, 'title', currentLang)}
@@ -661,12 +731,18 @@ export default function Portfolio() {
                 />
               </div>
                 
-              <CardContent className="-mt-8">
+              <CardContent className="-mt-9">
                 <div className="flex items-end gap-4">
-                  <Avatar className="h-20 w-20 ring-4 ring-background">
+                  <ProfileImageModal 
+                    src={profile?.avatar_url || "profile.png"} 
+                    alt="Profile photo" 
+                    fallback="YDC"
+                  >
+                  <Avatar className="h-23 w-23 ring-4 ring-background">
                     <AvatarImage alt="avatar" src={profile?.avatar_url || "profile.png"} />
                     <AvatarFallback>YDC</AvatarFallback>
                   </Avatar>
+                  </ProfileImageModal>
                   <div className="pb-1">
                     <h3 className="text-xl font-semibold leading-tight">{profile?.name || "Yohann Di Crescenzo"}</h3>
                     <p className="text-muted-foreground">{profile?.location || "Paris, France"}</p>
@@ -752,11 +828,7 @@ export default function Portfolio() {
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {allProjects.map((p) => (
-                  p.is_mega_project ? (
-                    <MegaProjectCard key={p.id} project={p} currentLang={currentLang} t={t} />
-                  ) : (
                   <ProjectCard key={p.id} project={p} currentLang={currentLang} t={t} />
-                  )
                 ))}
               </div>
             )}
@@ -785,7 +857,7 @@ export default function Portfolio() {
                   <CardDescription>{getLocalizedText(f, 'description', currentLang)}</CardDescription>
                 </CardHeader>
                 <CardContent className={getDirectionalClass("flex items-center justify-between")}>
-                  <Badge variant="secondary">{t.freelance}</Badge>
+                  <Badge variant="secondary" className="dark:bg-blue-600 dark:text-white">{t.freelance}</Badge>
                   <a href={f.url} target="_blank" rel="noreferrer">
                     <Button size="sm" variant="outline" className={getDirectionalClass("flex items-center")}>
                       {t.open} 
@@ -803,7 +875,18 @@ export default function Portfolio() {
       <section id="cv" className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">{t.cv} / {t.certifications}</h2>
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight flex items-center gap-2">
+              {t.cv} / {t.certifications}
+              <a 
+                href="https://drive.google.com/file/d/1DvjLKHI-Fz0KPnPzNxUXarnwUlnRjJb_/view?usp=sharing" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:opacity-80 transition-opacity"
+                title="Voir le CV complet"
+              >
+                <ArrowUpRight className="h-5 w-5 text-primary" />
+              </a>
+            </h2>
             <p className="text-muted-foreground">{t.courseAndSkills}</p>
           </div>
         </div>
@@ -815,6 +898,12 @@ export default function Portfolio() {
           ) : (
             certifications?.map((c) => (
               <Card key={c.id} className="relative pt-8">
+                {/* Admin Edit Button */}
+                <AdminEditButton 
+                  href={`/admin/certifications/edit/${c.id}`} 
+                  className="absolute top-2 left-2 z-10"
+                />
+                
                 <div className="absolute top-4 right-4">
                   <Badge 
                     className={`text-xs ${
@@ -822,6 +911,8 @@ export default function Portfolio() {
                         ? 'bg-green-100 text-green-800' 
                         : c.status === 'in_progress' 
                           ? 'bg-gray-200 text-gray-800 dark:bg-zinc-700 dark:text-zinc-200'
+                          : c.status === 'to_deploy'
+                            ? 'bg-green-100 text-green-800'
                           : 'bg-gray-100 text-gray-700'
                     }`}
                   >
@@ -829,30 +920,63 @@ export default function Portfolio() {
                       ? '✅' 
                       : c.status === 'in_progress' 
                         ? '⏳' 
+                        : c.status === 'to_deploy'
+                          ? '🚀'
                         : '🗂️'}
-                    <span className="ml-1.5">{c.status === 'completed' ? t.completed : c.status === 'in_progress' ? t.inProgress : t.planned}</span>
+                    <span className="ml-1.5">{c.status === 'completed' ? t.completed : c.status === 'in_progress' ? t.inProgress : c.status === 'to_deploy' ? t.toDeploy : t.planned}</span>
                   </Badge>
                 </div>
                 <CardHeader className="pb-2 pt-0">
                   <CardTitle className="text-lg">{c.title}</CardTitle>
                   <CardDescription className="mb-2">{c.provider || "Certification"}</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  {c.certificate_urls && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {Object.entries(c.certificate_urls).map(([type, url]) => (
-                        <a key={type} href={url} target="_blank" rel="noreferrer">
-                          <Button size="sm" variant="ghost" className="h-6 px-2 text-xs">
-                            <ExternalLink className="h-3 w-3 mr-1" />
-                            {type}
-                          </Button>
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {getLocalizedText(c, 'description', currentLang)}
-                  </p>
+                <CardContent className="flex flex-col h-full">
+                  <div className="flex-1">
+                    {c.certificate_urls && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {Object.entries(c.certificate_urls).map(([type, url]) => (
+                          <a key={type} href={url} target="_blank" rel="noreferrer">
+                            <Button size="sm" variant="ghost" className="h-6 px-2 text-xs">
+                              <ExternalLink className="h-3 w-3 mr-1" />
+                              {type}
+                            </Button>
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {getLocalizedText(c, 'description', currentLang)}
+                    </p>
+                  </div>
+                  
+                  {/* Buttons row at bottom */}
+                  <div className={`${getDirectionalClass("flex gap-2")} mt-auto pt-3 border-t`}>
+                    {/* Voir button - always displayed */}
+                    <Button size="sm" variant="outline" className={`flex-1 ${getDirectionalClass("flex items-center justify-center")}`}>
+                      <Globe className={`${isRTL ? 'ml-2' : 'mr-2'} w-4 h-4 no-rtl-transform`} />
+                      {t.see}
+                    </Button>
+                    
+                    {/* GitHub button - only if github_url exists */}
+                    {c.github_url && (
+                      <a href={c.github_url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="ghost" size="sm" className="no-rtl-transform px-3">
+                          <Github className="w-4 h-4" />
+                        </Button>
+                      </a>
+                    )}
+                    
+                    {/* Figma button - only if figma_url exists */}
+                    {c.figma_url && (
+                      <a href={c.figma_url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="ghost" size="sm" className="no-rtl-transform px-3">
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M15.852 8.981h-4.588V0h4.588c2.476 0 4.49 2.014 4.49 4.49s-2.014 4.491-4.49 4.491zM12.735 7.51h3.117c1.665 0 3.019-1.355 3.019-3.019s-1.354-3.019-3.019-3.019h-3.117V7.51zm0 1.471H8.148c-2.476 0-4.49-2.015-4.49-4.491S5.672 0 8.148 0h4.588v8.981zm-4.587-7.51c-1.665 0-3.019 1.355-3.019 3.019s1.354 3.02 3.019 3.02h3.117V1.471H8.148zm4.587 15.019H8.148c-2.476 0-4.49-2.014-4.49-4.49s2.014-4.49 4.49-4.49h4.588v8.98zM8.148 8.981c-1.665 0-3.019 1.355-3.019 3.019s1.355 3.019 3.019 3.019h3.117V8.981H8.148zM8.172 24c-2.489 0-4.515-2.014-4.515-4.49s2.014-4.49 4.49-4.49h4.588v4.441c0 2.503-2.047 4.539-4.563 4.539zm-.024-7.51a3.023 3.023 0 0 0-3.019 3.019c0 1.665 1.365 3.019 3.044 3.019 1.705 0 3.093-1.376 3.093-3.068V16.49H8.148zM24 12.981c0 2.476-2.014 4.49-4.49 4.49s-4.49-2.014-4.49-4.49 2.014-4.49 4.49-4.49 4.49 2.014 4.49 4.49zm-4.49-3.019c-1.665 0-3.019 1.355-3.019 3.019s1.354 3.019 3.019 3.019 3.019-1.355 3.019-3.019-1.354-3.019-3.019-3.019z"/>
+                          </svg>
+                        </Button>
+                      </a>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             ))
@@ -963,9 +1087,20 @@ export default function Portfolio() {
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} {profile?.name || "Yohann Di Crescenzo"}. Tous droits réservés.</p>
           <div className="flex items-center gap-4">
-            <p>
-              {t.builtWith} <span className="font-medium">React</span> & <span className="font-medium">Tailwind</span> & <span className="font-medium">Supabase</span>
-            </p>
+            <div className="flex items-center gap-2">
+              <span className="text-sm">{t.builtWith}</span>
+              <div className="flex items-center gap-3">
+                <svg viewBox="0 0 24 24" className="w-5 h-5 text-blue-500" fill="currentColor">
+                  <path d="M14.23 12.004a2.236 2.236 0 0 1-2.235 2.236 2.236 2.236 0 0 1-2.236-2.236 2.236 2.236 0 0 1 2.235-2.236 2.236 2.236 0 0 1 2.236 2.236zm2.648-10.69c-1.346 0-3.107.96-4.888 2.622-1.78-1.653-3.542-2.602-4.887-2.602-.41 0-.783.093-1.106.278-1.375.793-1.683 3.264-.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03-.704 3.113-.39 5.588.988 6.38.32.187.69.275 1.102.275 1.345 0 3.107-.96 4.888-2.624 1.78 1.654 3.542 2.603 4.887 2.603.41 0 .783-.09 1.106-.275 1.374-.792 1.683-3.263.973-6.365C22.02 15.096 24 13.59 24 12.004c0-1.59-1.99-3.097-5.043-4.032.704-3.11.39-5.587-.988-6.38-.318-.184-.688-.277-1.092-.278zm-.005 1.09v.006c.225 0 .406.044.558.127.666.382.955 1.835.73 3.704-.054.46-.142.945-.25 1.44-.96-.236-2.006-.417-3.107-.534-.66-.905-1.345-1.727-2.035-2.447 1.592-1.48 3.087-2.292 4.105-2.295zm-9.77.02c1.012 0 2.514.808 4.11 2.28-.686.72-1.37 1.537-2.02 2.442-1.107.117-2.154.298-3.113.538-.112-.49-.195-.964-.254-1.42-.23-1.868.054-3.32.714-3.707.19-.09.4-.127.563-.132zm4.882 3.05c.455.468.91.992 1.36 1.564-.44-.02-.89-.034-1.36-.034-.47 0-.92.014-1.36.034.44-.572.895-1.096 1.36-1.564zM12 8.1c.74 0 1.477.034 2.202.093.406.582.802 1.203 1.183 1.86.372.64.71 1.29 1.018 1.946-.308.655-.646 1.31-1.013 1.95-.38.66-.773 1.288-1.18 1.87-.728.063-1.466.098-2.21.098-.74 0-1.477-.035-2.202-.093-.406-.582-.802-1.204-1.183-1.86-.372-.64-.71-1.29-1.018-1.946.303-.657.646-1.313 1.013-1.954.38-.66.773-1.286 1.18-1.86.728-.064 1.466-.098 2.21-.098zm-3.635.254c-.24.377-.48.763-.704 1.16-.225.39-.435.782-.635 1.174-.265-.656-.49-1.31-.676-1.947.64-.15 1.315-.283 2.015-.386zm7.26 0c.695.103 1.365.23 2.006.387-.18.632-.405 1.282-.66 1.933-.2-.39-.41-.783-.64-1.174-.225-.392-.465-.774-.705-1.146zm3.063.675c.484.15.944.317 1.375.498 1.732.74 2.852 1.708 2.852 2.476-.005.768-1.125 1.74-2.857 2.475-.42.18-.88.342-1.355.493-.28-.958-.646-1.956-1.1-2.98.45-1.017.81-2.01 1.085-2.964zm-13.395.004c.278.96.645 1.957 1.1 2.98-.45 1.017-.812 2.01-1.086 2.964-.484-.15-.944-.318-1.37-.5-1.732-.737-2.852-1.706-2.852-2.474 0-.768 1.12-1.742 2.852-2.476.42-.18.88-.342 1.356-.494zm11.678 4.28c.265.657.49 1.312.676 1.948-.64.157-1.316.29-2.016.39.24-.375.48-.762.705-1.158.225-.39.435-.788.636-1.18zm-9.945.02c.2.392.41.783.64 1.175.23.39.465.772.705 1.143-.695-.102-1.365-.23-2.006-.386.18-.63.406-1.282.66-1.933zM17.92 16.32c.112.493.2.968.254 1.423.23 1.868-.054 3.32-.714 3.708-.147.09-.338.128-.563.128-1.012 0-2.514-.807-4.11-2.28.686-.72 1.37-1.536 2.02-2.44 1.107-.118 2.154-.3 3.113-.54zm-11.83.01c.96.234 2.006.415 3.107.532.66.905 1.345 1.727 2.035 2.446-1.595 1.483-3.092 2.295-4.11 2.295-.22-.005-.406-.05-.553-.132-.666-.38-.955-1.834-.73-3.703.054-.46.142-.944.25-1.438zm4.56.64c.44.02.89.034 1.36.034.47 0 .92-.014 1.36-.034-.44.572-.895 1.095-1.36 1.563-.455-.468-.91-.991-1.36-1.563z"/>
+                </svg>
+                <svg viewBox="0 0 24 24" className="w-5 h-5 text-cyan-500" fill="currentColor">
+                  <path d="M12.001,4.8c-3.2,0-5.2,1.6-6,4.8c1.2-1.6,2.6-2.2,4.2-1.8c0.913,0.228,1.565,0.89,2.288,1.624C13.666,10.618,15.027,12,18.001,12c3.2,0,5.2-1.6,6-4.8c-1.2,1.6-2.6,2.2-4.2,1.8c-0.913-0.228-1.565-0.89-2.288-1.624C16.337,6.182,14.976,4.8,12.001,4.8z M6.001,12c-3.2,0-5.2,1.6-6,4.8c1.2-1.6,2.6-2.2,4.2-1.8c0.913,0.228,1.565,0.89,2.288,1.624C7.666,17.818,9.027,19.2,12.001,19.2c3.2,0,5.2-1.6,6-4.8c-1.2,1.6-2.6,2.2-4.2,1.8c-0.913-0.228-1.565-0.89-2.288-1.624C10.337,13.182,8.976,12,6.001,12z"/>
+                </svg>
+                <svg viewBox="0 0 24 24" className="w-5 h-5 text-green-500" fill="currentColor">
+                  <path d="M21.362,9.354H12V.396a.396.396,0,0,0-.716-.233L2.203,9.321a.396.396,0,0,0,.233.716H12V21.604a.396.396,0,0,0,.716.233L21.797,12.679a.396.396,0,0,0-.233-.716H12V9.354Z"/>
+                </svg>
+              </div>
+            </div>
             <a href="/admin" className="hover:text-primary transition-colors">Voir le site admin</a>
           </div>
         </div>
@@ -979,7 +1114,19 @@ export default function Portfolio() {
         isVisible={showNotification}
         onClose={() => setShowNotification(false)}
       />
+
+      {/* Indicateur d'authentification pour les développeurs */}
+      <AuthStatusIndicator />
     </motion.div>
+  );
+}
+
+// Composant principal avec providers
+export default function Portfolio() {
+  return (
+    <AdminGuestProvider>
+      <PortfolioContent />
+    </AdminGuestProvider>
   );
 }
 
@@ -1006,58 +1153,3 @@ function SocialLink({ href, icon, label }) {
   );
 }
 
-function MegaProjectCard({ project, currentLang, t }) {
-  const { getDirectionalClass, isRTL } = useDirectionalClasses();
-
-  return (
-    <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-      <Card className="h-full relative overflow-hidden">
-        {project.is_mega_project && (
-          <div className="absolute top-2 right-2 z-10">
-            <Badge variant="destructive" className="text-xs">MEGA</Badge>
-          </div>
-        )}
-        
-        <CardHeader className="pb-2 pt-6">
-          <div className={`${getDirectionalClass("flex items-start justify-between")} gap-2`}>
-            <div className="flex-1">
-              <CardTitle className="text-lg">{getLocalizedText(project, 'title', currentLang)}</CardTitle>
-            </div>
-            {project.stars > 0 && (
-            <div className="flex items-center text-sm text-muted-foreground">
-              <Star className="h-4 w-4 mr-1" /> {project.stars}
-            </div>
-            )}
-          </div>
-        </CardHeader>
-        
-        <CardContent>
-          <div className={`${getDirectionalClass("flex flex-wrap gap-2")} mb-4`}>
-            {(Array.isArray(project.category) ? project.category : [project.category]).map((cat) => (
-              <Badge key={`${project.id}-category-${cat}`} variant="default" className="rounded-full capitalize h-6 px-3 text-xs">{cat}</Badge>
-            ))}
-            {project.tags?.map((tag) => (
-              <Badge key={tag} variant="secondary" className="rounded-full h-6 px-3 text-xs">{tag}</Badge>
-            ))}
-          </div>
-          <div className={`${getDirectionalClass("flex items-center gap-2")} justify-start`}>
-            {project.link && project.link !== '#' && (
-              <a href={project.link} target="_blank" rel="noopener noreferrer">
-                <Button size="sm" variant="outline" className={getDirectionalClass("flex items-center")}>
-                  {t.see} <ArrowUpRight className={`${isRTL ? 'mr-1' : 'ml-1'} h-4 w-4 no-rtl-transform`} />
-                </Button>
-              </a>
-            )}
-            {project.github_url && (
-              <a href={project.github_url} target="_blank" rel="noopener noreferrer">
-                <Button variant="ghost" size="sm" className="no-rtl-transform">
-                  <Github className="w-4 h-4" />
-                </Button>
-              </a>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-}

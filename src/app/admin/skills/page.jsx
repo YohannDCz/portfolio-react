@@ -149,12 +149,18 @@ export default function SkillsAdmin() {
       return;
     }
 
+    // Debug: Log the form data being submitted
+    console.log('Submitting skill data:', formData);
+    
     let result;
     if (editingSkill) {
       result = await updateSkill(editingSkill, formData);
     } else {
       result = await createSkill(formData);
     }
+    
+    // Debug: Log the result
+    console.log('Skill creation/update result:', result);
 
     if (result.success) {
       resetForm();
@@ -320,7 +326,14 @@ export default function SkillsAdmin() {
                     min="0"
                     max="100"
                     value={formData.level}
-                    onChange={(e) => setFormData(prev => ({...prev, level: parseInt(e.target.value) || 0}))}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      const numValue = parseInt(value, 10);
+                      setFormData(prev => ({
+                        ...prev, 
+                        level: isNaN(numValue) ? 0 : Math.max(0, Math.min(100, numValue))
+                      }));
+                    }}
                   />
                 </div>
               </div>

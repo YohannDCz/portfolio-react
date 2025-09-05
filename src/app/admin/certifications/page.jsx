@@ -1,34 +1,22 @@
 'use client';
 
+import CertificationDragDrop from "@/components/CertificationDragDrop";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAdminGuest } from "@/contexts/AdminGuestContext";
 import {
-  deleteCertification,
-  useCertifications
+    deleteCertification,
+    reorderCertifications,
+    useCertifications
 } from "@/lib/supabase";
 import {
-  Edit,
-  ExternalLink,
-  Filter,
-  Plus,
-  Search,
-  Trash2
+    Filter,
+    Plus,
+    Search
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -54,6 +42,20 @@ export default function CertificationsAdmin() {
     }
     
     setDeleteLoading("");
+  };
+
+  const handleReorder = async (reorderedCertifications) => {
+    try {
+      const result = await reorderCertifications(reorderedCertifications);
+      if (result.success) {
+        // Refresh data or update local state
+        window.location.reload();
+      } else {
+        setDeleteError(result.error);
+      }
+    } catch (error) {
+      setDeleteError("Erreur lors de la réorganisation");
+    }
   };
 
   // Filtrer les certifications
@@ -175,117 +177,32 @@ export default function CertificationsAdmin() {
         </Alert>
       )}
 
-      {/* Liste des certifications */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredCertifications.map((cert) => (
-          <Card key={cert.id} className="hover:shadow-md transition-shadow flex flex-col h-full">
-            <CardHeader className="pb-2">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <CardTitle className="text-lg">{cert.title}</CardTitle>
-                  <CardDescription>{cert.provider}</CardDescription>
+      {/* Drag & Drop Certification List */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-sm text-muted-foreground">
+              {isGuest 
+                ? "Mode lecture seule - Réorganisation désactivée" 
+                : "Glissez-déposez pour réorganiser les certifications"
+              }
+            </p>
+            <p className="text-xs text-muted-foreground">
+              L'ordre sera reflété sur la page d'accueil
+            </p>
                 </div>
-                <Badge 
-                  className={
-                    cert.status === 'completed' ? 'bg-green-600 text-white' :
-                    cert.status === 'to_deploy' ? 'bg-emerald-500 text-white' :
-                    cert.status === 'in_progress' ? 'bg-blue-600 text-white' :
-                    'bg-gray-200 text-gray-800'
-                  }
-                >
-                  {cert.status === 'completed' ? '✓ Obtenue' : 
-                   cert.status === 'to_deploy' ? '🚀 À déployer' :
-                   cert.status === 'in_progress' ? '⏳ En cours' : '📋 Planifiée'}
+          <Badge variant="outline" className="text-xs">
+            {filteredCertifications.length} certification{filteredCertifications.length > 1 ? 's' : ''}
                 </Badge>
               </div>
-            </CardHeader>
-            
-            <CardContent className="flex-1 flex flex-col">
-              <div className="space-y-3 flex-1">
-                {/* Année */}
-                {cert.year && (
-                  <div className="text-sm text-muted-foreground">
-                    Année: {cert.year}
-                  </div>
-                )}
-
-                {/* Description */}
-                {cert.description_fr && (
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {cert.description_fr}
-                  </p>
-                )}
-
-                {/* Liens */}
-                {cert.certificate_urls && (
-                  <div className="flex flex-wrap gap-1">
-                    {Object.entries(cert.certificate_urls).map(([type, url]) => {
-                      const linkLabels = {
-                        certificate: 'Certificat',
-                        course: 'Cours',
-                        verification: 'Vérification',
-                        documentation: 'Documentation',
-                        tutorials: 'Tutoriels',
-                        figma: 'Figma'
-                      };
-                      return (
-                        <a key={type} href={url} target="_blank" rel="noopener noreferrer">
-                          <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
-                            <ExternalLink className="w-3 h-3 mr-1" />
-                            {linkLabels[type] || type}
-                          </Button>
-                        </a>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Actions - stuck to bottom */}
-              <div className="flex gap-2 pt-3 mt-auto border-t">
-                  <Link href={`/admin/certifications/edit/${cert.id}`} className="flex-1" passHref>
-                    <Button variant="outline" size="sm" className="w-full" disabled={isGuest}>
-                      <Edit className="w-4 h-4 mr-2" />
-                      Modifier
-                    </Button>
-                  </Link>
-                  
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        disabled={isGuest}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Supprimer la certification</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Êtes-vous sûr de vouloir supprimer la certification "{cert.title}" ? 
-                          Cette action est irréversible.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Annuler</AlertDialogCancel>
-                        <AlertDialogAction
-                          className="bg-red-600 hover:bg-red-700"
-                          onClick={() => handleDelete(cert.id, cert.title)}
-                          disabled={deleteLoading === cert.id}
-                        >
-                          {deleteLoading === cert.id ? "Suppression..." : "Supprimer"}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-              </div>
-
-            </CardContent>
-          </Card>
-        ))}
+        
+        <CertificationDragDrop
+          certifications={filteredCertifications}
+          onReorder={handleReorder}
+          onDelete={handleDelete}
+          deleteLoading={deleteLoading}
+          currentLang="fr"
+        />
       </div>
 
       {/* État vide */}

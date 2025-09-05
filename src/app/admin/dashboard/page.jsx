@@ -69,13 +69,13 @@ function QuickAction({ title, description, href, icon: Icon, color = "primary" }
     <Component href={href}>
       <Card className={`hover:shadow-md transition-shadow h-full ${isGuest ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
         <CardContent className="p-6 h-full flex items-start">
-          <div className="flex items-start space-x-4 w-full">
+          <div className="flex items-start space-x-4 w-full h-full">
             <div className={`p-2 rounded-lg ${colorClasses[color]} flex-shrink-0`}>
               <Icon className="h-6 w-6" />
             </div>
-            <div className="space-y-1 flex-1">
-              <h3 className="font-semibold">{title}</h3>
-              <p className="text-sm text-muted-foreground">{description}</p>
+            <div className="space-y-1 flex-1 flex flex-col justify-center h-full min-h-[60px]">
+              <h3 className="font-semibold leading-tight">{title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
             </div>
           </div>
         </CardContent>
@@ -155,7 +155,7 @@ export default function AdminDashboard() {
       {/* Actions rapides */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Actions rapides</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 items-stretch">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 items-stretch auto-rows-fr">
           <QuickAction
             title="Tableau Kanban"
             description="Gérer vos tâches et workflow de projet"
