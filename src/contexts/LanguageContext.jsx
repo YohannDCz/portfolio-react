@@ -39,7 +39,8 @@ export function LanguageProvider({ children }) {
     { code: 'fr', name: 'Français', flag: '🇫🇷', dir: 'ltr' },
     { code: 'en', name: 'English', flag: '🇺🇸', dir: 'ltr' },
     { code: 'hi', name: 'हिन्दी', flag: '🇮🇳', dir: 'ltr' },
-    { code: 'ar', name: 'العربية', flag: '🇸🇦', dir: 'rtl' }
+    { code: 'ar', name: 'العربية', flag: '🇸🇦', dir: 'rtl' },
+    { code: 'zh', name: '简体中文', flag: '🇨🇳', dir: 'ltr' }
   ];
 
   const currentLanguage = languages.find(lang => lang.code === currentLang);

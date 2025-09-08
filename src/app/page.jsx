@@ -17,15 +17,15 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 // Import des hooks Supabase
 import {
-  getLocalizedText,
-  getProjectsByCategory,
-  sendContactMessage,
-  useAuth,
-  useCertifications,
-  useFreelancePlatforms,
-  useProfile,
-  useProjects,
-  useSkills
+    getLocalizedText,
+    getProjectsByCategory,
+    sendContactMessage,
+    useAuth,
+    useCertifications,
+    useFreelancePlatforms,
+    useProfile,
+    useProjects,
+    useSkills
 } from "@/lib/supabase";
 
 // Import du contexte multilingue
@@ -286,7 +286,7 @@ function PortfolioContent() {
       setNotificationData({
         type: 'success',
         title: t.messageSent,
-        message: 'Nous vous répondrons dans les plus brefs délais.'
+        message: t.responseMessage || 'Nous vous répondrons dans les plus brefs délais.'
       });
       setShowNotification(true);
       e.target.reset();
@@ -295,7 +295,7 @@ function PortfolioContent() {
       setNotificationData({
         type: 'error',
         title: t.messageError,
-        message: result.error || 'Une erreur inattendue s\'est produite.'
+        message: result.error || t.unexpectedError || 'Une erreur inattendue s\'est produite.'
       });
       setShowNotification(true);
     }
@@ -399,7 +399,7 @@ function PortfolioContent() {
           <div className="grid md:grid-cols-[1.1fr_0.9fr] gap-8 items-center">
             <div>
               <div className="flex gap-2 mb-4 flex-wrap">
-              <Badge>🎯 {currentLang === 'fr' ? 'Viser le millénaire' : currentLang === 'en' ? 'Aim for millennium' : currentLang === 'hi' ? 'सहस्राब्दी का लक्ष्य' : 'استهداف الألفية'}</Badge>
+              <Badge>🎯 {t.aimForMillennium}</Badge>
               <Badge variant="secondary">{t.availableForMissions}</Badge>
               <Badge variant="outline">{t.availableForInternship}</Badge>
             </div>
@@ -416,7 +416,7 @@ function PortfolioContent() {
                   <ArrowUpRight className={`${isRTL ? 'mr-2' : 'ml-2'} h-4 w-4 no-rtl-transform`} />
                 </Button>
               </a>
-              <Link href={"/not-found"} target="_blank" rel="noreferrer">
+              <Link href={"/not-found"} rel="noreferrer">
                 <Button variant="outline">{t.seeWebsite}</Button>
               </Link>
             </div>
@@ -861,18 +861,18 @@ function PortfolioContent() {
                   <Input 
                     required 
                     name="name" 
-                    placeholder={currentLang === 'fr' ? 'Votre nom' : currentLang === 'en' ? 'Your name' : currentLang === 'hi' ? 'आपका नाम' : 'اسمك'} 
+                    placeholder={t.namePlaceholder} 
                   />
-                  <Input required name="email" type="email" placeholder="Email" />
+                  <Input required name="email" type="email" placeholder={t.emailPlaceholder} />
                 </div>
                 <Input 
                   name="subject" 
-                  placeholder={currentLang === 'fr' ? 'Sujet (optionnel)' : currentLang === 'en' ? 'Subject (optional)' : currentLang === 'hi' ? 'विषय (वैकल्पिक)' : 'الموضوع (اختياري)'} 
+                  placeholder={t.subjectPlaceholder} 
                 />
                 <Textarea 
                   required 
                   name="message" 
-                  placeholder={currentLang === 'fr' ? 'Votre message…' : currentLang === 'en' ? 'Your message…' : currentLang === 'hi' ? 'आपका संदेश…' : 'رسالتك…'} 
+                  placeholder={t.messagePlaceholder} 
                   rows={5} 
                 />
                 <div className="flex items-center gap-3">

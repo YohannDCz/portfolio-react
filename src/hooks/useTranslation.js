@@ -28,14 +28,14 @@ export function useTranslation() {
         // Translate to each target field
         for (const targetField of targetFields) {
           const targetLang = targetField.split('_').pop()
-          if (!['en', 'fr', 'hi', 'ar'].includes(targetLang)) continue
+          if (!['en', 'fr', 'hi', 'ar', 'zh'].includes(targetLang)) continue
           if (sourceLang === targetLang) continue
 
           // For FR <-> EN bidirectional translation, always translate (overwrite existing content)
           // For other languages (HI, AR), only translate if target field is empty
-          const isFrEnBidirectional = (sourceLang === 'fr' && targetLang === 'en') || 
-                                     (sourceLang === 'en' && targetLang === 'fr')
-          
+          const isFrEnBidirectional = (sourceLang === 'fr' && targetLang === 'en') ||
+            (sourceLang === 'en' && targetLang === 'fr')
+
           if (!isFrEnBidirectional && formData[targetField]?.trim()) continue
 
           try {
