@@ -333,7 +333,6 @@ export const sendContactMessage = async (messageData) => {
 
     return result;
   } catch (err) {
-    console.error('Erreur sendContactMessage:', err);
     return { success: false, error: err.message }
   }
 }
@@ -534,22 +533,16 @@ export const reorderCertifications = async (certifications) => {
 // Compétences
 export const createSkill = async (skillData) => {
   try {
-    console.log('Creating skill with data:', skillData)
-
     const { data, error } = await supabase
       .from('skills')
       .insert([skillData])
       .select()
 
     if (error) {
-      console.error('Supabase error:', error)
       throw error
     }
-
-    console.log('Skill created successfully:', data[0])
     return { success: true, data: data[0] }
   } catch (err) {
-    console.error('Create skill error:', err)
     return { success: false, error: err.message }
   }
 }
@@ -961,7 +954,6 @@ export const useAllProjectsProgress = () => {
         })
         setProgressData(progressMap)
       } catch (error) {
-        console.error('Erreur lors du calcul des progressions:', error)
       } finally {
         setLoading(false)
       }

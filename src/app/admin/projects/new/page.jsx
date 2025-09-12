@@ -52,6 +52,7 @@ export default function NewProject() {
     figma_url: '',
     image_url: '',
     status: 'completed',
+    featured: false,
     stack: '',
     priority: 1,
     sort_order: 0
@@ -448,6 +449,15 @@ export default function NewProject() {
                     onCheckedChange={(checked) => handleInputChange('is_mega_project', checked)}
                   />
                   <Label htmlFor="is_mega_project">Mega Projet</Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="featured"
+                    checked={formData.featured}
+                    onCheckedChange={(checked) => handleInputChange('featured', checked)}
+                  />
+                  <Label htmlFor="featured">Nouveau Projet (Mettre en avant)</Label>
                 </div>
 
                 {formData.is_mega_project && (

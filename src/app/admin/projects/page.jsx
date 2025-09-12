@@ -54,6 +54,7 @@ export default function ProjectsAdmin() {
 
   const toDeployProjects = projects?.filter(p => p.status === 'to_deploy') || [];
   const inProgressProjects = projects?.filter(p => p.status === 'in_progress') || [];
+  const featuredProjects = projects?.filter(p => p.featured) || [];
 
   const handleDelete = async (projectId, projectTitle) => {
     setDeleteLoading(projectId);
@@ -151,7 +152,7 @@ export default function ProjectsAdmin() {
       </Card>
 
       {/* Statistiques */}
-      <div className="grid gap-4 md:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-6">
         <Card>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">{projects?.length || 0}</div>
@@ -185,6 +186,14 @@ export default function ProjectsAdmin() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">
+              {projects?.filter(p => p.featured).length || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">Nouveaux projets</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold">
               {projects?.reduce((sum, p) => sum + (p.stars || 0), 0) || 0}
             </div>
             <p className="text-xs text-muted-foreground">Total étoiles</p>
@@ -197,6 +206,115 @@ export default function ProjectsAdmin() {
         <Alert variant="destructive">
           <AlertDescription>{deleteError}</AlertDescription>
         </Alert>
+      )}
+
+      {/* Section Nouveaux Projets */}
+      {featuredProjects.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="h-6 w-1 bg-blue-500 rounded-full"></div>
+            <h2 className="text-xl font-semibold text-blue-700 dark:text-blue-300">
+              Nouveaux Projets (Mis en avant)
+            </h2>
+            <Badge className="bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/50 dark:text-blue-300">
+              {featuredProjects.length}
+            </Badge>
+          </div>
+          
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {featuredProjects.slice(0, 6).map((project) => (
+              <Card key={`featured-${project.id}`} className="border-blue-200 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-800">
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <span className="truncate">{project.title_fr}</span>
+                        <Badge variant="secondary" className="text-xs flex-shrink-0 bg-blue-100 text-blue-700 border-blue-200">
+                          NOUVEAU
+                        </Badge>
+                      </CardTitle>
+                      <div className="flex items-center gap-2 mt-1 mb-2">
+                        <Badge variant={project.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
+                          {project.status === 'completed' ? 'Terminé' : 
+                           project.status === 'in_progress' ? 'En cours' : 
+                           project.status === 'to_deploy' ? 'À déployer' : 
+                           'Planifié'}
+                        </Badge>
+                        {project.category && (
+                          <div className="flex gap-1 flex-wrap">
+                            {project.category.slice(0, 2).map((cat) => (
+                              <Badge key={cat} variant="outline" className="text-xs capitalize">
+                                {cat}
+                              </Badge>
+                            ))}
+                            {project.category.length > 2 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{project.category.length - 2}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <CardDescription className="text-sm line-clamp-2">
+                        {project.description_fr}
+                      </CardDescription>
+                    </div>
+                    <div className="flex gap-1 ml-2">
+                      <Link href={`/admin/projects/edit/${project.id}`}>
+                        <Button variant="ghost" size="sm" disabled={isGuest}>
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </Link>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="sm" disabled={isGuest}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Supprimer le projet</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Êtes-vous sûr de vouloir supprimer "{project.title_fr}" ? Cette action est irréversible.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => handleDelete(project.id, project.title_fr)}
+                              disabled={deleteLoading === project.id}
+                            >
+                              {deleteLoading === project.id ? 'Suppression...' : 'Supprimer'}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <div className="flex items-center gap-4">
+                      {project.stars > 0 && (
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4" />
+                          <span>{project.stars}</span>
+                        </div>
+                      )}
+                      {project.link && project.link !== '#' && (
+                        <a href={project.link} target="_blank" rel="noopener noreferrer">
+                          <Button variant="ghost" size="sm">
+                            <ExternalLink className="w-4 h-4" />
+                          </Button>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
       )}
 
  {/* Section Projets à déployer */}
