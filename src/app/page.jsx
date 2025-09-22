@@ -450,7 +450,7 @@ function PortfolioContent() {
                   >
                   <Avatar className="h-23 w-23 ring-4 ring-background">
                     <AvatarImage alt="avatar" src={profile?.avatar_url || "profile.png"} />
-                    <AvatarFallback>YDC</AvatarFallback>
+                    <AvatarFallback>YD</AvatarFallback>
                   </Avatar>
                   </ProfileImageModal>
                   <div className="pb-1">
