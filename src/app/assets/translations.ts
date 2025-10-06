@@ -1,0 +1,426 @@
+import type { Language } from '@/types';
+
+// ——————————————————————————————————————————————
+// TYPE DEFINITIONS
+// ——————————————————————————————————————————————
+
+interface TranslationStrings {
+  portfolio: string;
+  projects: string;
+  freelance: string;
+  cv: string;
+  certifications: string;
+  about: string;
+  contact: string;
+  goals: string;
+  projectSelection: string;
+  projectFilter: string;
+  newProjects: string;
+  newProjectsDescription: string;
+  searchPlaceholder: string;
+  sort: string;
+  popular: string;
+  alphabetical: string;
+  all: string;
+  web: string;
+  mobile: string;
+  design: string;
+  other: string;
+  see: string;
+  open: string;
+  availableForMissions: string;
+  availableForInternship: string;
+  contactMe: string;
+  seeWebsite: string;
+  yearsExp: string;
+  satisfaction: string;
+  mainPlatforms: string;
+  courseAndSkills: string;
+  inProgress: string;
+  completed: string;
+  planned: string;
+  toDeploy: string;
+  strategicProjects: string;
+  vision: string;
+  productionGoals: string;
+  productionSubtitle: string;
+  aboutApproach: string;
+  aboutDescription: string;
+  quickInfo: string;
+  quickInfoSubtitle: string;
+  basedIn: string;
+  availability: string;
+  languages: string;
+  preferredStack: string;
+  workTogether: string;
+  workTogetherSubtitle: string;
+  networks: string;
+  networksSubtitle: string;
+  send: string;
+  sending: string;
+  messageSent: string;
+  messageError: string;
+  directEmail: string;
+  builtWith: string;
+  loading: string;
+  error: string;
+  namePlaceholder: string;
+  emailPlaceholder: string;
+  subjectPlaceholder: string;
+  messagePlaceholder: string;
+  aimForMillennium: string;
+  responseMessage: string;
+  unexpectedError: string;
+}
+
+// ——————————————————————————————————————————————
+// TRADUCTIONS STATIQUES
+// ——————————————————————————————————————————————
+
+export const TRANSLATIONS: Record<Language, TranslationStrings> = {
+  fr: {
+    portfolio: 'Portfolio',
+    projects: 'Projets',
+    freelance: 'Freelance',
+    cv: 'Curriculum',
+    certifications: 'Certifications',
+    about: 'À propos',
+    contact: 'Contact',
+    goals: 'Objectifs',
+    projectSelection: 'Sélection de projets',
+    projectFilter: 'Filtrez par type, triez et cherchez.',
+    newProjects: 'Nouveaux Projets',
+    newProjectsDescription: 'Découvrez mes dernières réalisations mises en avant.',
+    searchPlaceholder: 'Rechercher un projet…',
+    sort: 'Trier',
+    popular: 'Populaire',
+    alphabetical: 'A → Z',
+    all: 'Tous',
+    web: 'Web',
+    mobile: 'Mobile',
+    design: 'Design',
+    other: 'Autre',
+    see: 'Voir',
+    open: 'Ouvrir',
+    availableForMissions: 'Disponible pour mission',
+    availableForInternship: 'Disponible pour stage',
+    contactMe: 'Me contacter',
+    seeWebsite: 'Voir mon site',
+    yearsExp: "Années d'exp.",
+    satisfaction: 'Satisfaction',
+    mainPlatforms: 'Présence sur les principales plateformes.',
+    courseAndSkills: 'Parcours et compétences validées.',
+    inProgress: 'En cours',
+    completed: 'Terminé',
+    planned: 'Planifié',
+    toDeploy: 'À déployer',
+    strategicProjects: 'Chantiers stratégiques long terme.',
+    vision: 'Vision',
+    productionGoals: 'Objectifs de production',
+    productionSubtitle: '100 sites React/Node • 100 apps React Native • 100 apps Flutter.',
+    aboutApproach: 'Approche produit et méthode.',
+    aboutDescription:
+      "De la recherche utilisateur au prototypage haute fidélité, jusqu'à l'implémentation full-stack et mobile (accessibilité, micro‑interactions, performance, maintenance).",
+    quickInfo: 'Infos rapides',
+    quickInfoSubtitle: 'Ce que vous devez savoir.',
+    basedIn: 'Basé à :',
+    availability: 'Dispo :',
+    languages: 'Langues :',
+    preferredStack: 'Stack préférée :',
+    workTogether: 'Travaillons ensemble',
+    workTogetherSubtitle: 'Dites‑moi en quelques mots votre besoin.',
+    networks: 'Réseaux',
+    networksSubtitle: 'Retrouvez‑moi en ligne.',
+    send: 'Envoyer',
+    sending: 'Envoi...',
+    messageSent: 'Message envoyé !',
+    messageError: "Erreur lors de l'envoi",
+    directEmail: 'Ou écrivez‑moi directement',
+    builtWith: 'Construit avec',
+    loading: 'Chargement...',
+    error: 'Erreur de chargement',
+    namePlaceholder: 'Votre nom',
+    emailPlaceholder: 'Email',
+    subjectPlaceholder: 'Sujet (optionnel)',
+    messagePlaceholder: 'Votre message…',
+    aimForMillennium: 'Viser le millénaire',
+    responseMessage: 'Nous vous répondrons dans les plus brefs délais.',
+    unexpectedError: "Une erreur inattendue s'est produite.",
+  },
+  en: {
+    portfolio: 'Portfolio',
+    projects: 'Projects',
+    freelance: 'Freelance',
+    cv: 'Curriculum',
+    certifications: 'Certifications',
+    about: 'About',
+    contact: 'Contact',
+    goals: 'Goals',
+    projectSelection: 'Project Selection',
+    projectFilter: 'Filter by type, sort and search.',
+    newProjects: 'New Projects',
+    newProjectsDescription: 'Discover my latest featured achievements.',
+    searchPlaceholder: 'Search a project…',
+    sort: 'Sort',
+    popular: 'Popular',
+    alphabetical: 'A → Z',
+    all: 'All',
+    web: 'Web',
+    mobile: 'Mobile',
+    design: 'Design',
+    other: 'Other',
+    see: 'See',
+    open: 'Open',
+    availableForMissions: 'Available for mission',
+    availableForInternship: 'Available for internship',
+    contactMe: 'Contact me',
+    seeWebsite: 'See my website',
+    yearsExp: 'Years exp.',
+    satisfaction: 'Satisfaction',
+    mainPlatforms: 'Presence on main platforms.',
+    courseAndSkills: 'Course and validated skills.',
+    inProgress: 'In progress',
+    completed: 'Completed',
+    planned: 'Planned',
+    toDeploy: 'To deploy',
+    strategicProjects: 'Long-term strategic projects.',
+    vision: 'Vision',
+    productionGoals: 'Production Goals',
+    productionSubtitle: '100 React/Node sites • 100 React Native apps • 100 Flutter apps.',
+    aboutApproach: 'Product approach and method.',
+    aboutDescription:
+      'From user research to high-fidelity prototyping, to full-stack and mobile implementation (accessibility, micro-interactions, performance, maintenance).',
+    quickInfo: 'Quick Info',
+    quickInfoSubtitle: 'What you need to know.',
+    basedIn: 'Based in:',
+    availability: 'Available:',
+    languages: 'Languages:',
+    preferredStack: 'Preferred stack:',
+    workTogether: "Let's work together",
+    workTogetherSubtitle: 'Tell me about your needs in a few words.',
+    networks: 'Networks',
+    networksSubtitle: 'Find me online.',
+    send: 'Send',
+    sending: 'Sending...',
+    messageSent: 'Message sent!',
+    messageError: 'Error sending',
+    directEmail: 'Or write me directly',
+    builtWith: 'Built with',
+    loading: 'Loading...',
+    error: 'Loading error',
+    namePlaceholder: 'Your name',
+    emailPlaceholder: 'Email',
+    subjectPlaceholder: 'Subject (optional)',
+    messagePlaceholder: 'Your message…',
+    aimForMillennium: 'Aim for millennium',
+    responseMessage: 'We will respond to you as soon as possible.',
+    unexpectedError: 'An unexpected error occurred.',
+  },
+  hi: {
+    portfolio: 'पोर्टफोलियो',
+    projects: 'प्रोजेक्ट्स',
+    freelance: 'फ्रीलांस',
+    cv: 'सीवी',
+    certifications: 'प्रमाणपत्र',
+    about: 'के बारे में',
+    contact: 'संपर्क',
+    goals: 'लक्ष्य',
+    projectSelection: 'प्रोजेक्ट चयन',
+    projectFilter: 'प्रकार के अनुसार फ़िल्टर करें, सॉर्ट करें और खोजें।',
+    newProjects: 'नए प्रोजेक्ट्स',
+    newProjectsDescription: 'मेरी नवीनतम विशेषताओं को देखें।',
+    searchPlaceholder: 'एक प्रोजेक्ट खोजें…',
+    sort: 'सॉर्ट',
+    popular: 'लोकप्रिय',
+    alphabetical: 'A → Z',
+    all: 'सभी',
+    web: 'वेब',
+    mobile: 'मोबाइल',
+    design: 'डिज़ाइन',
+    other: 'अन्य',
+    see: 'देखें',
+    open: 'खोलें',
+    availableForMissions: 'मिशन के लिए उपलब्ध',
+    availableForInternship: 'इंटर्नशिप के लिए उपलब्ध',
+    contactMe: 'मुझसे संपर्क करें',
+    seeWebsite: 'मेरी वेबसाइट देखें',
+    yearsExp: 'वर्षों का अनुभव',
+    satisfaction: 'संतुष्टि',
+    mainPlatforms: 'मुख्य प्लेटफॉर्म पर उपस्थिति।',
+    courseAndSkills: 'कोर्स और सत्यापित कौशल।',
+    inProgress: 'प्रगति में',
+    completed: 'पूर्ण',
+    planned: 'नियोजित',
+    toDeploy: 'तैनात करना',
+    strategicProjects: 'दीर्घकालिक रणनीतिक परियोजनाएं।',
+    vision: 'दृष्टि',
+    productionGoals: 'उत्पादन लक्ष्य',
+    productionSubtitle: '100 React/Node साइटें • 100 React Native ऐप्स • 100 Flutter ऐप्स।',
+    aboutApproach: 'उत्पाद दृष्टिकोण और विधि।',
+    aboutDescription:
+      'उपयोगकर्ता अनुसंधान से उच्च-फिडेलिटी प्रोटोटाइपिंग तक, फुल-स्टैक और मोबाइल कार्यान्वयन तक।',
+    quickInfo: 'त्वरित जानकारी',
+    quickInfoSubtitle: 'आपको जो जानना चाहिए।',
+    basedIn: 'स्थित:',
+    availability: 'उपलब्ध:',
+    languages: 'भाषाएं:',
+    preferredStack: 'पसंदीदा स्टैक:',
+    workTogether: 'आइए मिलकर काम करते हैं',
+    workTogetherSubtitle: 'कुछ शब्दों में अपनी आवश्यकताओं के बारे में बताएं।',
+    networks: 'नेटवर्क',
+    networksSubtitle: 'मुझे ऑनलाइन खोजें।',
+    send: 'भेजें',
+    sending: 'भेजा जा रहा है...',
+    messageSent: 'संदेश भेजा गया!',
+    messageError: 'भेजने में त्रुटि',
+    directEmail: 'या मुझे सीधे लिखें',
+    builtWith: 'के साथ निर्मित',
+    loading: 'लोड हो रहा है...',
+    error: 'लोडिंग त्रुटि',
+    namePlaceholder: 'आपका नाम',
+    emailPlaceholder: 'ईमेल',
+    subjectPlaceholder: 'विषय (वैकल्पिक)',
+    messagePlaceholder: 'आपका संदेश…',
+    aimForMillennium: 'सहस्राब्दी का लक्ष्य',
+    responseMessage: 'हम जल्द ही आपको जवाब देंगे।',
+    unexpectedError: 'एक अप्रत्याशित त्रुटि हुई।',
+  },
+  ar: {
+    portfolio: 'محفظة الأعمال',
+    projects: 'المشاريع',
+    freelance: 'العمل الحر',
+    cv: 'السيرة الذاتية',
+    certifications: 'الشهادات',
+    about: 'حول',
+    contact: 'اتصال',
+    goals: 'الأهداف',
+    projectSelection: 'اختيار المشاريع',
+    projectFilter: 'تصفية حسب النوع، ترتيب وبحث.',
+    newProjects: 'المشاريع الجديدة',
+    newProjectsDescription: 'اكتشف أحدث إنجازاتي المميزة.',
+    searchPlaceholder: 'البحث عن مشروع…',
+    sort: 'ترتيب',
+    popular: 'شائع',
+    alphabetical: 'أ → ي',
+    all: 'الكل',
+    web: 'ويب',
+    mobile: 'محمول',
+    design: 'تصميم',
+    other: 'أخرى',
+    see: 'مشاهدة',
+    open: 'فتح',
+    availableForMissions: 'متاح للمهمة',
+    availableForInternship: 'متاح للتدريب',
+    contactMe: 'اتصل بي',
+    seeWebsite: 'مشاهدة موقعي',
+    yearsExp: 'سنوات الخبرة',
+    satisfaction: 'الرضا',
+    mainPlatforms: 'الحضور على المنصات الرئيسية.',
+    courseAndSkills: 'الدورة والمهارات المعتمدة.',
+    inProgress: 'قيد التقدم',
+    completed: 'مكتمل',
+    planned: 'مخطط',
+    toDeploy: 'للنشر',
+    strategicProjects: 'مشاريع استراتيجية طويلة المدى.',
+    vision: 'رؤية',
+    productionGoals: 'أهداف الإنتاج',
+    productionSubtitle: '100 موقع React/Node • 100 تطبيق React Native • 100 تطبيق Flutter.',
+    aboutApproach: 'نهج المنتج والطريقة.',
+    aboutDescription:
+      'من بحث المستخدم إلى النماذج الأولية عالية الدقة، إلى التنفيذ الكامل والمحمول.',
+    quickInfo: 'معلومات سريعة',
+    quickInfoSubtitle: 'ما تحتاج لمعرفته.',
+    basedIn: 'مقره في:',
+    availability: 'متاح:',
+    languages: 'اللغات:',
+    preferredStack: 'المكدس المفضل:',
+    workTogether: 'لنعمل معًا',
+    workTogetherSubtitle: 'أخبرني عن احتياجاتك في كلمات قليلة.',
+    networks: 'الشبكات',
+    networksSubtitle: 'ابحث عني عبر الإنترنت.',
+    send: 'إرسال',
+    sending: 'جاري الإرسال...',
+    messageSent: 'تم إرسال الرسالة!',
+    messageError: 'خطأ في الإرسال',
+    directEmail: 'أو اكتب لي مباشرة',
+    builtWith: 'مبني باستخدام',
+    loading: 'جاري التحميل...',
+    error: 'خطأ في التحميل',
+    namePlaceholder: 'اسمك',
+    emailPlaceholder: 'البريد الإلكتروني',
+    subjectPlaceholder: 'الموضوع (اختياري)',
+    messagePlaceholder: 'رسالتك…',
+    aimForMillennium: 'استهداف الألفية',
+    responseMessage: 'سنرد عليك في أقرب وقت ممكن.',
+    unexpectedError: 'حدث خطأ غير متوقع.',
+  },
+  zh: {
+    portfolio: '作品集',
+    projects: '项目',
+    freelance: '自由职业',
+    cv: '简历',
+    certifications: '认证',
+    about: '关于',
+    contact: '联系',
+    goals: '目标',
+    projectSelection: '项目选择',
+    projectFilter: '按类型筛选、排序和搜索。',
+    newProjects: '新项目',
+    newProjectsDescription: '发现我最新的精选作品。',
+    searchPlaceholder: '搜索项目…',
+    sort: '排序',
+    popular: '热门',
+    alphabetical: 'A → Z',
+    all: '全部',
+    web: '网页',
+    mobile: '移动端',
+    design: '设计',
+    other: '其他',
+    see: '查看',
+    open: '打开',
+    availableForMissions: '可接项目',
+    availableForInternship: '可接实习',
+    contactMe: '联系我',
+    seeWebsite: '查看我的网站',
+    yearsExp: '年经验',
+    satisfaction: '满意度',
+    mainPlatforms: '在主要平台上的存在感。',
+    courseAndSkills: '课程和已验证的技能。',
+    inProgress: '进行中',
+    completed: '已完成',
+    planned: '已计划',
+    toDeploy: '待部署',
+    strategicProjects: '长期战略项目。',
+    vision: '愿景',
+    productionGoals: '生产目标',
+    productionSubtitle: '100个React/Node网站 • 100个React Native应用 • 100个Flutter应用。',
+    aboutApproach: '产品方法和方式。',
+    aboutDescription:
+      '从用户研究到高保真原型设计，再到全栈和移动端实现（无障碍性、微交互、性能、维护）。',
+    quickInfo: '快速信息',
+    quickInfoSubtitle: '您需要了解的信息。',
+    basedIn: '所在地：',
+    availability: '可用性：',
+    languages: '语言：',
+    preferredStack: '首选技术栈：',
+    workTogether: '让我们合作',
+    workTogetherSubtitle: '用几句话告诉我您的需求。',
+    networks: '网络',
+    networksSubtitle: '在线找到我。',
+    send: '发送',
+    sending: '发送中...',
+    messageSent: '消息已发送！',
+    messageError: '发送错误',
+    directEmail: '或直接给我写邮件',
+    builtWith: '构建工具',
+    loading: '加载中...',
+    error: '加载错误',
+    namePlaceholder: '您的姓名',
+    emailPlaceholder: '邮箱',
+    subjectPlaceholder: '主题（可选）',
+    messagePlaceholder: '您的消息…',
+    aimForMillennium: '千年目标',
+    responseMessage: '我们将尽快回复您。',
+    unexpectedError: '发生了意外错误。',
+  },
+};
