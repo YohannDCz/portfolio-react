@@ -19,13 +19,35 @@ import {
   Kanban,
   Plus,
   Settings,
-  User
+  User,
+  LucideIcon
 } from "lucide-react";
 import Link from "next/link";
 
-function StatCard({ title, value, description, icon: Icon, href, color = "primary" }) {
+// TypeScript interfaces
+type ColorType = "primary" | "green" | "blue" | "purple" | "orange";
+
+interface StatCardProps {
+  title: string;
+  value: string | number;
+  description: string;
+  icon: LucideIcon;
+  href?: string;
+  color?: ColorType;
+}
+
+interface QuickActionProps {
+  title: string;
+  description: string;
+  href: string;
+  icon: LucideIcon;
+  color?: ColorType;
+  external?: boolean;
+}
+
+function StatCard({ title, value, description, icon: Icon, href, color = "primary" }: StatCardProps): JSX.Element {
   const { isGuest } = useAdminGuest();
-  const colorClasses = {
+  const colorClasses: Record<ColorType, string> = {
     primary: "text-primary",
     green: "text-green-600",
     blue: "text-blue-600",
@@ -54,13 +76,14 @@ function StatCard({ title, value, description, icon: Icon, href, color = "primar
   );
 }
 
-function QuickAction({ title, description, href, icon: Icon, color = "primary", external = false }) {
+function QuickAction({ title, description, href, icon: Icon, color = "primary", external = false }: QuickActionProps): JSX.Element {
   const { isGuest } = useAdminGuest();
-  const colorClasses = {
+  const colorClasses: Record<ColorType, string> = {
     primary: "bg-primary text-primary-foreground hover:bg-primary/90",
     green: "bg-green-600 text-white hover:bg-green-700",
     blue: "bg-blue-600 text-white hover:bg-blue-700",
-    purple: "bg-purple-600 text-white hover:bg-purple-700"
+    purple: "bg-purple-600 text-white hover:bg-purple-700",
+    orange: "bg-orange-600 text-white hover:bg-orange-700"
   };
 
   if (isGuest) {
@@ -120,7 +143,7 @@ function QuickAction({ title, description, href, icon: Icon, color = "primary", 
   );
 }
 
-export default function AdminDashboard() {
+export default function AdminDashboard(): JSX.Element {
   const { isGuest } = useAdminGuest();
   const { projects, loading: projectsLoading } = useProjects();
   const { certifications, loading: certsLoading } = useCertifications();

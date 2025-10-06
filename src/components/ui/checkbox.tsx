@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { CheckIcon } from 'lucide-react';
 import * as React from 'react';
+import { JSX } from 'react';
 
 // =====================================
 // TYPE DEFINITIONS

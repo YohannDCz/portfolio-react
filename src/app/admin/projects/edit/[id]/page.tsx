@@ -11,30 +11,64 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useAdminGuest } from "@/contexts/AdminGuestContext";
 import { useTranslation } from "@/hooks/useTranslation";
-import { createProject, uploadImageAndGetPublicUrl } from "@/lib/supabase";
-import { ArrowLeft, Plus, X } from "lucide-react";
+import { getProject, updateProject, uploadImageAndGetPublicUrl } from "@/lib/supabase";
+import { ArrowLeft, Loader2, Plus, X } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { JSX, useEffect, useState } from "react";
 
-const CATEGORIES = ['web', 'mobile', 'design', 'autre'];
-const TECH_TAGS = [
+// TypeScript imports et interfaces
+import type { Project } from "@/types";
+
+interface ProjectFormData {
+  external_id: string;
+  title_fr: string;
+  title_en: string;
+  title_hi: string;
+  title_ar: string;
+  description_fr: string;
+  description_en: string;
+  description_hi: string;
+  description_ar: string;
+  category: string[];
+  tags: string[];
+  stars: number;
+  link: string;
+  github_url: string;
+  figma_url: string;
+  image_url: string;
+  status: 'completed' | 'in_progress' | 'planned' | 'to_deploy';
+  featured: boolean;
+  is_mega_project: boolean;
+  stack: string;
+  priority: number;
+  sort_order: number;
+}
+
+const CATEGORIES: readonly string[] = ['web', 'mobile', 'design', 'autre'] as const;
+const TECH_TAGS: readonly string[] = [
   'React', 'Vue.js', 'Angular', 'Next.js', 'Nuxt.js',
   'Node.js', 'Express', 'PHP', 'Laravel', 'Python',
   'React Native', 'Flutter', 'Swift', 'Kotlin',
   'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Sass',
   'Tailwind CSS', 'Bootstrap', 'MongoDB', 'PostgreSQL',
   'MySQL', 'Firebase', 'Supabase', 'Docker', 'AWS'
-];
+] as const;
 
-export default function NewProject() {
+export default function EditProject(): JSX.Element {
   const { isGuest } = useAdminGuest();
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  
-  // État du formulaire
-  const [formData, setFormData] = useState({
+  const params = useParams();
+  const id: string | undefined = Array.isArray(params?.id) ? params.id[0] : params?.id;
+
+  // State variables avec typage TypeScript complet
+  const [loading, setLoading] = useState<boolean>(false);
+  const [fetchLoading, setFetchLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
+  const [project, setProject] = useState<Project | null>(null);
+
+  // État du formulaire avec typage TypeScript
+  const [formData, setFormData] = useState<ProjectFormData>({
     external_id: '',
     title_fr: '',
     title_en: '',
@@ -53,32 +87,85 @@ export default function NewProject() {
     image_url: '',
     status: 'completed',
     featured: false,
+    is_mega_project: false,
     stack: '',
     priority: 1,
     sort_order: 0
   });
 
-  const [newTag, setNewTag] = useState('');
-  const [imageFile, setImageFile] = useState(null);
+  const [newTag, setNewTag] = useState<string>('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const { translateFields, translating } = useTranslation();
 
-  const handleInputChange = (field, value) => {
+  // Récupérer le projet à éditer avec typage TypeScript
+  useEffect(() => {
+    const fetchProject = async (): Promise<void> => {
+      if (!id) {
+        setError("ID du projet manquant");
+        setFetchLoading(false);
+        return;
+      }
+      
+      setFetchLoading(true);
+      setError("");
+      
+      const result = await getProject(id);
+
+      if (result.success) {
+        setProject(result.data || null);
+        setFormData({
+          external_id: result.data?.external_id || '',
+          title_fr: result.data?.title_fr || '',
+          title_en: result.data?.title_en || '',
+          title_hi: result.data?.title_hi || '',
+          title_ar: result.data?.title_ar || '',
+          description_fr: result.data?.description_fr || '',
+          description_en: result.data?.description_en || '',
+          description_hi: result.data?.description_hi || '',
+          description_ar: result.data?.description_ar || '',
+          category: result.data?.category || [],
+          tags: result.data?.tags || [],
+          stars: result.data?.stars || 0,
+          link: result.data?.link || '',
+          github_url: result.data?.github_url || '',
+          figma_url: result.data?.figma_url || '',
+          image_url: result.data?.image_url || '',
+          status: result.data?.status || 'completed',
+          featured: result.data?.featured || false,
+          is_mega_project: result.data?.is_mega_project || false,
+          stack: result.data?.stack || '',
+          priority: result.data?.priority || 1,
+          sort_order: result.data?.sort_order || 0
+        });
+      } else {
+        setError(`Erreur lors du chargement du projet: ${result.error}`);
+      }
+
+      setFetchLoading(false);
+    };
+
+    if (id) {
+      fetchProject();
+    }
+  }, [id]);
+
+  const handleInputChange = (field: keyof ProjectFormData, value: any): void => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
 
-  const handleCategoryChange = (category, checked) => {
+  const handleCategoryChange = (category: string, checked: boolean): void => {
     setFormData(prev => ({
       ...prev,
-      category: checked 
+      category: checked
         ? [...prev.category, category]
         : prev.category.filter(c => c !== category)
     }));
   };
 
-  const addTag = (tag) => {
+  const addTag = (tag: string): void => {
     if (tag && !formData.tags.includes(tag)) {
       setFormData(prev => ({
         ...prev,
@@ -88,14 +175,14 @@ export default function NewProject() {
     setNewTag('');
   };
 
-  const removeTag = (tagToRemove) => {
+  const removeTag = (tagToRemove: string): void => {
     setFormData(prev => ({
       ...prev,
       tags: prev.tags.filter(tag => tag !== tagToRemove)
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -113,24 +200,29 @@ export default function NewProject() {
       return;
     }
 
-    // Upload image file if provided
     let payload = { ...formData };
     if (imageFile) {
       const upload = await uploadImageAndGetPublicUrl({ bucket: 'images', folder: 'projects', file: imageFile });
       if (!upload.success) {
-        setError(upload.error);
+        setError(upload.error || "Erreur lors de l'upload de l'image");
         setLoading(false);
         return;
       }
-      payload.image_url = upload.url;
+      payload.image_url = upload.url || '';
     }
 
-    const result = await createProject(payload);
+    if (!id) {
+      setError("ID du projet manquant");
+      setLoading(false);
+      return;
+    }
+
+    const result = await updateProject(id, payload);
 
     if (result.success) {
       router.push('/admin/projects');
     } else {
-      setError(result.error);
+      setError(result.error || "Erreur lors de la mise à jour du projet");
     }
 
     setLoading(false);
@@ -156,13 +248,77 @@ export default function NewProject() {
       }
     ]
 
-    const result = await translateFields(formData, setFormData, fieldMappings, true)
-    
+    const result = await translateFields(
+      formData as Record<string, any>, 
+      setFormData as React.Dispatch<React.SetStateAction<Record<string, any>>>, 
+      fieldMappings, 
+      true
+    )
+
     if (result.success) {
-      console.log(`✅ Translated ${result.translated} fields - Page will refresh soon!`)
+      // console.log(`✅ Translated ${result.translated} fields - Page will refresh soon!`)
     } else if (result.error) {
-      console.error('❌ Translation failed:', result.error)
+      // console.error('❌ Translation failed:', result.error)
     }
+  }
+
+  if (fetchLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Link href="/admin/projects">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Retour
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Modifier le Projet</h1>
+            <p className="text-gray-600">Chargement des données...</p>
+          </div>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i}>
+              <CardHeader>
+                <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {[...Array(3)].map((_, j) => (
+                    <div key={j} className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !project) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Link href="/admin/projects">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Retour
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Modifier le Projet</h1>
+            <p className="text-gray-600">Erreur lors du chargement</p>
+          </div>
+        </div>
+
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      </div>
+    );
   }
 
   return (
@@ -176,8 +332,10 @@ export default function NewProject() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Nouveau Projet</h1>
-          <p className="text-gray-600">Ajoutez un nouveau projet à votre portfolio</p>
+          <h1 className="text-3xl font-bold text-gray-900">Modifier le Projet</h1>
+          <p className="text-gray-600">
+            Modifiez les informations de &ldquo;{project?.title_fr}&rdquo;
+          </p>
         </div>
       </div>
 
@@ -199,7 +357,7 @@ export default function NewProject() {
                 </CardDescription>
                 <div className="mt-2">
                   <Button type="button" variant="outline" size="sm" onClick={handleAutoTranslate} disabled={translating}>
-                    {translating ? 'Traduction...' : '🌍 Traduire automatiquement'}
+                    {translating ? 'Traduction...' : 'Traduire automatiquement'}
                   </Button>
                 </div>
               </CardHeader>
@@ -243,6 +401,7 @@ export default function NewProject() {
                     value={formData.title_hi}
                     onChange={(e) => handleInputChange('title_hi', e.target.value)}
                     placeholder="Nom du projet en hindi"
+                    disabled
                   />
                 </div>
 
@@ -253,6 +412,7 @@ export default function NewProject() {
                     value={formData.title_ar}
                     onChange={(e) => handleInputChange('title_ar', e.target.value)}
                     placeholder="Nom du projet en arabe"
+                    disabled
                   />
                 </div>
               </CardContent>
@@ -295,8 +455,9 @@ export default function NewProject() {
                     id="description_hi"
                     value={formData.description_hi}
                     onChange={(e) => handleInputChange('description_hi', e.target.value)}
-                    placeholder="प्रोजेक्ट का विवरण हिंदी में..."
+                    placeholder="Description du projet en hindi"
                     rows={3}
+                    disabled
                   />
                 </div>
 
@@ -306,8 +467,9 @@ export default function NewProject() {
                     id="description_ar"
                     value={formData.description_ar}
                     onChange={(e) => handleInputChange('description_ar', e.target.value)}
-                    placeholder="وصف المشروع باللغة العربية..."
+                    placeholder="Description du projet en arabe"
                     rows={3}
+                    disabled
                   />
                 </div>
               </CardContent>
@@ -332,7 +494,7 @@ export default function NewProject() {
                       <Checkbox
                         id={category}
                         checked={formData.category.includes(category)}
-                        onCheckedChange={(checked) => handleCategoryChange(category, checked)}
+                        onCheckedChange={(checked) => handleCategoryChange(category, Boolean(checked))}
                       />
                       <Label htmlFor={category} className="capitalize">
                         {category}
@@ -376,7 +538,7 @@ export default function NewProject() {
                     </Button>
                   </div>
                 </div>
-                
+
                 {/* Tags sélectionnés */}
                 <div className="flex flex-wrap gap-2">
                   {formData.tags.map((tag) => (
@@ -422,7 +584,7 @@ export default function NewProject() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="stars">Nombre d'étoiles</Label>
+                  <Label htmlFor="stars">Nombre d&rsquo;étoiles</Label>
                   <Input
                     id="stars"
                     type="number"
@@ -554,7 +716,14 @@ export default function NewProject() {
                   </Button>
                 </Link>
                 <Button type="submit" disabled={loading || isGuest}>
-                  {loading ? "Création..." : "Créer le projet"}
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Mise à jour...
+                    </>
+                  ) : (
+                    "Mettre à jour le projet"
+                  )}
                 </Button>
               </div>
             </CardContent>
@@ -564,4 +733,6 @@ export default function NewProject() {
     </div>
   );
 }
+
+
 

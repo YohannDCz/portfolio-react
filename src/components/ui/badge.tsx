@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import * as React from 'react';
+import { JSX } from 'react';
 
 // =====================================
 // TYPE DEFINITIONS

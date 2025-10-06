@@ -16,21 +16,28 @@ export interface Profile {
   id: string;
   full_name_fr?: string;
   full_name_en?: string;
+  name?: string; // Nom simplifié
   title_fr?: string;
   title_en?: string;
   bio_fr?: string;
   bio_en?: string;
   location_fr?: string;
   location_en?: string;
+  location?: string; // Localisation simplifiée
   email?: string;
   github_url?: string;
   linkedin_url?: string;
   twitter_url?: string;
   profile_image?: string;
+  avatar_url?: string; // URL d'avatar
+  cover_url?: string; // URL de couverture
   phone?: string;
   is_available?: boolean;
   availability_text_fr?: string;
   availability_text_en?: string;
+  years_experience?: number; // Années d'expérience
+  satisfaction_rate?: number; // Taux de satisfaction
+  spoken_languages?: string[]; // Langues parlées
   created_at?: string;
   updated_at?: string;
 }
@@ -40,20 +47,34 @@ export interface Profile {
 // =====================================
 export interface Project {
   id: string;
+  external_id?: string; // ID externe
   title_fr: string;
   title_en?: string;
+  title_hi?: string; // Titre en hindi
+  title_ar?: string; // Titre en arabe
   description_fr: string;
   description_en?: string;
+  description_hi?: string; // Description en hindi
+  description_ar?: string; // Description en arabe
   technologies: string[];
+  tags?: string[]; // Tags du projet
   demo_url?: string;
   repo_url?: string;
+  link?: string; // Lien vers le projet
+  github_url?: string; // URL GitHub
+  live_url?: string; // URL de démo en direct
   image?: string;
+  image_url?: string; // URL d'image alternative
   status: 'completed' | 'in_progress' | 'planned' | 'to_deploy';
   is_featured?: boolean;
+  featured?: boolean; // Alias pour is_featured
   is_mega_project?: boolean;
   category?: string[];
   stars?: number;
   figma_url?: string;
+  stack?: string; // Stack technique
+  priority?: number; // Priorité
+  sort_order?: number; // Ordre de tri
   created_at?: string;
   updated_at?: string;
 }
@@ -79,12 +100,15 @@ export interface Certification {
   id: string;
   title_fr: string;
   title_en?: string;
+  title?: string; // Titre simplifié
   organization_fr: string;
   organization_en?: string;
+  provider?: string; // Alias pour organization
   description_fr?: string;
   description_en?: string;
   image?: string;
   certificate_url?: string;
+  certificate_urls?: Record<string, string>; // Multiples URLs de certificats
   status: 'completed' | 'in_progress' | 'planned' | 'to_deploy';
   display_order?: number;
   created_at?: string;
@@ -158,6 +182,26 @@ export interface KanbanTaskComment {
   author: string;
   content: string;
   created_at?: string;
+}
+
+// =====================================
+// CONTACT FORM TYPES
+// =====================================
+export interface ContactFormData {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  language: string;
+}
+
+// =====================================
+// NOTIFICATION TYPES
+// =====================================
+export interface NotificationData {
+  type?: 'success' | 'error' | 'warning' | 'info';
+  title?: string;
+  message?: string;
 }
 
 // =====================================
@@ -249,7 +293,7 @@ export interface UseProjectProgressResult {
 // =====================================
 // UTILITY TYPES
 // =====================================
-export type Language = 'fr' | 'en';
+export type Language = 'fr' | 'en' | 'ar' | 'hi' | 'zh';
 
 export interface LocalizedField {
   fr: string;

@@ -12,8 +12,8 @@ import { CheckCircle, Clock, Eye, Mail, MessageSquare, Reply, Trash2, User } fro
 import { useEffect, useState } from "react";
 
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
 const statusConfig = {
@@ -24,16 +24,27 @@ const statusConfig = {
 
 const languageConfig = {
   fr: '🇫🇷 Français',
-  en: '🇬🇧 English', 
+  en: '🇬🇧 English',
   hi: '🇮🇳 हिंदी',
   ar: '🇸🇦 العربية'
 };
 
+interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
+  language: string;
+  status: 'new' | 'read' | 'replied';
+  created_at: string;
+}
+
 export default function ContactMessagesPage() {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedMessage, setSelectedMessage] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [languageFilter, setLanguageFilter] = useState('all');
 
@@ -57,7 +68,7 @@ export default function ContactMessagesPage() {
 
       if (error) throw error;
       setMessages(data || []);
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
@@ -69,7 +80,7 @@ export default function ContactMessagesPage() {
   }, [statusFilter, languageFilter]);
 
   // Marquer comme lu
-  const markAsRead = async (messageId) => {
+  const markAsRead = async (messageId: string) => {
     try {
       const { error } = await supabase
         .from('contact_messages')
@@ -77,14 +88,14 @@ export default function ContactMessagesPage() {
         .eq('id', messageId);
 
       if (error) throw error;
-      
+
       // Mettre à jour l'état local
-      setMessages(prev => prev.map(msg => 
+      setMessages(prev => prev.map(msg =>
         msg.id === messageId ? { ...msg, status: 'read' } : msg
       ));
 
       if (selectedMessage?.id === messageId) {
-        setSelectedMessage(prev => ({ ...prev, status: 'read' }));
+        setSelectedMessage(prev => prev ? { ...prev, status: 'read' } : null);
       }
     } catch (err) {
       console.error('Erreur lors du marquage comme lu:', err);
@@ -92,7 +103,7 @@ export default function ContactMessagesPage() {
   };
 
   // Marquer comme répondu
-  const markAsReplied = async (messageId) => {
+  const markAsReplied = async (messageId: string) => {
     try {
       const { error } = await supabase
         .from('contact_messages')
@@ -100,13 +111,13 @@ export default function ContactMessagesPage() {
         .eq('id', messageId);
 
       if (error) throw error;
-      
-      setMessages(prev => prev.map(msg => 
+
+      setMessages(prev => prev.map(msg =>
         msg.id === messageId ? { ...msg, status: 'replied' } : msg
       ));
 
       if (selectedMessage?.id === messageId) {
-        setSelectedMessage(prev => ({ ...prev, status: 'replied' }));
+        setSelectedMessage(prev => prev ? { ...prev, status: 'replied' } : null);
       }
     } catch (err) {
       console.error('Erreur lors du marquage comme répondu:', err);
@@ -114,7 +125,7 @@ export default function ContactMessagesPage() {
   };
 
   // Supprimer un message
-  const deleteMessage = async (messageId) => {
+  const deleteMessage = async (messageId: string) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce message ?')) {
       return;
     }
@@ -126,9 +137,9 @@ export default function ContactMessagesPage() {
         .eq('id', messageId);
 
       if (error) throw error;
-      
+
       setMessages(prev => prev.filter(msg => msg.id !== messageId));
-      
+
       if (selectedMessage?.id === messageId) {
         setSelectedMessage(null);
       }
@@ -137,7 +148,7 @@ export default function ContactMessagesPage() {
     }
   };
 
-  const handleMessageClick = (message) => {
+  const handleMessageClick = (message: ContactMessage) => {
     setSelectedMessage(message);
     if (message.status === 'new') {
       markAsRead(message.id);
@@ -207,7 +218,7 @@ export default function ContactMessagesPage() {
           <h2 className="text-xl font-semibold mb-4">
             Messages ({messages.length})
           </h2>
-          
+
           {messages.length === 0 ? (
             <Card>
               <CardContent className="p-6 text-center text-muted-foreground">
@@ -219,11 +230,10 @@ export default function ContactMessagesPage() {
             messages.map((message) => {
               const StatusIcon = statusConfig[message.status].icon;
               return (
-                <Card 
-                  key={message.id} 
-                  className={`cursor-pointer transition-all hover:shadow-md ${
-                    selectedMessage?.id === message.id ? 'ring-2 ring-primary' : ''
-                  }`}
+                <Card
+                  key={message.id}
+                  className={`cursor-pointer transition-all hover:shadow-md ${selectedMessage?.id === message.id ? 'ring-2 ring-primary' : ''
+                    }`}
                   onClick={() => handleMessageClick(message)}
                 >
                   <CardHeader className="pb-3">
@@ -243,7 +253,7 @@ export default function ContactMessagesPage() {
                           {statusConfig[message.status].label}
                         </Badge>
                         <span className="text-xs text-muted-foreground">
-                          {languageConfig[message.language] || message.language}
+                          {languageConfig[message.language as keyof typeof languageConfig] || message.language}
                         </span>
                       </div>
                     </div>
@@ -258,9 +268,9 @@ export default function ContactMessagesPage() {
                       {message.message}
                     </p>
                     <p className="text-xs text-muted-foreground mt-2">
-                      {formatDistanceToNow(new Date(message.created_at), { 
-                        addSuffix: true, 
-                        locale: fr 
+                      {formatDistanceToNow(new Date(message.created_at), {
+                        addSuffix: true,
+                        locale: fr
                       })}
                     </p>
                   </CardContent>
@@ -290,12 +300,12 @@ export default function ContactMessagesPage() {
                       {statusConfig[selectedMessage.status].label}
                     </Badge>
                     <span className="text-sm text-muted-foreground">
-                      {languageConfig[selectedMessage.language] || selectedMessage.language}
+                      {languageConfig[selectedMessage.language as keyof typeof languageConfig] || selectedMessage.language}
                     </span>
                   </div>
                 </div>
               </CardHeader>
-              
+
               <CardContent className="space-y-6">
                 {/* Informations du message */}
                 <div>
@@ -303,7 +313,7 @@ export default function ContactMessagesPage() {
                     <Clock className="h-4 w-4" />
                     Reçu le {format(new Date(selectedMessage.created_at), 'PPP à HH:mm', { locale: fr })}
                   </div>
-                  
+
                   {selectedMessage.subject && (
                     <div className="mb-4">
                       <h3 className="font-semibold mb-2">Sujet:</h3>
@@ -312,7 +322,7 @@ export default function ContactMessagesPage() {
                       </p>
                     </div>
                   )}
-                  
+
                   <div>
                     <h3 className="font-semibold mb-2">Message:</h3>
                     <div className="text-sm bg-muted p-4 rounded-lg whitespace-pre-wrap">
@@ -331,9 +341,9 @@ export default function ContactMessagesPage() {
                       Répondre par email
                     </Button>
                   </a>
-                  
+
                   {selectedMessage.status !== 'replied' && (
-                    <Button 
+                    <Button
                       variant="outline"
                       onClick={() => markAsReplied(selectedMessage.id)}
                       className="flex items-center gap-2"
@@ -342,8 +352,8 @@ export default function ContactMessagesPage() {
                       Marquer comme répondu
                     </Button>
                   )}
-                  
-                  <Button 
+
+                  <Button
                     variant="destructive"
                     onClick={() => deleteMessage(selectedMessage.id)}
                     className="flex items-center gap-2"

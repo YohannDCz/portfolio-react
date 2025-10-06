@@ -5,25 +5,38 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AdminGuestProvider, useAdminGuest } from "@/contexts/AdminGuestContext";
 import { useAuth } from "@/lib/supabase";
 import {
-    Award,
-    ExternalLink,
-    Eye,
-    FolderOpen,
-    Globe,
-    Home,
-    Kanban,
-    LayoutDashboard,
-    Loader2,
-    LogOut,
-    Mail,
-    Settings,
-    User
+  Award,
+  ExternalLink,
+  Eye,
+  FolderOpen,
+  Globe,
+  Home,
+  Kanban,
+  LayoutDashboard,
+  Loader2,
+  LogOut,
+  LucideIcon,
+  Mail,
+  Settings,
+  User
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { JSX, useEffect } from "react";
 
-const navigation = [
+// TypeScript interfaces
+interface NavigationItem {
+  name: string;
+  href: string;
+  icon: LucideIcon;
+  external?: boolean;
+}
+
+interface AdminLayoutProps {
+  children: React.ReactNode;
+}
+
+const navigation: NavigationItem[] = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { name: 'Projets', href: '/admin/projects', icon: FolderOpen },
   { name: 'Certifications', href: '/admin/certifications', icon: Award },
@@ -34,7 +47,7 @@ const navigation = [
   { name: 'Kanban', href: 'https://github.com/YohannDCz/kanban-react', icon: Kanban, external: true }
 ];
 
-function AdminLayoutContent({ children }) {
+function AdminLayoutContent({ children }: AdminLayoutProps): JSX.Element {
   const { user, loading, signOut, isAuthenticated } = useAuth();
   const { isGuest, logoutGuest, transitionToAdmin } = useAdminGuest();
   const router = useRouter();
@@ -44,14 +57,14 @@ function AdminLayoutContent({ children }) {
     if (!loading && !isAuthenticated && !isGuest && pathname !== '/admin') {
       router.push('/admin');
     }
-    
+
     // Handle visitor to admin transition
     if (!loading && isAuthenticated && isGuest) {
       transitionToAdmin();
     }
   }, [loading, isAuthenticated, isGuest, router, pathname, transitionToAdmin]);
 
-  const handleSignOut = async () => {
+  const handleSignOut = async (): Promise<void> => {
     if (isGuest) {
       logoutGuest();
     } else {
@@ -68,9 +81,9 @@ function AdminLayoutContent({ children }) {
     );
   }
 
-  // Page de connexion
+  // Page de connexion - Return login page when not authenticated
   if ((!isAuthenticated && !isGuest) || pathname === '/admin') {
-    return children;
+    return <>{children}</>;
   }
 
   return (
@@ -85,16 +98,16 @@ function AdminLayoutContent({ children }) {
             </div>
             <div className="flex-1">
               <h1 className="text-lg font-semibold">Admin Portfolio</h1>
-              <p className="text-xs text-gray-500">Panel d'administration</p>
+              <p className="text-xs text-gray-500">Panel d&apos;administration</p>
             </div>
           </div>
-          
+
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6">
             <ul className="space-y-2">
               {navigation.map((item) => {
                 const isActive = pathname === item.href && !item.external;
-                
+
                 if (item.external) {
                   return (
                     <li key={item.name}>
@@ -111,15 +124,15 @@ function AdminLayoutContent({ children }) {
                     </li>
                   );
                 }
-                
+
                 return (
                   <li key={item.name}>
                     <Link
                       href={item.href}
                       className={`
                         flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                        ${isActive 
-                          ? 'bg-primary text-primary-foreground' 
+                        ${isActive
+                          ? 'bg-primary text-primary-foreground'
                           : 'text-gray-700 hover:bg-gray-100'
                         }
                       `}
@@ -195,7 +208,7 @@ function AdminLayoutContent({ children }) {
   );
 }
 
-export default function AdminLayout({ children }) {
+export default function AdminLayout({ children }: AdminLayoutProps): JSX.Element {
   return (
     <AdminGuestProvider>
       <AdminLayoutContent>{children}</AdminLayoutContent>

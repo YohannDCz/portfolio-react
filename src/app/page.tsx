@@ -20,7 +20,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, ExternalLink, Github, Globe, Linkedin, Mail, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { JSX, useCallback, useEffect, useMemo, useState } from 'react';
+
 // Import des hooks Supabase
 import {
   getLocalizedText,
@@ -51,19 +52,31 @@ import Notification from '@/components/Notification';
 import { useGlobalLoading } from '@/hooks/useGlobalLoading';
 
 import { TRANSLATIONS } from '@/app/assets/translations';
+
+// TypeScript imports
+import type {
+  ContactFormData,
+  NotificationData
+} from '@/types';
 // ——————————————————————————————————————————————
 // Thème (clair/sombre)
 // ——————————————————————————————————————————————
-function useTheme() {
+interface ThemeHook {
+  dark: boolean;
+  setDark: (dark: boolean) => void;
+}
+
+function useTheme(): ThemeHook {
   const prefersDark =
     typeof window !== 'undefined' &&
     window.matchMedia &&
     window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const [dark, setDark] = useState(prefersDark);
+  const [dark, setDark] = useState<boolean>(prefersDark);
+
   useEffect(() => {
     const root = document.documentElement;
 
-    // Désactiver temporairement les transitions
+    // Désactiver temporairement les transitions [[memory:7903260]]
     root.classList.add('disable-transitions');
 
     if (dark) root.classList.add('dark');
@@ -74,13 +87,14 @@ function useTheme() {
       root.classList.remove('disable-transitions');
     }, 1);
   }, [dark]);
+
   return { dark, setDark };
 }
 
 // ——————————————————————————————————————————————
 // Composant Loading
 // ——————————————————————————————————————————————
-function LoadingSpinner() {
+function LoadingSpinner(): JSX.Element {
   return (
     <div className="flex items-center justify-center p-8">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -88,7 +102,11 @@ function LoadingSpinner() {
   );
 }
 
-function ErrorMessage({ message }) {
+interface ErrorMessageProps {
+  message: string;
+}
+
+function ErrorMessage({ message }: ErrorMessageProps): JSX.Element {
   return (
     <div className="flex items-center justify-center p-8 text-red-500">
       <p>Erreur: {message}</p>
@@ -99,31 +117,33 @@ function ErrorMessage({ message }) {
 // ——————————————————————————————————————————————
 // Composant principal
 // ——————————————————————————————————————————————
-function PortfolioContent() {
+function PortfolioContent(): JSX.Element {
   const { dark, setDark } = useTheme();
   const { currentLang, isRTL } = useLanguage();
   const { getDirectionalClass, getFlexDirection, getTextAlign } = useDirectionalClasses();
   const { isAuthenticated } = useAuth();
   const { isGuest } = useAdminGuest();
-  const isAdminMode = isAuthenticated || isGuest;
-  const [query, setQuery] = useState('');
-  const [tab, setTab] = useState('tous');
-  const [sort, setSort] = useState('popular');
-  const [sendingMessage, setSendingMessage] = useState(false);
-  const [messageStatus, setMessageStatus] = useState(null);
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationData, setNotificationData] = useState({});
-  const [activeSection, setActiveSection] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [currentCertPage, setCurrentCertPage] = useState(1);
+  const isAdminMode: boolean = isAuthenticated || isGuest;
+
+  // State variables avec typage TypeScript
+  const [query, setQuery] = useState<string>('');
+  const [tab, setTab] = useState<string>('tous');
+  const [sort, setSort] = useState<string>('popular');
+  const [sendingMessage, setSendingMessage] = useState<boolean>(false);
+  const [messageStatus, setMessageStatus] = useState<string | null>(null);
+  const [showNotification, setShowNotification] = useState<boolean>(false);
+  const [notificationData, setNotificationData] = useState<NotificationData>({});
+  const [activeSection, setActiveSection] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [currentCertPage, setCurrentCertPage] = useState<number>(1);
 
   const t = TRANSLATIONS[currentLang];
 
   // Hook pour détecter la taille d'écran
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
   useEffect(() => {
-    const checkMobile = () => {
+    const checkMobile = (): void => {
       setIsMobile(window.innerWidth < 1024); // lg breakpoint
     };
 
@@ -163,23 +183,23 @@ function PortfolioContent() {
   ]);
 
   // Scroll spy pour navigation active
-  const handleScroll = useCallback(() => {
-    const scrollPosition = window.scrollY + 150; // Base offset for all sections
+  const handleScroll = useCallback((): void => {
+    const scrollPosition: number = window.scrollY + 150; // Base offset for all sections
 
     // Get all section elements with their positions
-    const projetsEl = document.getElementById('projets');
-    const cvEl = document.getElementById('cv');
-    const aproposEl = document.getElementById('apropos');
-    const contactEl = document.getElementById('contact');
+    const projetsEl: HTMLElement | null = document.getElementById('projets');
+    const cvEl: HTMLElement | null = document.getElementById('cv');
+    const aproposEl: HTMLElement | null = document.getElementById('apropos');
+    const contactEl: HTMLElement | null = document.getElementById('contact');
 
     // Debug logging (remove in production)
     if (aproposEl) {
-      console.log('Scroll Debug:', {
-        scrollPosition: scrollPosition - 150,
-        aproposTop: aproposEl.offsetTop,
-        aproposTrigger: aproposEl.offsetTop - 100,
-        shouldTriggerContact: scrollPosition >= aproposEl.offsetTop - 100,
-      });
+      // console.log('Scroll Debug:', {
+      //  scrollPosition: scrollPosition - 150,
+      //  aproposTop: aproposEl.offsetTop,
+      //  aproposTrigger: aproposEl.offsetTop - 100,
+      //  shouldTriggerContact: scrollPosition >= aproposEl.offsetTop - 100,
+      // });
     }
 
     // Determine which section is currently active
@@ -222,7 +242,7 @@ function PortfolioContent() {
     }
 
     if (sort === 'popular') {
-      items = items.sort((a, b) => b.stars - a.stars);
+      items = items.sort((a, b) => (b.stars || 0) - (a.stars || 0));
     }
     if (sort === 'alpha') {
       items = items.sort((a, b) => {
@@ -285,17 +305,17 @@ function PortfolioContent() {
   }, [certifications, certificationsPerPage]);
 
   // Gestion du formulaire de contact
-  const handleContactSubmit = async (e) => {
+  const handleContactSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setSendingMessage(true);
     setMessageStatus(null);
 
-    const formData = new FormData(e.target);
-    const messageData = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      subject: formData.get('subject') || '',
-      message: formData.get('message'),
+    const formData = new FormData(e.currentTarget);
+    const messageData: ContactFormData = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      subject: (formData.get('subject') as string) || '',
+      message: formData.get('message') as string,
       language: currentLang,
     };
 
@@ -309,7 +329,7 @@ function PortfolioContent() {
         message: t.responseMessage || 'Nous vous répondrons dans les plus brefs délais.',
       });
       setShowNotification(true);
-      e.target.reset();
+      (e.target as HTMLFormElement).reset();
     } else {
       setMessageStatus('error');
       setNotificationData({
@@ -373,25 +393,22 @@ function PortfolioContent() {
           >
             <a
               href="#projets"
-              className={`hover:opacity-80 transition-all ${
-                activeSection === 'projets' ? 'font-bold text-primary' : ''
-              }`}
+              className={`hover:opacity-80 transition-all ${activeSection === 'projets' ? 'font-bold text-primary' : ''
+                }`}
             >
               {t.projects}
             </a>
             <a
               href="#cv"
-              className={`hover:opacity-80 transition-all ${
-                activeSection === 'cv' ? 'font-bold text-primary' : ''
-              }`}
+              className={`hover:opacity-80 transition-all ${activeSection === 'cv' ? 'font-bold text-primary' : ''
+                }`}
             >
               {t.cv}
             </a>
             <a
               href="#contact"
-              className={`hover:opacity-80 transition-all ${
-                activeSection === 'contact' ? 'font-bold text-primary' : ''
-              }`}
+              className={`hover:opacity-80 transition-all ${activeSection === 'contact' ? 'font-bold text-primary' : ''
+                }`}
             >
               {t.contact}
             </a>
@@ -603,7 +620,7 @@ function PortfolioContent() {
                 {allProjects.filter((p) => p.status !== 'to_deploy').length === 1
                   ? 'résultat trouvé'
                   : 'résultats trouvés'}{' '}
-                pour "{query}"
+                pour &ldquo;{query}&rdquo;
               </p>
             </div>
             {projectsLoading ? (
@@ -626,7 +643,7 @@ function PortfolioContent() {
               </div>
             ) : (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">Aucun projet trouvé pour "{query}"</p>
+                <p className="text-muted-foreground">Aucun projet trouvé pour &ldquo;{query}&rdquo;</p>
               </div>
             )}
           </div>
@@ -838,15 +855,14 @@ function PortfolioContent() {
 
                     <div className="absolute top-4 right-4">
                       <Badge
-                        className={`text-xs ${
-                          c.status === 'completed'
-                            ? 'bg-green-100 text-green-800'
-                            : c.status === 'in_progress'
-                              ? 'bg-gray-200 text-gray-800 dark:bg-zinc-700 dark:text-zinc-200'
-                              : c.status === 'to_deploy'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-gray-100 text-gray-700'
-                        }`}
+                        className={`text-xs ${c.status === 'completed'
+                          ? 'bg-green-100 text-green-800'
+                          : c.status === 'in_progress'
+                            ? 'bg-gray-200 text-gray-800 dark:bg-zinc-700 dark:text-zinc-200'
+                            : c.status === 'to_deploy'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-700'
+                          }`}
                       >
                         {c.status === 'completed'
                           ? '✅'
@@ -1103,9 +1119,9 @@ function PortfolioContent() {
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <a href="/" className="hover:text-primary transition-colors">
+              <Link href="/" className="hover:text-primary transition-colors">
                 Voir le dépot GitHub
-              </a>
+              </Link>
               <div className="flex items-center gap-3">
                 <svg viewBox="0 0 24 24" className="w-5 h-5 text-blue-500" fill="currentColor">
                   <path d="M14.23 12.004a2.236 2.236 0 0 1-2.235 2.236 2.236 2.236 0 0 1-2.236-2.236 2.236 2.236 0 0 1 2.235-2.236 2.236 2.236 0 0 1 2.236 2.236zm2.648-10.69c-1.346 0-3.107.96-4.888 2.622-1.78-1.653-3.542-2.602-4.887-2.602-.41 0-.783.093-1.106.278-1.375.793-1.683 3.264-.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03-.704 3.113-.39 5.588.988 6.38.32.187.69.275 1.102.275 1.345 0 3.107-.96 4.888-2.624 1.78 1.654 3.542 2.603 4.887 2.603.41 0 .783-.09 1.106-.275 1.374-.792 1.683-3.263.973-6.365C22.02 15.096 24 13.59 24 12.004c0-1.59-1.99-3.097-5.043-4.032.704-3.11.39-5.587-.988-6.38-.318-.184-.688-.277-1.092-.278zm-.005 1.09v.006c.225 0 .406.044.558.127.666.382.955 1.835.73 3.704-.054.46-.142.945-.25 1.44-.96-.236-2.006-.417-3.107-.534-.66-.905-1.345-1.727-2.035-2.447 1.592-1.48 3.087-2.292 4.105-2.295zm-9.77.02c1.012 0 2.514.808 4.11 2.28-.686.72-1.37 1.537-2.02 2.442-1.107.117-2.154.298-3.113.538-.112-.49-.195-.964-.254-1.42-.23-1.868.054-3.32.714-3.707.19-.09.4-.127.563-.132zm4.882 3.05c.455.468.91.992 1.36 1.564-.44-.02-.89-.034-1.36-.034-.47 0-.92.014-1.36.034.44-.572.895-1.096 1.36-1.564zM12 8.1c.74 0 1.477.034 2.202.093.406.582.802 1.203 1.183 1.86.372.64.71 1.29 1.018 1.946-.308.655-.646 1.31-1.013 1.95-.38.66-.773 1.288-1.18 1.87-.728.063-1.466.098-2.21.098-.74 0-1.477-.035-2.202-.093-.406-.582-.802-1.204-1.183-1.86-.372-.64-.71-1.29-1.018-1.946.303-.657.646-1.313 1.013-1.954.38-.66.773-1.286 1.18-1.86.728-.064 1.466-.098 2.21-.098zm-3.635.254c-.24.377-.48.763-.704 1.16-.225.39-.435.782-.635 1.174-.265-.656-.49-1.31-.676-1.947.64-.15 1.315-.283 2.015-.386zm7.26 0c.695.103 1.365.23 2.006.387-.18.632-.405 1.282-.66 1.933-.2-.39-.41-.783-.64-1.174-.225-.392-.465-.774-.705-1.146zm3.063.675c.484.15.944.317 1.375.498 1.732.74 2.852 1.708 2.852 2.476-.005.768-1.125 1.74-2.857 2.475-.42.18-.88.342-1.355.493-.28-.958-.646-1.956-1.1-2.98.45-1.017.81-2.01 1.085-2.964zm-13.395.004c.278.96.645 1.957 1.1 2.98-.45 1.017-.812 2.01-1.086 2.964-.484-.15-.944-.318-1.37-.5-1.732-.737-2.852-1.706-2.852-2.474 0-.768 1.12-1.742 2.852-2.476.42-.18.88-.342 1.356-.494zm11.678 4.28c.265.657.49 1.312.676 1.948-.64.157-1.316.29-2.016.39.24-.375.48-.762.705-1.158.225-.39.435-.788.636-1.18zm-9.945.02c.2.392.41.783.64 1.175.23.39.465.772.705 1.143-.695-.102-1.365-.23-2.006-.386.18-.63.406-1.282.66-1.933zM17.92 16.32c.112.493.2.968.254 1.423.23 1.868-.054 3.32-.714 3.708-.147.09-.338.128-.563.128-1.012 0-2.514-.807-4.11-2.28.686-.72 1.37-1.536 2.02-2.44 1.107-.118 2.154-.3 3.113-.54zm-11.83.01c.96.234 2.006.415 3.107.532.66.905 1.345 1.727 2.035 2.446-1.595 1.483-3.092 2.295-4.11 2.295-.22-.005-.406-.05-.553-.132-.666-.38-.955-1.834-.73-3.703.054-.46.142-.944.25-1.438zm4.56.64c.44.02.89.034 1.36.034.47 0 .92-.014 1.36-.034-.44.572-.895 1.095-1.36 1.563-.455-.468-.91-.991-1.36-1.563z" />
@@ -1139,7 +1155,7 @@ function PortfolioContent() {
 }
 
 // Composant principal avec providers
-export default function Portfolio() {
+export default function Portfolio(): JSX.Element {
   return (
     <AdminGuestProvider>
       <PortfolioContent />
@@ -1150,7 +1166,12 @@ export default function Portfolio() {
 // ——————————————————————————————————————————————
 // Sous‑composants
 // ——————————————————————————————————————————————
-function Stat({ label, value }) {
+interface StatProps {
+  label: string;
+  value: string | number;
+}
+
+function Stat({ label, value }: StatProps): JSX.Element {
   return (
     <div className="p-4 rounded-xl bg-muted/50 text-center sm:text-left">
       <div className="text-2xl font-semibold leading-none">{value}</div>
@@ -1159,7 +1180,13 @@ function Stat({ label, value }) {
   );
 }
 
-function SocialLink({ href, icon, label }) {
+interface SocialLinkProps {
+  href?: string | null;
+  icon: React.ReactNode;
+  label: string;
+}
+
+function SocialLink({ href, icon, label }: SocialLinkProps): JSX.Element | null {
   if (!href) return null;
 
   return (

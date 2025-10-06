@@ -37,16 +37,22 @@ import {
   Trash2
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { JSX, useState } from "react";
 
-export default function ProjectsAdmin() {
+// TypeScript imports
+import type { Project } from "@/types";
+
+export default function ProjectsAdmin(): JSX.Element {
   const { isGuest } = useAdminGuest();
   const { projects, loading, error } = useProjects();
   const { progressData, loading: progressLoading } = useAllProjectsProgress();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [deleteLoading, setDeleteLoading] = useState("");
-  const [deleteError, setDeleteError] = useState("");
+
+  // State variables avec typage TypeScript
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [deleteLoading, setDeleteLoading] = useState<string>("");
+  const [deleteError, setDeleteError] = useState<string>("");
+
   const { currentLang, isRTL } = useLanguage();
   const t = TRANSLATIONS[currentLang];
 
@@ -56,30 +62,32 @@ export default function ProjectsAdmin() {
   const inProgressProjects = projects?.filter(p => p.status === 'in_progress') || [];
   const featuredProjects = projects?.filter(p => p.featured) || [];
 
-  const handleDelete = async (projectId, projectTitle) => {
+  const handleDelete = async (projectId: string, projectTitle: string): Promise<void> => {
     setDeleteLoading(projectId);
     setDeleteError("");
-    
+
     const result = await deleteProject(projectId);
-    
+
     if (result.success) {
       // Recharger la page pour actualiser les données
       window.location.reload();
     } else {
-      setDeleteError(result.error);
+      setDeleteError(result.error || "Erreur lors de la suppression");
     }
-    
+
     setDeleteLoading("");
   };
 
-  // Filtrer les projets
-  const filteredProjects = projects?.filter(project => {
-    const matchesSearch = project.title_fr?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         project.title_en?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         project.description_fr?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = statusFilter === "all" || project.status === statusFilter;
-    
+  // Filtrer les projets avec typage TypeScript
+  const filteredProjects: Project[] = projects?.filter((project: Project) => {
+    const matchesSearch: boolean =
+      project.title_fr?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.title_en?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.description_fr?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      false;
+
+    const matchesStatus: boolean = statusFilter === "all" || project.status === statusFilter;
+
     return matchesSearch && matchesStatus;
   }) || [];
 
@@ -220,7 +228,7 @@ export default function ProjectsAdmin() {
               {featuredProjects.length}
             </Badge>
           </div>
-          
+
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {featuredProjects.slice(0, 6).map((project) => (
               <Card key={`featured-${project.id}`} className="border-blue-200 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-800">
@@ -235,10 +243,10 @@ export default function ProjectsAdmin() {
                       </CardTitle>
                       <div className="flex items-center gap-2 mt-1 mb-2">
                         <Badge variant={project.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
-                          {project.status === 'completed' ? 'Terminé' : 
-                           project.status === 'in_progress' ? 'En cours' : 
-                           project.status === 'to_deploy' ? 'À déployer' : 
-                           'Planifié'}
+                          {project.status === 'completed' ? 'Terminé' :
+                            project.status === 'in_progress' ? 'En cours' :
+                              project.status === 'to_deploy' ? 'À déployer' :
+                                'Planifié'}
                         </Badge>
                         {project.category && (
                           <div className="flex gap-1 flex-wrap">
@@ -280,7 +288,7 @@ export default function ProjectsAdmin() {
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Annuler</AlertDialogCancel>
-                            <AlertDialogAction 
+                            <AlertDialogAction
                               onClick={() => handleDelete(project.id, project.title_fr)}
                               disabled={deleteLoading === project.id}
                             >
@@ -317,7 +325,7 @@ export default function ProjectsAdmin() {
         </div>
       )}
 
- {/* Section Projets à déployer */}
+      {/* Section Projets à déployer */}
       {toDeployProjects.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
@@ -329,7 +337,7 @@ export default function ProjectsAdmin() {
               {toDeployProjects.length}
             </Badge>
           </div>
-          
+
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {toDeployProjects.slice(0, 6).map((project) => (
               <Card key={`to-deploy-${project.id}`} className="border-emerald-200 bg-emerald-50/50 dark:bg-emerald-900/10 dark:border-emerald-800">
@@ -358,7 +366,7 @@ export default function ProjectsAdmin() {
                     </div>
                   </div>
                 </CardHeader>
-                
+
                 <CardContent className="pt-0">
                   <div className="space-y-3">
                     {/* Catégories et tags */}
@@ -397,7 +405,7 @@ export default function ProjectsAdmin() {
               </Card>
             ))}
           </div>
-          
+
           {toDeployProjects.length > 6 && (
             <div className="text-center">
               <Link href="/admin/projects">
@@ -422,7 +430,7 @@ export default function ProjectsAdmin() {
               {inProgressProjects.length}
             </Badge>
           </div>
-          
+
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {inProgressProjects.slice(0, 6).map((project) => (
               <Card key={`in-progress-${project.id}`} className="border-orange-200 bg-orange-50/50 dark:bg-orange-900/10 dark:border-orange-800">
@@ -451,7 +459,7 @@ export default function ProjectsAdmin() {
                     </div>
                   </div>
                 </CardHeader>
-                
+
                 <CardContent className="pt-0">
                   <div className="space-y-3">
                     {/* Catégories et tags */}
@@ -483,7 +491,7 @@ export default function ProjectsAdmin() {
               </Card>
             ))}
           </div>
-          
+
           {inProgressProjects.length > 6 && (
             <div className="text-center">
               <Link href="/admin/projects">
@@ -502,131 +510,131 @@ export default function ProjectsAdmin() {
           <div className="h-6 w-1 bg-primary rounded-full"></div>
           <h2 className="text-xl font-semibold">Tous les projets</h2>
         </div>
-        
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredProjects.map((project) => (
-          <Card key={project.id} className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-2">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    {project.title_fr}
-                    {project.featured && (
-                      <Badge variant="secondary" className="text-xs">
-                        EN AVANT
-                      </Badge>
-                    )}
-                  </CardTitle>
-                  <CardDescription className="line-clamp-2 mb-2">
-                    {project.description_fr}
-                  </CardDescription>
-                </div>
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Star className="w-4 h-4" />
-                  {project.stars}
-                </div>
-              </div>
-            </CardHeader>
-            
-            <CardContent>
-              <div className="space-y-3">
-                {/* Catégories et tags */}
-                <div className="flex flex-wrap gap-1 mb-3">
-                  {project.category?.map((cat) => (
-                    <Badge key={cat} variant="outline" className="text-xs">
-                      {cat}
-                    </Badge>
-                  ))}
-                  {project.tags?.slice(0, 3).map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
-                  {project.tags?.length > 3 && (
-                    <Badge variant="secondary" className="text-xs">
-                      +{project.tags.length - 3}
-                    </Badge>
-                  )}
-                </div>
 
-                {/* Statut et Progression */}
-                <div className="space-y-2 mt-auto">
-                  <div className="flex items-center justify-between">
-                    <Badge 
-                      className={
-                        project.status === 'completed' ? 'bg-black text-white' :
-                        project.status == 'to_deploy'? 'bg-green-600 text-white' :
-                        project.status === 'in_progress' ? 'bg-orange-600 text-white dark:text-white' :
-                        'bg-gray-200 text-gray-800'
-                      }
-                    >
-                      {project.status === 'completed' ? 'Terminé' : 
-                      project.status == 'to_deploy'? 'À déployer' :
-                       project.status === 'in_progress' ? 'En cours' : 'Terminé'}
-                    </Badge>
-                    
-                    {project.link && project.link !== '#' && (
-                      <a href={project.link} target="_blank" rel="noopener noreferrer">
-                        <Button variant="ghost" size="sm">
-                          <ExternalLink className="w-4 h-4" />
-                        </Button>
-                      </a>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {filteredProjects.map((project) => (
+            <Card key={project.id} className="hover:shadow-md transition-shadow">
+              <CardHeader className="pb-2">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      {project.title_fr}
+                      {project.featured && (
+                        <Badge variant="secondary" className="text-xs">
+                          EN AVANT
+                        </Badge>
+                      )}
+                    </CardTitle>
+                    <CardDescription className="line-clamp-2 mb-2">
+                      {project.description_fr}
+                    </CardDescription>
+                  </div>
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <Star className="w-4 h-4" />
+                    {project.stars}
+                  </div>
+                </div>
+              </CardHeader>
+
+              <CardContent>
+                <div className="space-y-3">
+                  {/* Catégories et tags */}
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {project.category?.map((cat) => (
+                      <Badge key={cat} variant="outline" className="text-xs">
+                        {cat}
+                      </Badge>
+                    ))}
+                    {project.tags?.slice(0, 3).map((tag) => (
+                      <Badge key={tag} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                    {project.tags?.length > 3 && (
+                      <Badge variant="secondary" className="text-xs">
+                        +{project.tags.length - 3}
+                      </Badge>
                     )}
                   </div>
 
-                </div>
-
-                {/* Actions */}
-                <div className="mt-3 pt-3 border-t flex gap-2">
-                  <Link href={`/admin/projects/edit/${project.id}`} className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full" disabled={isGuest}>
-                      <Edit className="w-4 h-4 mr-2" />
-                      Modifier
-                    </Button>
-                  </Link>
-                  
-                  <Link href={`/admin/kanban?project=${project.id}`}>
-                    <Button variant="outline" size="sm" title="Gérer les tâches">
-                      <CheckSquare className="w-4 h-4" />
-                    </Button>
-                  </Link>
-                  
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        disabled={isGuest}
+                  {/* Statut et Progression */}
+                  <div className="space-y-2 mt-auto">
+                    <div className="flex items-center justify-between">
+                      <Badge
+                        className={
+                          project.status === 'completed' ? 'bg-black text-white' :
+                            project.status == 'to_deploy' ? 'bg-green-600 text-white' :
+                              project.status === 'in_progress' ? 'bg-orange-600 text-white dark:text-white' :
+                                'bg-gray-200 text-gray-800'
+                        }
                       >
-                        <Trash2 className="w-4 h-4" />
+                        {project.status === 'completed' ? 'Terminé' :
+                          project.status == 'to_deploy' ? 'À déployer' :
+                            project.status === 'in_progress' ? 'En cours' : 'Terminé'}
+                      </Badge>
+
+                      {project.link && project.link !== '#' && (
+                        <a href={project.link} target="_blank" rel="noopener noreferrer">
+                          <Button variant="ghost" size="sm">
+                            <ExternalLink className="w-4 h-4" />
+                          </Button>
+                        </a>
+                      )}
+                    </div>
+
+                  </div>
+
+                  {/* Actions */}
+                  <div className="mt-3 pt-3 border-t flex gap-2">
+                    <Link href={`/admin/projects/edit/${project.id}`} className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full" disabled={isGuest}>
+                        <Edit className="w-4 h-4 mr-2" />
+                        Modifier
                       </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Supprimer le projet</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Êtes-vous sûr de vouloir supprimer le projet "{project.title_fr}" ? 
-                          Cette action est irréversible.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Annuler</AlertDialogCancel>
-                        <AlertDialogAction
-                          className="bg-red-600 hover:bg-red-700"
-                          onClick={() => handleDelete(project.id, project.title_fr)}
-                          disabled={deleteLoading === project.id}
+                    </Link>
+
+                    <Link href={`/admin/kanban?project=${project.id}`}>
+                      <Button variant="outline" size="sm" title="Gérer les tâches">
+                        <CheckSquare className="w-4 h-4" />
+                      </Button>
+                    </Link>
+
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          disabled={isGuest}
                         >
-                          {deleteLoading === project.id ? "Suppression..." : "Supprimer"}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Supprimer le projet</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Êtes-vous sûr de vouloir supprimer le projet "{project.title_fr}" ?
+                            Cette action est irréversible.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Annuler</AlertDialogCancel>
+                          <AlertDialogAction
+                            className="bg-red-600 hover:bg-red-700"
+                            onClick={() => handleDelete(project.id, project.title_fr)}
+                            disabled={deleteLoading === project.id}
+                          >
+                            {deleteLoading === project.id ? "Suppression..." : "Supprimer"}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
 
@@ -642,7 +650,7 @@ export default function ProjectsAdmin() {
                 {searchQuery || statusFilter !== "all" ? "Aucun projet trouvé" : "Aucun projet"}
               </h3>
               <p className="text-gray-600 mb-4">
-                {searchQuery || statusFilter !== "all" 
+                {searchQuery || statusFilter !== "all"
                   ? "Essayez de modifier vos critères de recherche"
                   : "Commencez par ajouter votre premier projet"
                 }

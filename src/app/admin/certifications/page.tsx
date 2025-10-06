@@ -9,14 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAdminGuest } from "@/contexts/AdminGuestContext";
 import {
-    deleteCertification,
-    reorderCertifications,
-    useCertifications
+  deleteCertification,
+  reorderCertifications,
+  useCertifications
 } from "@/lib/supabase";
 import {
-    Filter,
-    Plus,
-    Search
+  Filter,
+  Plus,
+  Search
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -29,22 +29,22 @@ export default function CertificationsAdmin() {
   const [deleteLoading, setDeleteLoading] = useState("");
   const [deleteError, setDeleteError] = useState("");
 
-  const handleDelete = async (certId, certTitle) => {
+  const handleDelete = async (certId: string, certTitle: string) => {
     setDeleteLoading(certId);
     setDeleteError("");
-    
+
     const result = await deleteCertification(certId);
-    
+
     if (result.success) {
       window.location.reload();
     } else {
       setDeleteError(result.error);
     }
-    
+
     setDeleteLoading("");
   };
 
-  const handleReorder = async (reorderedCertifications) => {
+  const handleReorder = async (reorderedCertifications: any[]) => {
     try {
       const result = await reorderCertifications(reorderedCertifications);
       if (result.success) {
@@ -61,10 +61,10 @@ export default function CertificationsAdmin() {
   // Filtrer les certifications
   const filteredCertifications = certifications?.filter(cert => {
     const matchesSearch = cert.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         cert.provider?.toLowerCase().includes(searchQuery.toLowerCase());
-    
+      cert.provider?.toLowerCase().includes(searchQuery.toLowerCase());
+
     const matchesStatus = statusFilter === "all" || cert.status === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   }) || [];
 
@@ -182,20 +182,20 @@ export default function CertificationsAdmin() {
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">
-              {isGuest 
-                ? "Mode lecture seule - Réorganisation désactivée" 
+              {isGuest
+                ? "Mode lecture seule - Réorganisation désactivée"
                 : "Glissez-déposez pour réorganiser les certifications"
               }
             </p>
             <p className="text-xs text-muted-foreground">
               L'ordre sera reflété sur la page d'accueil
             </p>
-                </div>
+          </div>
           <Badge variant="outline" className="text-xs">
             {filteredCertifications.length} certification{filteredCertifications.length > 1 ? 's' : ''}
-                </Badge>
-              </div>
-        
+          </Badge>
+        </div>
+
         <CertificationDragDrop
           certifications={filteredCertifications}
           onReorder={handleReorder}
@@ -217,7 +217,7 @@ export default function CertificationsAdmin() {
                 {searchQuery || statusFilter !== "all" ? "Aucune certification trouvée" : "Aucune certification"}
               </h3>
               <p className="text-gray-600 mb-4">
-                {searchQuery || statusFilter !== "all" 
+                {searchQuery || statusFilter !== "all"
                   ? "Essayez de modifier vos critères de recherche"
                   : "Commencez par ajouter votre première certification"
                 }
@@ -235,4 +235,3 @@ export default function CertificationsAdmin() {
     </div>
   );
 }
-

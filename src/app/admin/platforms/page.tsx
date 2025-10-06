@@ -2,15 +2,15 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,21 +20,21 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAdminGuest } from "@/contexts/AdminGuestContext";
 import {
-    createFreelancePlatform,
-    deleteFreelancePlatform,
-    updateFreelancePlatform,
-    useFreelancePlatforms
+  createFreelancePlatform,
+  deleteFreelancePlatform,
+  updateFreelancePlatform,
+  useFreelancePlatforms
 } from "@/lib/supabase";
 import {
-    Edit,
-    ExternalLink,
-    Globe,
-    Plus,
-    Save,
-    Search,
-    Star,
-    Trash2,
-    X
+  Edit,
+  ExternalLink,
+  Globe,
+  Plus,
+  Save,
+  Search,
+  Star,
+  Trash2,
+  X
 } from "lucide-react";
 import { useState } from "react";
 
@@ -81,17 +81,37 @@ const PREDEFINED_PLATFORMS = [
   }
 ];
 
+interface FormData {
+  name: string;
+  url: string;
+  description_fr: string;
+  description_en: string;
+  description_hi: string;
+  description_ar: string;
+  rating: number;
+  reviews_count: number;
+}
+
+interface PredefinedPlatform {
+  name: string;
+  url: string;
+  description_fr: string;
+  description_en: string;
+  rating: number;
+  reviews_count: number;
+}
+
 export default function PlatformsAdmin() {
   const { isGuest } = useAdminGuest();
   const { platforms, loading, error } = useFreelancePlatforms();
   const [searchQuery, setSearchQuery] = useState("");
-  const [editingPlatform, setEditingPlatform] = useState(null);
+  const [editingPlatform, setEditingPlatform] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [actionLoading, setActionLoading] = useState("");
   const [actionError, setActionError] = useState("");
-  
+
   // État du formulaire
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     url: '',
     description_fr: '',
@@ -117,7 +137,7 @@ export default function PlatformsAdmin() {
     setShowAddForm(false);
   };
 
-  const startEdit = (platform) => {
+  const startEdit = (platform: any) => {
     setFormData({
       name: platform.name || '',
       url: platform.url || '',
@@ -130,7 +150,7 @@ export default function PlatformsAdmin() {
     });
     setEditingPlatform(platform.id);
     setShowAddForm(false);
-    
+
     // Scroll vers le haut pour voir le formulaire d'édition
     window.scrollTo({
       top: 0,
@@ -138,14 +158,14 @@ export default function PlatformsAdmin() {
     });
   };
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setActionLoading(editingPlatform ? 'update' : 'create');
     setActionError("");
@@ -173,22 +193,22 @@ export default function PlatformsAdmin() {
     setActionLoading("");
   };
 
-  const handleDelete = async (platformId, platformName) => {
+  const handleDelete = async (platformId: string, platformName: string) => {
     setActionLoading(platformId);
     setActionError("");
-    
+
     const result = await deleteFreelancePlatform(platformId);
-    
+
     if (result.success) {
       window.location.reload();
     } else {
       setActionError(result.error);
     }
-    
+
     setActionLoading("");
   };
 
-  const addPredefinedPlatform = async (predefinedPlatform) => {
+  const addPredefinedPlatform = async (predefinedPlatform: PredefinedPlatform) => {
     setActionLoading('predefined');
     const result = await createFreelancePlatform(predefinedPlatform);
     if (result.success) {
@@ -202,16 +222,16 @@ export default function PlatformsAdmin() {
   // Filtrer les plateformes
   const filteredPlatforms = platforms?.filter(platform => {
     const matchesSearch = platform.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         platform.description_fr?.toLowerCase().includes(searchQuery.toLowerCase());
+      platform.description_fr?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
   }) || [];
 
   // Plateformes prédéfinies non encore ajoutées
-  const availablePredefined = PREDEFINED_PLATFORMS.filter(predefined => 
+  const availablePredefined = PREDEFINED_PLATFORMS.filter(predefined =>
     !platforms?.some(platform => platform.name.toLowerCase() === predefined.name.toLowerCase())
   );
 
-  const renderStars = (rating) => {
+  const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
     const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
@@ -271,7 +291,7 @@ export default function PlatformsAdmin() {
             });
           }
         }}
-        disabled={isGuest}
+          disabled={isGuest}
         >
           <Plus className="w-4 h-4 mr-2" />
           Nouvelle plateforme
@@ -289,115 +309,115 @@ export default function PlatformsAdmin() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <fieldset disabled={isGuest} className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nom de la plateforme *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    placeholder="ex: Malt"
-                    required
-                  />
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Nom de la plateforme *</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      placeholder="ex: Malt"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="url">URL du profil *</Label>
+                    <Input
+                      id="url"
+                      type="url"
+                      value={formData.url}
+                      onChange={(e) => handleInputChange('url', e.target.value)}
+                      placeholder="https://malt.fr/profile/username"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="rating">Note (0-5)</Label>
+                    <Input
+                      id="rating"
+                      type="number"
+                      min="0"
+                      max="5"
+                      step="0.1"
+                      value={formData.rating}
+                      onChange={(e) => handleInputChange('rating', parseFloat(e.target.value) || 0)}
+                      placeholder="4.5"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="reviews_count">Nombre d'avis</Label>
+                    <Input
+                      id="reviews_count"
+                      type="number"
+                      min="0"
+                      value={formData.reviews_count}
+                      onChange={(e) => handleInputChange('reviews_count', parseInt(e.target.value) || 0)}
+                      placeholder="150"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="url">URL du profil *</Label>
-                  <Input
-                    id="url"
-                    type="url"
-                    value={formData.url}
-                    onChange={(e) => handleInputChange('url', e.target.value)}
-                    placeholder="https://malt.fr/profile/username"
-                    required
-                  />
+                {/* Descriptions multilingues */}
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="description_fr">Description (Français)</Label>
+                    <Textarea
+                      id="description_fr"
+                      value={formData.description_fr}
+                      onChange={(e) => handleInputChange('description_fr', e.target.value)}
+                      placeholder="Description de votre profil sur cette plateforme..."
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description_en">Description (Anglais)</Label>
+                    <Textarea
+                      id="description_en"
+                      value={formData.description_en}
+                      onChange={(e) => handleInputChange('description_en', e.target.value)}
+                      placeholder="Description of your profile on this platform..."
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description_hi">Description (Hindi)</Label>
+                    <Textarea
+                      id="description_hi"
+                      value={formData.description_hi}
+                      onChange={(e) => handleInputChange('description_hi', e.target.value)}
+                      placeholder="इस प्लेटफॉर्म पर आपकी प्रोफ़ाइल का विवरण..."
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description_ar">Description (Arabe)</Label>
+                    <Textarea
+                      id="description_ar"
+                      value={formData.description_ar}
+                      onChange={(e) => handleInputChange('description_ar', e.target.value)}
+                      placeholder="وصف ملفك الشخصي على هذه المنصة..."
+                      rows={3}
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="rating">Note (0-5)</Label>
-                  <Input
-                    id="rating"
-                    type="number"
-                    min="0"
-                    max="5"
-                    step="0.1"
-                    value={formData.rating}
-                    onChange={(e) => handleInputChange('rating', parseFloat(e.target.value) || 0)}
-                    placeholder="4.5"
-                  />
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={actionLoading === 'create' || actionLoading === 'update' || isGuest}>
+                    <Save className="w-4 h-4 mr-2" />
+                    {actionLoading === 'create' || actionLoading === 'update' ? 'Sauvegarde...' :
+                      editingPlatform ? 'Mettre à jour' : 'Ajouter'}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={resetForm}>
+                    <X className="w-4 h-4 mr-2" />
+                    Annuler
+                  </Button>
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="reviews_count">Nombre d'avis</Label>
-                  <Input
-                    id="reviews_count"
-                    type="number"
-                    min="0"
-                    value={formData.reviews_count}
-                    onChange={(e) => handleInputChange('reviews_count', parseInt(e.target.value) || 0)}
-                    placeholder="150"
-                  />
-                </div>
-              </div>
-
-              {/* Descriptions multilingues */}
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="description_fr">Description (Français)</Label>
-                  <Textarea
-                    id="description_fr"
-                    value={formData.description_fr}
-                    onChange={(e) => handleInputChange('description_fr', e.target.value)}
-                    placeholder="Description de votre profil sur cette plateforme..."
-                    rows={3}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description_en">Description (Anglais)</Label>
-                  <Textarea
-                    id="description_en"
-                    value={formData.description_en}
-                    onChange={(e) => handleInputChange('description_en', e.target.value)}
-                    placeholder="Description of your profile on this platform..."
-                    rows={3}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description_hi">Description (Hindi)</Label>
-                  <Textarea
-                    id="description_hi"
-                    value={formData.description_hi}
-                    onChange={(e) => handleInputChange('description_hi', e.target.value)}
-                    placeholder="इस प्लेटफॉर्म पर आपकी प्रोफ़ाइल का विवरण..."
-                    rows={3}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description_ar">Description (Arabe)</Label>
-                  <Textarea
-                    id="description_ar"
-                    value={formData.description_ar}
-                    onChange={(e) => handleInputChange('description_ar', e.target.value)}
-                    placeholder="وصف ملفك الشخصي على هذه المنصة..."
-                    rows={3}
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <Button type="submit" disabled={actionLoading === 'create' || actionLoading === 'update' || isGuest}>
-                  <Save className="w-4 h-4 mr-2" />
-                  {actionLoading === 'create' || actionLoading === 'update' ? 'Sauvegarde...' : 
-                   editingPlatform ? 'Mettre à jour' : 'Ajouter'}
-                </Button>
-                <Button type="button" variant="outline" onClick={resetForm}>
-                  <X className="w-4 h-4 mr-2" />
-                  Annuler
-                </Button>
-              </div>
               </fieldset>
             </form>
           </CardContent>
@@ -507,7 +527,7 @@ export default function PlatformsAdmin() {
                 </a>
               </div>
             </CardHeader>
-            
+
             <CardContent>
               <div className="space-y-3">
                 {/* Note et avis */}
@@ -520,9 +540,9 @@ export default function PlatformsAdmin() {
 
                 {/* Actions */}
                 <div className="flex gap-2 pt-2 border-t">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="flex-1"
                     onClick={() => startEdit(platform)}
                     disabled={isGuest}
@@ -530,11 +550,11 @@ export default function PlatformsAdmin() {
                     <Edit className="w-4 h-4 mr-2" />
                     Modifier
                   </Button>
-                  
+
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         disabled={isGuest}
@@ -546,7 +566,7 @@ export default function PlatformsAdmin() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Supprimer la plateforme</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Êtes-vous sûr de vouloir supprimer la plateforme "{platform.name}" ? 
+                          Êtes-vous sûr de vouloir supprimer la plateforme "{platform.name}" ?
                           Cette action est irréversible.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
@@ -581,7 +601,7 @@ export default function PlatformsAdmin() {
                 {searchQuery ? "Aucune plateforme trouvée" : "Aucune plateforme"}
               </h3>
               <p className="text-gray-600 mb-4">
-                {searchQuery 
+                {searchQuery
                   ? "Essayez de modifier votre recherche"
                   : "Commencez par ajouter vos plateformes freelance"
                 }
@@ -594,7 +614,7 @@ export default function PlatformsAdmin() {
                   behavior: 'smooth'
                 });
               }}
-              disabled={isGuest}
+                disabled={isGuest}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Nouvelle plateforme

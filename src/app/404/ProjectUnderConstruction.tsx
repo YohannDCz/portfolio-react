@@ -4,16 +4,25 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, Code, Hammer, Wrench } from "lucide-react";
+import { JSX } from "react";
 
-export default function ProjectUnderConstruction({ 
-  title = "Projet en construction", 
+// TypeScript interface pour les props du composant
+interface ProjectUnderConstructionProps {
+  title?: string;
+  description?: string;
+  expectedDate?: string | null;
+  onBack?: (() => void) | null;
+}
+
+export default function ProjectUnderConstruction({
+  title = "Projet en construction",
   description = "Ce projet est actuellement en développement. Revenez bientôt !",
   expectedDate = null,
-  onBack = null 
-}) {
+  onBack = null
+}: ProjectUnderConstructionProps): JSX.Element {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-background to-yellow-50 dark:from-orange-950/20 dark:via-background dark:to-yellow-950/20 flex items-center justify-center p-4">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
@@ -23,10 +32,10 @@ export default function ProjectUnderConstruction({
           <CardHeader className="text-center pb-4">
             {/* Animated construction icons */}
             <motion.div
-              animate={{ 
+              animate={{
                 rotate: [0, 5, -5, 0],
               }}
-              transition={{ 
+              transition={{
                 duration: 2,
                 repeat: Infinity,
                 ease: "easeInOut"
@@ -36,7 +45,7 @@ export default function ProjectUnderConstruction({
               <div className="flex justify-center gap-3 mb-4">
                 <motion.div
                   animate={{ y: [0, -8, 0] }}
-                  transition={{ 
+                  transition={{
                     duration: 1.5,
                     repeat: Infinity,
                     delay: 0
@@ -46,7 +55,7 @@ export default function ProjectUnderConstruction({
                 </motion.div>
                 <motion.div
                   animate={{ y: [0, -8, 0] }}
-                  transition={{ 
+                  transition={{
                     duration: 1.5,
                     repeat: Infinity,
                     delay: 0.3
@@ -56,7 +65,7 @@ export default function ProjectUnderConstruction({
                 </motion.div>
                 <motion.div
                   animate={{ y: [0, -8, 0] }}
-                  transition={{ 
+                  transition={{
                     duration: 1.5,
                     repeat: Infinity,
                     delay: 0.6
@@ -88,7 +97,7 @@ export default function ProjectUnderConstruction({
                   className="h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-full"
                   initial={{ width: "0%" }}
                   animate={{ width: "60%" }}
-                  transition={{ 
+                  transition={{
                     duration: 2,
                     ease: "easeOut"
                   }}
@@ -105,9 +114,9 @@ export default function ProjectUnderConstruction({
 
             {/* Action button */}
             {onBack && (
-              <Button 
+              <Button
                 onClick={onBack}
-                variant="outline" 
+                variant="outline"
                 className="gap-2 border-orange-300 text-orange-700 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-300 dark:hover:bg-orange-950/30"
               >
                 <ArrowLeft className="w-4 h-4" />

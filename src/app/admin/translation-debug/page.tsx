@@ -10,31 +10,82 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import {
-    Activity,
-    AlertCircle,
-    AlertTriangle,
-    BarChart3,
-    CheckCircle,
-    Clock,
-    Database,
-    Languages,
-    RefreshCw,
-    Settings,
-    TestTube,
-    TrendingUp,
-    XCircle,
-    Zap
+  Activity,
+  AlertCircle,
+  AlertTriangle,
+  BarChart3,
+  CheckCircle,
+  Clock,
+  Database,
+  Languages,
+  RefreshCw,
+  Settings,
+  TestTube,
+  TrendingUp,
+  XCircle,
+  Zap
 } from "lucide-react"
 import { useEffect, useState } from 'react'
 
+interface HealthStatus {
+  status: string;
+  timestamp?: string;
+  providers?: Record<string, string>;
+  error?: string;
+}
+
+interface Analytics {
+  totalRequests?: number;
+  successfulRequests?: number;
+  failedRequests?: number;
+  totalCharacters?: number;
+  successRate?: number;
+  avgResponseTime?: number;
+  languagePairs?: Record<string, number>;
+  providerStats?: Record<string, {
+    requests: number;
+    success: number;
+    avgResponseTime: number;
+  }>;
+}
+
+interface ErrorData {
+  errors?: Array<{
+    provider: string;
+    source_language: string;
+    target_language: string;
+    error_message: string;
+    created_at: string;
+  }>;
+  errorCounts?: Record<string, number>;
+}
+
+interface CacheStats {
+  totalEntries?: number;
+  totalCharacters?: number;
+  hitRate?: number;
+  providerStats?: Record<string, {
+    entries: number;
+    characters: number;
+  }>;
+}
+
+interface TestResult {
+  success: boolean;
+  data?: any;
+  error?: string;
+  responseTime: number;
+  status: number;
+}
+
 export default function TranslationDebugPage() {
   const [loading, setLoading] = useState(true)
-  const [healthStatus, setHealthStatus] = useState(null)
-  const [analytics, setAnalytics] = useState(null)
-  const [errors, setErrors] = useState(null)
-  const [testResult, setTestResult] = useState(null)
+  const [healthStatus, setHealthStatus] = useState<HealthStatus | null>(null)
+  const [analytics, setAnalytics] = useState<Analytics | null>(null)
+  const [errors, setErrors] = useState<ErrorData | null>(null)
+  const [testResult, setTestResult] = useState<TestResult | null>(null)
   const [testLoading, setTestLoading] = useState(false)
-  const [cacheStats, setCacheStats] = useState(null)
+  const [cacheStats, setCacheStats] = useState<CacheStats | null>(null)
   const [refreshing, setRefreshing] = useState(false)
 
   // Test form state
@@ -68,7 +119,7 @@ export default function TranslationDebugPage() {
       const response = await fetch('/api/translate')
       const data = await response.json()
       setHealthStatus(data)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load health status:', error)
       setHealthStatus({ status: 'error', error: error.message })
     }
@@ -113,7 +164,7 @@ export default function TranslationDebugPage() {
   const runTest = async () => {
     setTestLoading(true)
     setTestResult(null)
-    
+
     try {
       const startTime = Date.now()
       const response = await fetch('/api/translate', {
@@ -126,17 +177,17 @@ export default function TranslationDebugPage() {
           provider: testProvider || undefined
         })
       })
-      
+
       const endTime = Date.now()
       const data = await response.json()
-      
+
       setTestResult({
         success: response.ok,
         data,
         responseTime: endTime - startTime,
         status: response.status
       })
-    } catch (error) {
+    } catch (error: any) {
       setTestResult({
         success: false,
         error: error.message,
@@ -163,12 +214,12 @@ export default function TranslationDebugPage() {
       } else {
         alert('Failed to clear cache')
       }
-    } catch (error) {
+    } catch (error: any) {
       alert('Error clearing cache: ' + error.message)
     }
   }
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'healthy': return 'text-green-600'
       case 'degraded': return 'text-yellow-600'
@@ -177,7 +228,7 @@ export default function TranslationDebugPage() {
     }
   }
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'healthy': return <CheckCircle className="h-5 w-5 text-green-600" />
       case 'degraded': return <AlertTriangle className="h-5 w-5 text-yellow-600" />
@@ -205,8 +256,8 @@ export default function TranslationDebugPage() {
           <h1 className="text-3xl font-bold">Translation System Debug</h1>
           <p className="text-muted-foreground">Monitor and debug the automatic translation system</p>
         </div>
-        <Button 
-          onClick={refreshData} 
+        <Button
+          onClick={refreshData}
           disabled={refreshing}
           variant="outline"
         >
@@ -220,10 +271,10 @@ export default function TranslationDebugPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">System Status</CardTitle>
-            {getStatusIcon(healthStatus?.status)}
+            {getStatusIcon(healthStatus?.status || '')}
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${getStatusColor(healthStatus?.status)}`}>
+            <div className={`text-2xl font-bold ${getStatusColor(healthStatus?.status || '')}`}>
               {healthStatus?.status?.toUpperCase() || 'UNKNOWN'}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -374,7 +425,7 @@ export default function TranslationDebugPage() {
                 {analytics?.languagePairs ? (
                   <div className="space-y-2">
                     {Object.entries(analytics.languagePairs)
-                      .sort(([,a], [,b]) => b - a)
+                      .sort(([, a], [, b]) => b - a)
                       .slice(0, 5)
                       .map(([pair, count]) => (
                         <div key={pair} className="flex justify-between">
@@ -404,8 +455,8 @@ export default function TranslationDebugPage() {
                         <span className="font-medium capitalize">{provider}</span>
                         <Badge variant="outline">{stats.requests} requests</Badge>
                       </div>
-                      <Progress 
-                        value={(stats.success / stats.requests) * 100} 
+                      <Progress
+                        value={(stats.success / stats.requests) * 100}
                         className="h-2"
                       />
                       <div className="flex justify-between text-sm text-muted-foreground">
@@ -433,7 +484,7 @@ export default function TranslationDebugPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {errors?.errors?.length > 0 ? (
+              {errors?.errors && errors.errors.length > 0 ? (
                 <div className="space-y-3">
                   {errors.errors.map((error, index) => (
                     <Alert key={index} variant="destructive">
@@ -466,7 +517,7 @@ export default function TranslationDebugPage() {
               <CardContent>
                 <div className="space-y-2">
                   {Object.entries(errors.errorCounts)
-                    .sort(([,a], [,b]) => b - a)
+                    .sort(([, a], [, b]) => b - a)
                     .map(([error, count]) => (
                       <div key={error} className="flex justify-between">
                         <span className="text-sm truncate">{error}</span>
@@ -505,7 +556,7 @@ export default function TranslationDebugPage() {
                       <p className="text-2xl font-bold">{cacheStats.totalCharacters?.toLocaleString()}</p>
                     </div>
                   </div>
-                  
+
                   {cacheStats.providerStats && (
                     <div className="space-y-2">
                       <h4 className="font-medium">By Provider</h4>
@@ -520,10 +571,10 @@ export default function TranslationDebugPage() {
                       ))}
                     </div>
                   )}
-                  
-                  <Button 
-                    onClick={clearCache} 
-                    variant="destructive" 
+
+                  <Button
+                    onClick={clearCache}
+                    variant="destructive"
                     size="sm"
                     className="mt-4"
                   >
@@ -570,7 +621,7 @@ export default function TranslationDebugPage() {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <Label htmlFor="test-provider">Provider (optional)</Label>
                 <Input
@@ -649,7 +700,7 @@ export default function TranslationDebugPage() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Real-time logs would be displayed here. This feature requires additional implementation 
+                Real-time logs would be displayed here. This feature requires additional implementation
                 for log streaming from the backend.
               </p>
             </CardContent>

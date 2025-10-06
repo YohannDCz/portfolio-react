@@ -2,15 +2,15 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,25 +20,25 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAdminGuest } from "@/contexts/AdminGuestContext";
 import {
-    createSkill,
-    deleteSkill,
-    updateSkill,
-    useSkills
+  createSkill,
+  deleteSkill,
+  updateSkill,
+  useSkills
 } from "@/lib/supabase";
 import {
-    Code,
-    Edit,
-    Plus,
-    Save,
-    Search,
-    Trash2,
-    X
+  Code,
+  Edit,
+  Plus,
+  Save,
+  Search,
+  Trash2,
+  X
 } from "lucide-react";
 import { useState } from "react";
 
 const SKILL_CATEGORIES = [
   'frontend',
-  'backend', 
+  'backend',
   'mobile',
   'database',
   'devops',
@@ -57,56 +57,68 @@ const PREDEFINED_SKILLS = [
   { name: 'JavaScript', category: 'frontend', level: 90 },
   { name: 'HTML/CSS', category: 'frontend', level: 95 },
   { name: 'Tailwind CSS', category: 'frontend', level: 90 },
-  
+
   // Backend
   { name: 'Node.js', category: 'backend', level: 85 },
   { name: 'PHP', category: 'backend', level: 80 },
   { name: 'Python', category: 'backend', level: 75 },
   { name: 'Laravel', category: 'backend', level: 80 },
   { name: 'Express.js', category: 'backend', level: 85 },
-  
+
   // Mobile
   { name: 'React Native', category: 'mobile', level: 80 },
   { name: 'Flutter', category: 'mobile', level: 75 },
   { name: 'Swift', category: 'mobile', level: 60 },
   { name: 'Kotlin', category: 'mobile', level: 60 },
-  
+
   // Database
   { name: 'PostgreSQL', category: 'database', level: 85 },
   { name: 'MySQL', category: 'database', level: 80 },
   { name: 'MongoDB', category: 'database', level: 75 },
   { name: 'Firebase', category: 'database', level: 80 },
   { name: 'Supabase', category: 'database', level: 85 },
-  
+
   // DevOps
   { name: 'Docker', category: 'devops', level: 70 },
   { name: 'AWS', category: 'devops', level: 65 },
   { name: 'Git', category: 'devops', level: 90 },
   { name: 'GitHub Actions', category: 'devops', level: 75 },
-  
+
   // Design
   { name: 'Figma', category: 'design', level: 80 },
   { name: 'Adobe XD', category: 'design', level: 70 },
   { name: 'Photoshop', category: 'design', level: 75 },
-  
+
   // Tools
   { name: 'VS Code', category: 'tools', level: 95 },
   { name: 'Postman', category: 'tools', level: 85 },
   { name: 'Notion', category: 'tools', level: 80 }
 ];
 
+interface FormData {
+  name: string;
+  category: string;
+  level: number;
+}
+
+interface PredefinedSkill {
+  name: string;
+  category: string;
+  level: number;
+}
+
 export default function SkillsAdmin() {
   const { isGuest } = useAdminGuest();
   const { skills, loading, error } = useSkills();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [editingSkill, setEditingSkill] = useState(null);
+  const [editingSkill, setEditingSkill] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [actionLoading, setActionLoading] = useState("");
   const [actionError, setActionError] = useState("");
-  
+
   // État du formulaire
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     category: 'frontend',
     level: 50
@@ -122,7 +134,7 @@ export default function SkillsAdmin() {
     setShowAddForm(false);
   };
 
-  const startEdit = (skill) => {
+  const startEdit = (skill: any) => {
     setFormData({
       name: skill.name,
       category: skill.category,
@@ -130,7 +142,7 @@ export default function SkillsAdmin() {
     });
     setEditingSkill(skill.id);
     setShowAddForm(false);
-    
+
     // Scroll vers le haut pour voir le formulaire d'édition
     window.scrollTo({
       top: 0,
@@ -138,7 +150,7 @@ export default function SkillsAdmin() {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setActionLoading(editingSkill ? 'update' : 'create');
     setActionError("");
@@ -151,14 +163,14 @@ export default function SkillsAdmin() {
 
     // Debug: Log the form data being submitted
     console.log('Submitting skill data:', formData);
-    
+
     let result;
     if (editingSkill) {
       result = await updateSkill(editingSkill, formData);
     } else {
       result = await createSkill(formData);
     }
-    
+
     // Debug: Log the result
     console.log('Skill creation/update result:', result);
 
@@ -172,22 +184,22 @@ export default function SkillsAdmin() {
     setActionLoading("");
   };
 
-  const handleDelete = async (skillId, skillName) => {
+  const handleDelete = async (skillId: string, skillName: string) => {
     setActionLoading(skillId);
     setActionError("");
-    
+
     const result = await deleteSkill(skillId);
-    
+
     if (result.success) {
       window.location.reload();
     } else {
       setActionError(result.error);
     }
-    
+
     setActionLoading("");
   };
 
-  const addPredefinedSkill = async (predefinedSkill) => {
+  const addPredefinedSkill = async (predefinedSkill: PredefinedSkill) => {
     setActionLoading('predefined');
     const result = await createSkill(predefinedSkill);
     if (result.success) {
@@ -206,12 +218,12 @@ export default function SkillsAdmin() {
   }) || [];
 
   // Compétences prédéfinies non encore ajoutées
-  const availablePredefined = PREDEFINED_SKILLS.filter(predefined => 
+  const availablePredefined = PREDEFINED_SKILLS.filter(predefined =>
     !skills?.some(skill => skill.name.toLowerCase() === predefined.name.toLowerCase())
   );
 
-  const getCategoryColor = (category) => {
-    const colors = {
+  const getCategoryColor = (category: string) => {
+    const colors: Record<string, string> = {
       frontend: 'bg-blue-100 text-blue-800',
       backend: 'bg-green-100 text-green-800',
       mobile: 'bg-purple-100 text-purple-800',
@@ -224,7 +236,7 @@ export default function SkillsAdmin() {
     return colors[category] || colors.other;
   };
 
-  const getLevelColor = (level) => {
+  const getLevelColor = (level: number) => {
     if (level >= 90) return 'text-green-600';
     if (level >= 75) return 'text-blue-600';
     if (level >= 50) return 'text-orange-600';
@@ -272,7 +284,7 @@ export default function SkillsAdmin() {
             });
           }
         }}
-        disabled={isGuest}
+          disabled={isGuest}
         >
           <Plus className="w-4 h-4 mr-2" />
           Nouvelle compétence
@@ -290,65 +302,65 @@ export default function SkillsAdmin() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <fieldset disabled={isGuest} className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nom de la compétence *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))}
-                    placeholder="ex: React"
-                    required
-                  />
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Nom de la compétence *</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="ex: React"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Catégorie</Label>
+                    <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SKILL_CATEGORIES.map((cat) => (
+                          <SelectItem key={cat} value={cat}>
+                            {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="level">Niveau (0-100)</Label>
+                    <Input
+                      id="level"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.level}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        const numValue = parseInt(value, 10);
+                        setFormData(prev => ({
+                          ...prev,
+                          level: isNaN(numValue) ? 0 : Math.max(0, Math.min(100, numValue))
+                        }));
+                      }}
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="category">Catégorie</Label>
-                  <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({...prev, category: value}))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SKILL_CATEGORIES.map((cat) => (
-                        <SelectItem key={cat} value={cat}>
-                          {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={actionLoading === 'create' || actionLoading === 'update' || isGuest}>
+                    <Save className="w-4 h-4 mr-2" />
+                    {actionLoading === 'create' || actionLoading === 'update' ? 'Sauvegarde...' :
+                      editingSkill ? 'Mettre à jour' : 'Ajouter'}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={resetForm}>
+                    <X className="w-4 h-4 mr-2" />
+                    Annuler
+                  </Button>
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="level">Niveau (0-100)</Label>
-                  <Input
-                    id="level"
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={formData.level}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      const numValue = parseInt(value, 10);
-                      setFormData(prev => ({
-                        ...prev, 
-                        level: isNaN(numValue) ? 0 : Math.max(0, Math.min(100, numValue))
-                      }));
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <Button type="submit" disabled={actionLoading === 'create' || actionLoading === 'update' || isGuest}>
-                  <Save className="w-4 h-4 mr-2" />
-                  {actionLoading === 'create' || actionLoading === 'update' ? 'Sauvegarde...' : 
-                   editingSkill ? 'Mettre à jour' : 'Ajouter'}
-                </Button>
-                <Button type="button" variant="outline" onClick={resetForm}>
-                  <X className="w-4 h-4 mr-2" />
-                  Annuler
-                </Button>
-              </div>
               </fieldset>
             </form>
           </CardContent>
@@ -475,21 +487,20 @@ export default function SkillsAdmin() {
 
                 {/* Barre de progression */}
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className={`h-2 rounded-full transition-all ${
-                      skill.level >= 90 ? 'bg-green-500' :
-                      skill.level >= 75 ? 'bg-blue-500' :
-                      skill.level >= 50 ? 'bg-orange-500' : 'bg-red-500'
-                    }`}
+                  <div
+                    className={`h-2 rounded-full transition-all ${skill.level >= 90 ? 'bg-green-500' :
+                        skill.level >= 75 ? 'bg-blue-500' :
+                          skill.level >= 50 ? 'bg-orange-500' : 'bg-red-500'
+                      }`}
                     style={{ width: `${skill.level}%` }}
                   ></div>
                 </div>
 
                 {/* Actions */}
                 <div className="flex gap-2 pt-2 border-t">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="flex-1"
                     onClick={() => startEdit(skill)}
                     disabled={isGuest}
@@ -497,11 +508,11 @@ export default function SkillsAdmin() {
                     <Edit className="w-4 h-4 mr-2" />
                     Modifier
                   </Button>
-                  
+
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         disabled={isGuest}
@@ -513,7 +524,7 @@ export default function SkillsAdmin() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Supprimer la compétence</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Êtes-vous sûr de vouloir supprimer la compétence "{skill.name}" ? 
+                          Êtes-vous sûr de vouloir supprimer la compétence "{skill.name}" ?
                           Cette action est irréversible.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
@@ -548,7 +559,7 @@ export default function SkillsAdmin() {
                 {searchQuery || categoryFilter !== "all" ? "Aucune compétence trouvée" : "Aucune compétence"}
               </h3>
               <p className="text-gray-600 mb-4">
-                {searchQuery || categoryFilter !== "all" 
+                {searchQuery || categoryFilter !== "all"
                   ? "Essayez de modifier vos critères de recherche"
                   : "Commencez par ajouter vos premières compétences"
                 }
@@ -561,7 +572,7 @@ export default function SkillsAdmin() {
                   behavior: 'smooth'
                 });
               }}
-              disabled={isGuest}
+                disabled={isGuest}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Nouvelle compétence
