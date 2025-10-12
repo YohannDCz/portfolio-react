@@ -29,10 +29,16 @@ export default function Navbar({
 }: NavbarProps): JSX.Element {
   return (
     <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-      <div className={`max-w-6xl mx-auto px-4 py-3 ${getDirectionalClass('flex items-center justify-between')}`}>
+      <div
+        className={`max-w-6xl mx-auto px-4 py-3 ${getDirectionalClass('flex items-center justify-between')}`}
+      >
         <div className={getDirectionalClass('flex items-center gap-3')}>
           <div className="h-9 w-9 rounded-2xl bg-gradient-to-br from-primary/80 to-primary/30 grid place-items-center shadow-sm">
-            <ProfileImageModal src={profile?.avatar_url || 'profile.png'} alt="Profile photo" fallback="YOU">
+            <ProfileImageModal
+              src={profile?.avatar_url || 'profile.png'}
+              alt="Profile photo"
+              fallback="YOU"
+            >
               <Avatar className="ring-4 ring-background">
                 <AvatarImage alt="avatar" src={profile?.avatar_url || 'profile.png'} />
                 <AvatarFallback>YOU</AvatarFallback>
@@ -45,14 +51,19 @@ export default function Navbar({
           </div>
         </div>
 
-        <nav className={`hidden md:flex items-center gap-6 text-sm ${getDirectionalClass('flex-row')}`}>
+        <nav
+          className={`hidden md:flex items-center gap-6 text-sm ${getDirectionalClass('flex-row')}`}
+        >
           <a
             href="#projets"
             className={`hover:opacity-80 transition-all ${activeSection === 'projets' ? 'font-bold text-primary' : ''}`}
           >
             {t.projects}
           </a>
-          <a href="#cv" className={`hover:opacity-80 transition-all ${activeSection === 'cv' ? 'font-bold text-primary' : ''}`}>
+          <a
+            href="#cv"
+            className={`hover:opacity-80 transition-all ${activeSection === 'cv' ? 'font-bold text-primary' : ''}`}
+          >
             {t.cv}
           </a>
           <a
@@ -65,7 +76,6 @@ export default function Navbar({
 
         <div className={getDirectionalClass('flex items-center gap-2')}>
           <LanguageSelector variant="ghost" />
-
           <Button
             variant="ghost"
             size="icon"
@@ -85,11 +95,6 @@ export default function Navbar({
               <Linkedin className="h-5 w-5" />
             </Button>
           </a>
-          <Link href="/admin" className="hidden md:inline-flex">
-            <Button variant="outline" size="sm" className="no-rtl-transform">
-              Admin
-            </Button>
-          </Link>
         </div>
       </div>
     </header>

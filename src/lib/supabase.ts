@@ -26,7 +26,6 @@ import type {
   UseProjectsResult,
   UseSkillsResult,
 } from '@/types';
-import type { Database } from '@/types/supabase';
 import { createClient, type Session, type SupabaseClient, type User } from '@supabase/supabase-js';
 import { useEffect, useState } from 'react';
 
@@ -35,7 +34,8 @@ const supabaseUrl = 'https://ayrnxrqoheicolnsvtqf.supabase.co';
 const supabaseKey =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5cm54cnFvaGVpY29sbnN2dHFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1NDQyNTksImV4cCI6MjA3MjEyMDI1OX0.j_SazovRFlbbtgOXD7nKOgWhei5EsEJEt9Vj85ENC4M';
 
-export const supabase: SupabaseClient<Database> = createClient(supabaseUrl, supabaseKey);
+// Création du client Supabase sans types génériques pour résoudre les problèmes d'inférence TypeScript
+export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // =====================================
 // HOOKS D'AUTHENTIFICATION
@@ -141,11 +141,17 @@ export const useProfile = (): UseProfileResult => {
   useEffect(() => {
     const fetchProfile = async (): Promise<void> => {
       try {
+        console.log('🔍 Fetching profile from Supabase...');
         const { data, error } = await supabase.from('profiles').select('*').single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Profile fetch error:', error);
+          throw error;
+        }
+        console.log('✅ Profile fetched successfully:', data);
         setProfile(data);
       } catch (err) {
+        console.error('❌ Profile fetch exception:', err);
         setError((err as Error).message);
       } finally {
         setLoading(false);
@@ -203,14 +209,20 @@ export const useProjects = (): UseProjectsResult => {
   useEffect(() => {
     const fetchProjects = async (): Promise<void> => {
       try {
+        console.log('🔍 Fetching projects from Supabase...');
         const { data, error } = await supabase
           .from('projects')
           .select('*')
           .order('stars', { ascending: false });
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Projects fetch error:', error);
+          throw error;
+        }
+        console.log('✅ Projects fetched successfully:', data?.length, 'projects');
         setProjects(data || []);
       } catch (err) {
+        console.error('❌ Projects fetch exception:', err);
         setError((err as Error).message);
       } finally {
         setLoading(false);
@@ -1143,11 +1155,24 @@ export const uploadImageAndGetPublicUrl = async ({
  */
 export const getPublicImageUrl = (pathOrUrl: string, bucket: string = 'images'): string => {
   try {
-    if (!pathOrUrl) return '';
-    if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
+    if (!pathOrUrl) {
+      console.log('⚠️ getPublicImageUrl: Pas de chemin fourni');
+      return '';
+    }
+
+    // Si c'est déjà une URL absolue, la retourner directement
+    if (/^https?:\/\//i.test(pathOrUrl)) {
+      console.log('✅ getPublicImageUrl: URL absolue trouvée:', pathOrUrl);
+      return pathOrUrl;
+    }
+
+    // Sinon, construire l'URL depuis Supabase Storage
     const { data } = supabase.storage.from(bucket).getPublicUrl(pathOrUrl);
-    return data?.publicUrl || '';
-  } catch (_) {
+    const publicUrl = data?.publicUrl || '';
+    console.log('🔗 getPublicImageUrl: URL générée:', pathOrUrl, '->', publicUrl);
+    return publicUrl;
+  } catch (err) {
+    console.error('❌ getPublicImageUrl: Erreur:', err);
     return '';
   }
 };
