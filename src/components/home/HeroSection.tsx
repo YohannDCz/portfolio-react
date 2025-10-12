@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -79,8 +80,15 @@ export default function HeroSection({
 
           <div>
             <Card className="overflow-hidden">
-              <div className="h-40 overflow-hidden">
-                <img src={profile?.cover_url || 'cover.png'} alt="cover" className="w-full h-full object-cover" />
+              <div className="relative h-40 overflow-hidden">
+                <Image
+                  src={profile?.cover_url || 'cover.png'}
+                  alt="cover"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 40vw"
+                  className="object-cover"
+                  unoptimized
+                />
               </div>
 
               <CardContent className="-mt-9">

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, type SyntheticEvent } from 'react';
 
 // =====================================
@@ -27,7 +28,7 @@ export default function ProjectImage({
   src,
   alt,
   className = '',
-  fallbackGradient = 'from-muted/50 to-muted/20',
+  fallbackGradient = 'from-blue-500 via-purple-500 to-pink-500 dark:from-slate-800 dark:via-slate-700 dark:to-slate-600',
   onError,
 }: ProjectImageProps): JSX.Element {
   const [imageError, setImageError] = useState<boolean>(false);
@@ -53,7 +54,7 @@ export default function ProjectImage({
   if (!src || imageError) {
     return (
       <div
-        className={`bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 dark:from-slate-800 dark:via-slate-700 dark:to-slate-600 ${className} relative overflow-hidden`}
+        className={`relative overflow-hidden bg-gradient-to-br ${fallbackGradient} ${className}`}
       >
         {/* Beautiful geometric pattern */}
         <div className="absolute inset-0">
@@ -102,14 +103,15 @@ export default function ProjectImage({
       )}
 
       {/* Image principale */}
-      <img
+      <Image
         src={src}
         alt={alt}
-        className={`w-full h-full object-contain transition-all duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
+        fill
+        sizes="(max-width: 768px) 100vw, 50vw"
+        className={`object-contain transition-all duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
         onError={handleImageError}
         onLoad={handleImageLoad}
-        loading="lazy"
+        unoptimized
       />
     </div>
   );

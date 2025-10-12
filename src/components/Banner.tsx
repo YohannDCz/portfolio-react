@@ -44,7 +44,7 @@ export default function Banner(): JSX.Element {
             <div className="flex items-center gap-2">
               <Info className="h-4 w-4" />
               <p>
-                La plupart des sites webs sont deployés. Ne manque plus qu'à les documenter et les
+                La plupart des sites webs sont deployés. Ne manque plus qu&apos;à les documenter et les
                 passer en maintenance pure...
               </p>
             </div>
