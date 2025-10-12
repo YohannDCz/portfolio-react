@@ -170,7 +170,7 @@ export default function CertificationsAdmin() {
         </Card>
       </div>
 
-      {/* Message d'erreur */}
+      {/* Message d’erreur */}
       {deleteError && (
         <Alert variant="destructive">
           <AlertDescription>{deleteError}</AlertDescription>
@@ -185,10 +185,10 @@ export default function CertificationsAdmin() {
               {isGuest
                 ? "Mode lecture seule - Réorganisation désactivée"
                 : "Glissez-déposez pour réorganiser les certifications"
-              }
-            </p>
-            <p className="text-xs text-muted-foreground">
-              L'ordre sera reflété sur la page d'accueil
+            }
+          </p>
+          <p className="text-xs text-muted-foreground">
+            L’ordre sera reflété sur la page d’accueil
             </p>
           </div>
           <Badge variant="outline" className="text-xs">

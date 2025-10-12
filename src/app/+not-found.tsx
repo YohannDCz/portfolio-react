@@ -45,10 +45,11 @@ export default function NotFound(): JSX.Element {
             >
               <div className="text-8xl font-bold text-primary/20 mb-2">404</div>
               <div className="text-2xl font-semibold text-foreground mb-2">Page introuvable</div>
-              <p className="text-muted-foreground">
-                Oups ! Cette page semble s'être égarée dans le cyberespace.
-              </p>
             </motion.div>
+
+            <p className="text-muted-foreground">
+              Oups ! Cette page semble s’être égarée dans le cyberespace.
+            </p>
 
             {/* Fun animation */}
             <motion.div
@@ -71,7 +72,7 @@ export default function NotFound(): JSX.Element {
               <Link href="/" className="w-full">
                 <Button className="w-full gap-2" size="lg">
                   <Home className="w-4 h-4" />
-                  Retour à l'accueil
+                  Retour à l’accueil
                 </Button>
               </Link>
 
@@ -88,7 +89,7 @@ export default function NotFound(): JSX.Element {
               transition={{ delay: 1 }}
               className="text-xs text-muted-foreground mt-6"
             >
-              💡 Conseil : Vérifiez l'URL ou utilisez la navigation principale
+              💡 Conseil : Vérifiez l’URL ou utilisez la navigation principale
             </motion.p>
           </CardContent>
         </Card>

@@ -447,7 +447,7 @@ export default function NewProject() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="stars">Nombre d'étoiles</Label>
+                  <Label htmlFor="stars">Nombre d’étoiles</Label>
                   <Input
                     id="stars"
                     type="number"

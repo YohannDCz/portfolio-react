@@ -267,7 +267,7 @@ export default function EditCertification() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Modifier la Certification</h1>
           <p className="text-gray-600">
-            Modifiez les informations de "{certification?.title}"
+            Modifiez les informations de « {certification?.title} »
           </p>
         </div>
       </div>
