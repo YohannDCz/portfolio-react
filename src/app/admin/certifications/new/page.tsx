@@ -1,25 +1,31 @@
 'use client';
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useAdminGuest } from "@/contexts/AdminGuestContext";
-import { useTranslation } from "@/hooks/useTranslation";
-import { createCertification } from "@/lib/supabase";
-import { ArrowLeft, X } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useAdminGuest } from '@/contexts/AdminGuestContext';
+import { useTranslation } from '@/hooks/useTranslation';
+import { createCertification } from '@/lib/supabase';
+import { ArrowLeft, X } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 interface FormData {
   title: string;
   provider: string;
   year: string;
-  status: string;
+  status: 'completed' | 'in_progress' | 'planned' | 'to_deploy';
   description_fr: string;
   description_en: string;
   description_hi: string;
@@ -39,7 +45,7 @@ export default function NewCertification() {
   const { isGuest } = useAdminGuest();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const { translateFields, translating } = useTranslation();
 
   // État du formulaire
@@ -51,7 +57,7 @@ export default function NewCertification() {
     description_fr: '',
     description_en: '',
     description_hi: '',
-    description_ar: ''
+    description_ar: '',
   });
 
   // URLs des liens
@@ -61,38 +67,38 @@ export default function NewCertification() {
     verification: '',
     documentation: '',
     tutorials: '',
-    figma: ''
+    figma: '',
   });
 
   const handleInputChange = (field: keyof FormData, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleUrlChange = (type: keyof Urls, value: string) => {
-    setUrls(prev => ({
+    setUrls((prev) => ({
       ...prev,
-      [type]: value
+      [type]: value,
     }));
   };
 
   const removeUrl = (type: keyof Urls) => {
-    setUrls(prev => ({
+    setUrls((prev) => ({
       ...prev,
-      [type]: ''
+      [type]: '',
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setError('');
 
     // Validation basique
     if (!formData.title) {
-      setError("Le titre est obligatoire");
+      setError('Le titre est obligatoire');
       setLoading(false);
       return;
     }
@@ -107,7 +113,7 @@ export default function NewCertification() {
 
     const dataToSubmit = {
       ...formData,
-      certificate_urls: Object.keys(certificate_urls).length > 0 ? certificate_urls : null
+      certificate_urls: Object.keys(certificate_urls).length > 0 ? certificate_urls : undefined,
     };
 
     const result = await createCertification(dataToSubmit);
@@ -115,7 +121,7 @@ export default function NewCertification() {
     if (result.success) {
       router.push('/admin/certifications');
     } else {
-      setError(result.error);
+      setError(result.error || 'Erreur lors de la création');
     }
 
     setLoading(false);
@@ -125,25 +131,25 @@ export default function NewCertification() {
     const fieldMappings = [
       {
         sourceField: 'description_fr',
-        targetFields: ['description_en', 'description_hi', 'description_ar']
+        targetFields: ['description_en', 'description_hi', 'description_ar'],
       },
       {
         sourceField: 'description_en',
-        targetFields: ['description_fr', 'description_hi', 'description_ar']
-      }
-    ]
+        targetFields: ['description_fr', 'description_hi', 'description_ar'],
+      },
+    ];
 
-    const result = await translateFields(formData, setFormData, fieldMappings, true)
+    const result = await translateFields(formData, setFormData as any, fieldMappings, true);
 
     if (result.success) {
       // eslint-disable-next-line no-console
-      console.log(`✅ Successfully translated ${result.translated} field(s)`)
+      console.log(`✅ Successfully translated ${result.translated} field(s)`);
       // Show temporary success message
-      setError("")
+      setError('');
     } else if (result.error) {
       // eslint-disable-next-line no-console
-      console.error('❌ Translation failed:', result.error)
-      setError(`Erreur de traduction: ${result.error}`)
+      console.error('❌ Translation failed:', result.error);
+      setError(`Erreur de traduction: ${result.error}`);
     }
   };
 
@@ -176,9 +182,7 @@ export default function NewCertification() {
             <Card>
               <CardHeader>
                 <CardTitle>Informations générales</CardTitle>
-                <CardDescription>
-                  Détails de base de la certification
-                </CardDescription>
+                <CardDescription>Détails de base de la certification</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -215,7 +219,10 @@ export default function NewCertification() {
 
                   <div className="space-y-2">
                     <Label htmlFor="status">Statut</Label>
-                    <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+                    <Select
+                      value={formData.status}
+                      onValueChange={(value) => handleInputChange('status', value)}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -235,9 +242,7 @@ export default function NewCertification() {
             <Card>
               <CardHeader>
                 <CardTitle>Liens et ressources</CardTitle>
-                <CardDescription>
-                  URLs liées à la certification
-                </CardDescription>
+                <CardDescription>URLs liées à la certification</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -389,7 +394,13 @@ export default function NewCertification() {
                 Descriptions de la certification dans différentes langues
               </CardDescription>
               <div className="mt-2">
-                <Button type="button" variant="outline" size="sm" onClick={handleAutoTranslate} disabled={translating}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAutoTranslate}
+                  disabled={translating}
+                >
                   {translating ? 'Traduction...' : '🌍 Traduire automatiquement'}
                 </Button>
               </div>
@@ -453,7 +464,7 @@ export default function NewCertification() {
                   </Button>
                 </Link>
                 <Button type="submit" disabled={loading || isGuest}>
-                  {loading ? "Création..." : "Créer la certification"}
+                  {loading ? 'Création...' : 'Créer la certification'}
                 </Button>
               </div>
             </CardContent>

@@ -7,7 +7,11 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier . --write"
+    "format": "prettier . --write",
+    "check:types": "tsc --noEmit",
+    "check:lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "check:next": "next build",
+    "check": "pnpm run check:types && pnpm run check:lint && pnpm run check:next"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",

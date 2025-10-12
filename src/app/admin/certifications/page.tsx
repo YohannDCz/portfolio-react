@@ -1,47 +1,45 @@
 'use client';
 
-import CertificationDragDrop from "@/components/CertificationDragDrop";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAdminGuest } from "@/contexts/AdminGuestContext";
+import CertificationDragDrop from '@/components/CertificationDragDrop';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
-  deleteCertification,
-  reorderCertifications,
-  useCertifications
-} from "@/lib/supabase";
-import {
-  Filter,
-  Plus,
-  Search
-} from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useAdminGuest } from '@/contexts/AdminGuestContext';
+import { deleteCertification, reorderCertifications, useCertifications } from '@/lib/supabase';
+import { Filter, Plus, Search } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
 
 export default function CertificationsAdmin() {
   const { isGuest } = useAdminGuest();
   const { certifications, loading, error } = useCertifications();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [deleteLoading, setDeleteLoading] = useState("");
-  const [deleteError, setDeleteError] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [deleteLoading, setDeleteLoading] = useState('');
+  const [deleteError, setDeleteError] = useState('');
 
   const handleDelete = async (certId: string, certTitle: string) => {
     setDeleteLoading(certId);
-    setDeleteError("");
+    setDeleteError('');
 
     const result = await deleteCertification(certId);
 
     if (result.success) {
       window.location.reload();
     } else {
-      setDeleteError(result.error);
+      setDeleteError(result.error || 'Erreur lors de la suppression');
     }
 
-    setDeleteLoading("");
+    setDeleteLoading('');
   };
 
   const handleReorder = async (reorderedCertifications: any[]) => {
@@ -54,19 +52,21 @@ export default function CertificationsAdmin() {
         setDeleteError(result.error);
       }
     } catch (error) {
-      setDeleteError("Erreur lors de la réorganisation");
+      setDeleteError('Erreur lors de la réorganisation');
     }
   };
 
   // Filtrer les certifications
-  const filteredCertifications = certifications?.filter(cert => {
-    const matchesSearch = cert.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cert.provider?.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredCertifications =
+    certifications?.filter((cert) => {
+      const matchesSearch =
+        cert.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        cert.provider?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesStatus = statusFilter === "all" || cert.status === statusFilter;
+      const matchesStatus = statusFilter === 'all' || cert.status === statusFilter;
 
-    return matchesSearch && matchesStatus;
-  }) || [];
+      return matchesSearch && matchesStatus;
+    }) || [];
 
   if (loading) {
     return (
@@ -95,9 +95,7 @@ export default function CertificationsAdmin() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Certifications</h1>
-          <p className="text-gray-600">
-            Gérez vos certifications et formations
-          </p>
+          <p className="text-gray-600">Gérez vos certifications et formations</p>
         </div>
         <Link href="/admin/certifications/new" passHref>
           <Button disabled={isGuest}>
@@ -147,7 +145,7 @@ export default function CertificationsAdmin() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">
-              {certifications?.filter(c => c.status === 'completed').length || 0}
+              {certifications?.filter((c) => c.status === 'completed').length || 0}
             </div>
             <p className="text-xs text-muted-foreground">Obtenues</p>
           </CardContent>
@@ -155,7 +153,7 @@ export default function CertificationsAdmin() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">
-              {certifications?.filter(c => c.status === 'in_progress').length || 0}
+              {certifications?.filter((c) => c.status === 'in_progress').length || 0}
             </div>
             <p className="text-xs text-muted-foreground">En cours</p>
           </CardContent>
@@ -163,7 +161,7 @@ export default function CertificationsAdmin() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">
-              {certifications?.filter(c => c.status === 'planned').length || 0}
+              {certifications?.filter((c) => c.status === 'planned').length || 0}
             </div>
             <p className="text-xs text-muted-foreground">Planifiées</p>
           </CardContent>
@@ -183,16 +181,16 @@ export default function CertificationsAdmin() {
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">
               {isGuest
-                ? "Mode lecture seule - Réorganisation désactivée"
-                : "Glissez-déposez pour réorganiser les certifications"
-              }
+                ? 'Mode lecture seule - Réorganisation désactivée'
+                : 'Glissez-déposez pour réorganiser les certifications'}
             </p>
             <p className="text-xs text-muted-foreground">
               L&apos;ordre sera reflété sur la page d&apos;accueil
             </p>
           </div>
           <Badge variant="outline" className="text-xs">
-            {filteredCertifications.length} certification{filteredCertifications.length > 1 ? 's' : ''}
+            {filteredCertifications.length} certification
+            {filteredCertifications.length > 1 ? 's' : ''}
           </Badge>
         </div>
 
@@ -214,13 +212,14 @@ export default function CertificationsAdmin() {
                 <Plus className="w-8 h-8 text-gray-400" />
               </div>
               <h3 className="text-lg font-semibold mb-2">
-                {searchQuery || statusFilter !== "all" ? "Aucune certification trouvée" : "Aucune certification"}
+                {searchQuery || statusFilter !== 'all'
+                  ? 'Aucune certification trouvée'
+                  : 'Aucune certification'}
               </h3>
               <p className="text-gray-600 mb-4">
-                {searchQuery || statusFilter !== "all"
-                  ? "Essayez de modifier vos critères de recherche"
-                  : "Commencez par ajouter votre première certification"
-                }
+                {searchQuery || statusFilter !== 'all'
+                  ? 'Essayez de modifier vos critères de recherche'
+                  : 'Commencez par ajouter votre première certification'}
               </p>
               <Link href="/admin/certifications/new" passHref>
                 <Button disabled={isGuest}>
