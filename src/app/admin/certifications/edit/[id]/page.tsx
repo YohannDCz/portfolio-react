@@ -1,25 +1,31 @@
 'use client';
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useAdminGuest } from "@/contexts/AdminGuestContext";
-import { useTranslation } from "@/hooks/useTranslation";
-import { getCertification, updateCertification } from "@/lib/supabase";
-import { ArrowLeft, Loader2, X } from "lucide-react";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useAdminGuest } from '@/contexts/AdminGuestContext';
+import { useTranslation } from '@/hooks/useTranslation';
+import { getCertification, updateCertification } from '@/lib/supabase';
+import { ArrowLeft, Loader2, X } from 'lucide-react';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface FormData {
   title: string;
   provider: string;
   year: string;
-  status: string;
+  status: 'completed' | 'in_progress' | 'planned' | 'to_deploy';
   description_fr: string;
   description_en: string;
   description_hi: string;
@@ -42,7 +48,7 @@ export default function EditCertification() {
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [certification, setCertification] = useState<any>(null);
   const { translateFields, translating } = useTranslation();
 
@@ -55,7 +61,7 @@ export default function EditCertification() {
     description_fr: '',
     description_en: '',
     description_hi: '',
-    description_ar: ''
+    description_ar: '',
   });
 
   // URLs des liens
@@ -65,30 +71,36 @@ export default function EditCertification() {
     verification: '',
     documentation: '',
     tutorials: '',
-    figma: ''
+    figma: '',
   });
 
   // Récupérer la certification à éditer
   useEffect(() => {
     const fetchCertification = async () => {
+      if (!id) {
+        setError('ID de certification manquant');
+        setFetchLoading(false);
+        return;
+      }
+
       setFetchLoading(true);
-      setError("");
+      setError('');
 
       const result = await getCertification(id);
 
-      if (result.success) {
+      if (result.success && result.data) {
         const cert = result.data;
         setCertification(cert);
 
         setFormData({
           title: cert.title || '',
           provider: cert.provider || '',
-          year: cert.year || '',
+          year: '', // year n'existe pas dans le type Certification
           status: cert.status || 'planned',
           description_fr: cert.description_fr || '',
           description_en: cert.description_en || '',
-          description_hi: cert.description_hi || '',
-          description_ar: cert.description_ar || ''
+          description_hi: '', // description_hi n'existe pas dans le type Certification
+          description_ar: '', // description_ar n'existe pas dans le type Certification
         });
 
         // Extraire les URLs des certificate_urls JSON
@@ -99,7 +111,7 @@ export default function EditCertification() {
             verification: cert.certificate_urls.verification || '',
             documentation: cert.certificate_urls.documentation || '',
             tutorials: cert.certificate_urls.tutorials || '',
-            figma: cert.certificate_urls.figma || ''
+            figma: cert.certificate_urls.figma || '',
           });
         }
       } else {
@@ -115,34 +127,40 @@ export default function EditCertification() {
   }, [id]);
 
   const handleInputChange = (field: keyof FormData, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleUrlChange = (type: keyof Urls, value: string) => {
-    setUrls(prev => ({
+    setUrls((prev) => ({
       ...prev,
-      [type]: value
+      [type]: value,
     }));
   };
 
   const removeUrl = (type: keyof Urls) => {
-    setUrls(prev => ({
+    setUrls((prev) => ({
       ...prev,
-      [type]: ''
+      [type]: '',
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setError('');
 
     // Validation basique
     if (!formData.title) {
-      setError("Le titre est obligatoire");
+      setError('Le titre est obligatoire');
+      setLoading(false);
+      return;
+    }
+
+    if (!id) {
+      setError('ID de certification manquant');
       setLoading(false);
       return;
     }
@@ -157,7 +175,7 @@ export default function EditCertification() {
 
     const dataToSubmit = {
       ...formData,
-      certificate_urls: Object.keys(certificate_urls).length > 0 ? certificate_urls : null
+      certificate_urls: Object.keys(certificate_urls).length > 0 ? certificate_urls : undefined,
     };
 
     const result = await updateCertification(id, dataToSubmit);
@@ -165,7 +183,7 @@ export default function EditCertification() {
     if (result.success) {
       router.push('/admin/certifications');
     } else {
-      setError(result.error);
+      setError(result.error || 'Erreur lors de la mise à jour');
     }
 
     setLoading(false);
@@ -175,25 +193,25 @@ export default function EditCertification() {
     const fieldMappings = [
       {
         sourceField: 'description_fr',
-        targetFields: ['description_en', 'description_hi', 'description_ar']
+        targetFields: ['description_en', 'description_hi', 'description_ar'],
       },
       {
         sourceField: 'description_en',
-        targetFields: ['description_fr', 'description_hi', 'description_ar']
-      }
-    ]
+        targetFields: ['description_fr', 'description_hi', 'description_ar'],
+      },
+    ];
 
-    const result = await translateFields(formData, setFormData, fieldMappings, true)
+    const result = await translateFields(formData, setFormData as any, fieldMappings, true);
 
     if (result.success) {
       // eslint-disable-next-line no-console
-      console.log(`✅ Successfully translated ${result.translated} field(s)`)
+      console.log(`✅ Successfully translated ${result.translated} field(s)`);
       // Show temporary success message
-      setError("")
+      setError('');
     } else if (result.error) {
       // eslint-disable-next-line no-console
-      console.error('❌ Translation failed:', result.error)
-      setError(`Erreur de traduction: ${result.error}`)
+      console.error('❌ Translation failed:', result.error);
+      setError(`Erreur de traduction: ${result.error}`);
     }
   };
 
@@ -287,9 +305,7 @@ export default function EditCertification() {
             <Card>
               <CardHeader>
                 <CardTitle>Informations générales</CardTitle>
-                <CardDescription>
-                  Détails de base de la certification
-                </CardDescription>
+                <CardDescription>Détails de base de la certification</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -326,7 +342,10 @@ export default function EditCertification() {
 
                   <div className="space-y-2">
                     <Label htmlFor="status">Statut</Label>
-                    <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+                    <Select
+                      value={formData.status}
+                      onValueChange={(value) => handleInputChange('status', value)}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -345,9 +364,7 @@ export default function EditCertification() {
             <Card>
               <CardHeader>
                 <CardTitle>Liens et ressources</CardTitle>
-                <CardDescription>
-                  URLs liées à la certification
-                </CardDescription>
+                <CardDescription>URLs liées à la certification</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -499,7 +516,13 @@ export default function EditCertification() {
                 Descriptions de la certification dans différentes langues
               </CardDescription>
               <div className="mt-2">
-                <Button type="button" variant="outline" size="sm" onClick={handleAutoTranslate} disabled={translating}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAutoTranslate}
+                  disabled={translating}
+                >
                   {translating ? 'Traduction...' : '🌍 Traduire automatiquement'}
                 </Button>
               </div>
@@ -569,7 +592,7 @@ export default function EditCertification() {
                       Mise à jour...
                     </>
                   ) : (
-                    "Mettre à jour la certification"
+                    'Mettre à jour la certification'
                   )}
                 </Button>
               </div>
