@@ -68,6 +68,7 @@ export default function CertificationDragDrop({
 }: CertificationDragDropProps): JSX.Element {
   const { isGuest } = useAdminGuest();
   const [isDragDisabled, setIsDragDisabled] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   /**
    * Handle drag end event and reorder certifications
@@ -81,6 +82,7 @@ export default function CertificationDragDrop({
     if (source.index === destination.index) return;
 
     setIsDragDisabled(true);
+    setErrorMessage(null);
 
     try {
       // Create reordered array
@@ -91,7 +93,7 @@ export default function CertificationDragDrop({
       // Call parent's reorder function
       await onReorder(items);
     } catch (error) {
-      console.error('Failed to reorder certifications:', error);
+      setErrorMessage("Impossible de réordonner les certifications. Veuillez réessayer.");
     } finally {
       setIsDragDisabled(false);
     }
@@ -130,15 +132,20 @@ export default function CertificationDragDrop({
   };
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <Droppable droppableId="certifications-list">
-        {(provided, snapshot) => (
-          <div
-            {...provided.droppableProps}
-            ref={provided.innerRef}
-            className={`grid gap-4 md:grid-cols-2 lg:grid-cols-3 transition-colors ${snapshot.isDraggingOver ? 'bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2' : ''
-              }`}
-          >
+    <>
+      {errorMessage && (
+        <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/60 dark:text-red-100">
+          {errorMessage}
+        </div>
+      )}
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="certifications-list">
+          {(provided, snapshot) => (
+            <div
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              className={`grid gap-4 md:grid-cols-2 lg:grid-cols-3 transition-colors ${snapshot.isDraggingOver ? 'bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2' : ''}`}
+            >
             {certifications.map((cert, index) => (
               <Draggable
                 key={cert.id}
@@ -261,5 +268,6 @@ export default function CertificationDragDrop({
         )}
       </Droppable>
     </DragDropContext>
+    </>
   );
 }

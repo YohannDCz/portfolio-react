@@ -75,8 +75,6 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     return Response.json(successResponse);
   } catch (error) {
-    console.error('Translation error:', error);
-
     const errorResponse: ErrorResponse = {
       error: error instanceof Error ? error.message : 'Unknown error occurred',
       translatedText: '',

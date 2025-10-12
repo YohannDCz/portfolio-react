@@ -17,6 +17,8 @@ interface TranslationResult {
   translated?: number;
   updates?: Record<string, string>;
   error?: string;
+  failedFields?: string[];
+  shouldNotify?: boolean;
 }
 
 interface UseTranslationReturn {
@@ -63,6 +65,7 @@ export function useTranslation(): UseTranslationReturn {
     try {
       const updates: Record<string, string> = {};
       let translationCount = 0;
+      const failedFields: string[] = [];
 
       // Process each field mapping
       for (const { sourceField, targetFields } of fieldMappings) {
@@ -99,14 +102,21 @@ export function useTranslation(): UseTranslationReturn {
               }),
             });
 
+            if (!response.ok) {
+              failedFields.push(targetField);
+              continue;
+            }
+
             const data = await response.json();
 
             if (data.success && data.translatedText) {
               updates[targetField] = data.translatedText;
               translationCount++;
+            } else {
+              failedFields.push(targetField);
             }
           } catch (error) {
-            console.error(`Translation failed for ${targetField}:`, error);
+            failedFields.push(targetField);
           }
         }
       }
@@ -119,16 +129,18 @@ export function useTranslation(): UseTranslationReturn {
         }));
       }
 
-      // Show success notification if requested
-      if (translationCount > 0 && showNotification) {
-        console.log(`✅ Successfully translated ${translationCount} field(s)`);
-      }
+      const shouldNotify = translationCount > 0 && showNotification;
 
-      return { success: translationCount > 0, translated: translationCount, updates };
+      return {
+        success: translationCount > 0,
+        translated: translationCount,
+        updates,
+        failedFields: failedFields.length > 0 ? failedFields : undefined,
+        shouldNotify,
+      };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      console.error('Translation error:', error);
-      return { success: false, error: errorMessage };
+      return { success: false, error: errorMessage, shouldNotify: false };
     } finally {
       setTranslating(false);
     }
