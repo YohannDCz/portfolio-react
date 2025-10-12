@@ -85,7 +85,7 @@ export default function AdminLogin(): JSX.Element {
         <Card>
           <CardHeader>
             <CardTitle>Connexion Admin</CardTitle>
-            <CardDescription>Saisissez vos identifiants d'administrateur</CardDescription>
+            <CardDescription>Saisissez vos identifiants d’administrateur</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -144,7 +144,7 @@ export default function AdminLogin(): JSX.Element {
         </Card>
 
         <div className="text-center text-sm text-gray-500">
-          <p>Interface d'administration sécurisée</p>
+          <p>Interface d’administration sécurisée</p>
           <p>Accès restreint aux administrateurs autorisés</p>
         </div>
       </div>

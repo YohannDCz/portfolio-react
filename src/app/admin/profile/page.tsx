@@ -546,7 +546,7 @@ export default function ProfileAdmin() {
           {/* Taglines */}
           <Card>
             <CardHeader>
-              <CardTitle>Phrases d'accroche</CardTitle>
+              <CardTitle>Phrases d’accroche</CardTitle>
               <CardDescription>
                 Phrases courtes qui vous décrivent
               </CardDescription>
@@ -559,7 +559,7 @@ export default function ProfileAdmin() {
                     id="tagline_fr"
                     value={formData.tagline_fr}
                     onChange={(e) => handleInputChange('tagline_fr', e.target.value)}
-                    placeholder="Passionné par la création d'applications web modernes..."
+                    placeholder="Passionné par la création d’applications web modernes..."
                     rows={3}
                   />
                 </div>

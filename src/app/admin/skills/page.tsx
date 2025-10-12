@@ -524,7 +524,7 @@ export default function SkillsAdmin() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Supprimer la compétence</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Êtes-vous sûr de vouloir supprimer la compétence "{skill.name}" ?
+                          Êtes-vous sûr de vouloir supprimer la compétence « {skill.name} » ?
                           Cette action est irréversible.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
