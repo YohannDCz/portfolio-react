@@ -184,8 +184,10 @@ export default function NewProject() {
     const result = await translateFields(formData, setFormData, fieldMappings, true)
 
     if (result.success) {
+      // eslint-disable-next-line no-console
       console.log(`✅ Translated ${result.translated} fields - Page will refresh soon!`)
     } else if (result.error) {
+      // eslint-disable-next-line no-console
       console.error('❌ Translation failed:', result.error)
     }
   }
@@ -447,7 +449,7 @@ export default function NewProject() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="stars">Nombre d'étoiles</Label>
+                  <Label htmlFor="stars">Nombre d&apos;étoiles</Label>
                   <Input
                     id="stars"
                     type="number"

@@ -136,10 +136,12 @@ export default function NewCertification() {
     const result = await translateFields(formData, setFormData, fieldMappings, true)
 
     if (result.success) {
+      // eslint-disable-next-line no-console
       console.log(`✅ Successfully translated ${result.translated} field(s)`)
       // Show temporary success message
       setError("")
     } else if (result.error) {
+      // eslint-disable-next-line no-console
       console.error('❌ Translation failed:', result.error)
       setError(`Erreur de traduction: ${result.error}`)
     }

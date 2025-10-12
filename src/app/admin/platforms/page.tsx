@@ -348,7 +348,7 @@ export default function PlatformsAdmin() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="reviews_count">Nombre d'avis</Label>
+                    <Label htmlFor="reviews_count">Nombre d&apos;avis</Label>
                     <Input
                       id="reviews_count"
                       type="number"
@@ -566,7 +566,7 @@ export default function PlatformsAdmin() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Supprimer la plateforme</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Êtes-vous sûr de vouloir supprimer la plateforme "{platform.name}" ?
+                          Êtes-vous sûr de vouloir supprimer la plateforme {`"${platform.name}"`} ?
                           Cette action est irréversible.
                         </AlertDialogDescription>
                       </AlertDialogHeader>

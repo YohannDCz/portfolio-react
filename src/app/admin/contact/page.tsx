@@ -77,6 +77,7 @@ export default function ContactMessagesPage() {
 
   useEffect(() => {
     fetchMessages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, languageFilter]);
 
   // Marquer comme lu
@@ -98,6 +99,7 @@ export default function ContactMessagesPage() {
         setSelectedMessage(prev => prev ? { ...prev, status: 'read' } : null);
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error('Erreur lors du marquage comme lu:', err);
     }
   };
@@ -120,6 +122,7 @@ export default function ContactMessagesPage() {
         setSelectedMessage(prev => prev ? { ...prev, status: 'replied' } : null);
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error('Erreur lors du marquage comme répondu:', err);
     }
   };
@@ -144,6 +147,7 @@ export default function ContactMessagesPage() {
         setSelectedMessage(null);
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error('Erreur lors de la suppression:', err);
     }
   };

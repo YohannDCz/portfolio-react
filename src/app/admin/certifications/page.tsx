@@ -188,7 +188,7 @@ export default function CertificationsAdmin() {
               }
             </p>
             <p className="text-xs text-muted-foreground">
-              L'ordre sera reflété sur la page d'accueil
+              L&apos;ordre sera reflété sur la page d&apos;accueil
             </p>
           </div>
           <Badge variant="outline" className="text-xs">

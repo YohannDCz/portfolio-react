@@ -175,7 +175,7 @@ export default function AdminDashboard(): JSX.Element {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600">
-            Bienvenue dans votre panel d'administration
+            Bienvenue dans votre panel d&apos;administration
           </p>
         </div>
         <div className="flex items-center space-x-2">

@@ -213,7 +213,9 @@ export default function ProfileAdmin() {
     }
 
     // Debug profile ID
+    // eslint-disable-next-line no-console
     console.log('Profile ID:', profile?.id);
+    // eslint-disable-next-line no-console
     console.log('Payload:', payload);
 
     if (!profile?.id) {
@@ -281,8 +283,10 @@ export default function ProfileAdmin() {
     const result = await translateFields(formData, setFormData, fieldMappings, true)
 
     if (result.success) {
+      // eslint-disable-next-line no-console
       console.log(`✅ Translated ${result.translated} fields - Page will refresh soon!`)
     } else if (result.error) {
+      // eslint-disable-next-line no-console
       console.error('❌ Translation failed:', result.error)
     }
   }
@@ -546,7 +550,7 @@ export default function ProfileAdmin() {
           {/* Taglines */}
           <Card>
             <CardHeader>
-              <CardTitle>Phrases d'accroche</CardTitle>
+              <CardTitle>Phrases d&apos;accroche</CardTitle>
               <CardDescription>
                 Phrases courtes qui vous décrivent
               </CardDescription>

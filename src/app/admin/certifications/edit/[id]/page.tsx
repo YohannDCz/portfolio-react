@@ -186,10 +186,12 @@ export default function EditCertification() {
     const result = await translateFields(formData, setFormData, fieldMappings, true)
 
     if (result.success) {
+      // eslint-disable-next-line no-console
       console.log(`✅ Successfully translated ${result.translated} field(s)`)
       // Show temporary success message
       setError("")
     } else if (result.error) {
+      // eslint-disable-next-line no-console
       console.error('❌ Translation failed:', result.error)
       setError(`Erreur de traduction: ${result.error}`)
     }
@@ -267,7 +269,7 @@ export default function EditCertification() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Modifier la Certification</h1>
           <p className="text-gray-600">
-            Modifiez les informations de "{certification?.title}"
+            Modifiez les informations de {`"${certification?.title}"`}
           </p>
         </div>
       </div>
