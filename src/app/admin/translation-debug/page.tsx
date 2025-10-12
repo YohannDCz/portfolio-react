@@ -96,6 +96,7 @@ export default function TranslationDebugPage() {
 
   useEffect(() => {
     loadDashboardData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadDashboardData = async () => {
@@ -108,6 +109,7 @@ export default function TranslationDebugPage() {
         loadCacheStats()
       ])
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to load dashboard data:', error)
     } finally {
       setLoading(false)
@@ -120,6 +122,7 @@ export default function TranslationDebugPage() {
       const data = await response.json()
       setHealthStatus(data)
     } catch (error: any) {
+      // eslint-disable-next-line no-console
       console.error('Failed to load health status:', error)
       setHealthStatus({ status: 'error', error: error.message })
     }
@@ -133,6 +136,7 @@ export default function TranslationDebugPage() {
         setAnalytics(data)
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to load analytics:', error)
     }
   }
@@ -145,6 +149,7 @@ export default function TranslationDebugPage() {
         setErrors(data)
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to load error stats:', error)
     }
   }
@@ -157,6 +162,7 @@ export default function TranslationDebugPage() {
         setCacheStats(data)
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to load cache stats:', error)
     }
   }

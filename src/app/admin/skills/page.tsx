@@ -162,7 +162,10 @@ export default function SkillsAdmin() {
     }
 
     // Debug: Log the form data being submitted
-    console.log('Submitting skill data:', formData);
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.log('Submitting skill data:', formData);
+    }
 
     let result;
     if (editingSkill) {
@@ -172,7 +175,10 @@ export default function SkillsAdmin() {
     }
 
     // Debug: Log the result
-    console.log('Skill creation/update result:', result);
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.log('Skill creation/update result:', result);
+    }
 
     if (result.success) {
       resetForm();
@@ -524,7 +530,7 @@ export default function SkillsAdmin() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Supprimer la compétence</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Êtes-vous sûr de vouloir supprimer la compétence "{skill.name}" ?
+                          Êtes-vous sûr de vouloir supprimer la compétence {`"${skill.name}"`} ?
                           Cette action est irréversible.
                         </AlertDialogDescription>
                       </AlertDialogHeader>

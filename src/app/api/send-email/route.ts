@@ -206,6 +206,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       .single();
 
     if (supabaseError) {
+      // eslint-disable-next-line no-console
       console.error('Erreur Supabase:', supabaseError);
       return NextResponse.json(
         { success: false, error: 'Erreur lors de la sauvegarde' },
@@ -229,11 +230,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         });
 
         if (emailError) {
+          // eslint-disable-next-line no-console
           console.error('Erreur Resend:', emailError);
           // Don't fail the request if email doesn't send
           // Message is still saved in database
         }
       } catch (emailError) {
+        // eslint-disable-next-line no-console
         console.error("Erreur lors de l'envoi d'email:", emailError);
         // Email is optional, continue even on error
       }
@@ -245,6 +248,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       message: 'Message envoyé avec succès',
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Erreur API:', error);
     return NextResponse.json({ success: false, error: 'Erreur serveur interne' }, { status: 500 });
   }

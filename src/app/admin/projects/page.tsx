@@ -283,7 +283,7 @@ export default function ProjectsAdmin(): JSX.Element {
                           <AlertDialogHeader>
                             <AlertDialogTitle>Supprimer le projet</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Êtes-vous sûr de vouloir supprimer "{project.title_fr}" ? Cette action est irréversible.
+                              Êtes-vous sûr de vouloir supprimer {`"${project.title_fr}"`} ? Cette action est irréversible.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -614,7 +614,7 @@ export default function ProjectsAdmin(): JSX.Element {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Supprimer le projet</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Êtes-vous sûr de vouloir supprimer le projet "{project.title_fr}" ?
+                            Êtes-vous sûr de vouloir supprimer le projet {`"${project.title_fr}"`} ?
                             Cette action est irréversible.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
