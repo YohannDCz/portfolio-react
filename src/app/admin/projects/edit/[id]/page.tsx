@@ -1,31 +1,37 @@
 'use client';
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useAdminGuest } from "@/contexts/AdminGuestContext";
-import { useTranslation } from "@/hooks/useTranslation";
-import { getProject, updateProject, uploadImageAndGetPublicUrl } from "@/lib/supabase";
-import { ArrowLeft, Loader2, Plus, X } from "lucide-react";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { JSX, useEffect, useState } from "react";
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useAdminGuest } from '@/contexts/AdminGuestContext';
+import { useTranslation } from '@/hooks/useTranslation';
+import { getProject, updateProject, uploadImageAndGetPublicUrl } from '@/lib/supabase';
+import { ArrowLeft, Loader2, Plus, X } from 'lucide-react';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { JSX, useEffect, useState } from 'react';
 
 // TypeScript imports et interfaces
-import type { Project } from "@/types";
+import type { Project } from '@/types';
 
 interface ProjectFormData {
   external_id: string;
   title_fr: string;
   title_en: string;
-  title_hi: string;
   title_ar: string;
+  title_hi: string;
   description_fr: string;
   description_en: string;
   description_hi: string;
@@ -47,12 +53,34 @@ interface ProjectFormData {
 
 const CATEGORIES: readonly string[] = ['web', 'mobile', 'design', 'autre'] as const;
 const TECH_TAGS: readonly string[] = [
-  'React', 'Vue.js', 'Angular', 'Next.js', 'Nuxt.js',
-  'Node.js', 'Express', 'PHP', 'Laravel', 'Python',
-  'React Native', 'Flutter', 'Swift', 'Kotlin',
-  'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Sass',
-  'Tailwind CSS', 'Bootstrap', 'MongoDB', 'PostgreSQL',
-  'MySQL', 'Firebase', 'Supabase', 'Docker', 'AWS'
+  'React',
+  'Vue.js',
+  'Angular',
+  'Next.js',
+  'Nuxt.js',
+  'Node.js',
+  'Express',
+  'PHP',
+  'Laravel',
+  'Python',
+  'React Native',
+  'Flutter',
+  'Swift',
+  'Kotlin',
+  'TypeScript',
+  'JavaScript',
+  'HTML',
+  'CSS',
+  'Sass',
+  'Tailwind CSS',
+  'Bootstrap',
+  'MongoDB',
+  'PostgreSQL',
+  'MySQL',
+  'Firebase',
+  'Supabase',
+  'Docker',
+  'AWS',
 ] as const;
 
 export default function EditProject(): JSX.Element {
@@ -64,7 +92,7 @@ export default function EditProject(): JSX.Element {
   // State variables avec typage TypeScript complet
   const [loading, setLoading] = useState<boolean>(false);
   const [fetchLoading, setFetchLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string>('');
   const [project, setProject] = useState<Project | null>(null);
 
   // État du formulaire avec typage TypeScript
@@ -90,7 +118,7 @@ export default function EditProject(): JSX.Element {
     is_mega_project: false,
     stack: '',
     priority: 1,
-    sort_order: 0
+    sort_order: 0,
   });
 
   const [newTag, setNewTag] = useState<string>('');
@@ -101,14 +129,14 @@ export default function EditProject(): JSX.Element {
   useEffect(() => {
     const fetchProject = async (): Promise<void> => {
       if (!id) {
-        setError("ID du projet manquant");
+        setError('ID du projet manquant');
         setFetchLoading(false);
         return;
       }
-      
+
       setFetchLoading(true);
-      setError("");
-      
+      setError('');
+
       const result = await getProject(id);
 
       if (result.success) {
@@ -135,7 +163,7 @@ export default function EditProject(): JSX.Element {
           is_mega_project: result.data?.is_mega_project || false,
           stack: result.data?.stack || '',
           priority: result.data?.priority || 1,
-          sort_order: result.data?.sort_order || 0
+          sort_order: result.data?.sort_order || 0,
         });
       } else {
         setError(`Erreur lors du chargement du projet: ${result.error}`);
@@ -150,59 +178,63 @@ export default function EditProject(): JSX.Element {
   }, [id]);
 
   const handleInputChange = (field: keyof ProjectFormData, value: any): void => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleCategoryChange = (category: string, checked: boolean): void => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       category: checked
         ? [...prev.category, category]
-        : prev.category.filter(c => c !== category)
+        : prev.category.filter((c) => c !== category),
     }));
   };
 
   const addTag = (tag: string): void => {
     if (tag && !formData.tags.includes(tag)) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        tags: [...prev.tags, tag]
+        tags: [...prev.tags, tag],
       }));
     }
     setNewTag('');
   };
 
   const removeTag = (tagToRemove: string): void => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
+      tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setError('');
 
     // Validation basique
     if (!formData.title_fr || !formData.title_en) {
-      setError("Les titres en français et anglais sont obligatoires");
+      setError('Les titres en français et anglais sont obligatoires');
       setLoading(false);
       return;
     }
 
     if (formData.category.length === 0) {
-      setError("Sélectionnez au moins une catégorie");
+      setError('Sélectionnez au moins une catégorie');
       setLoading(false);
       return;
     }
 
     let payload = { ...formData };
     if (imageFile) {
-      const upload = await uploadImageAndGetPublicUrl({ bucket: 'images', folder: 'projects', file: imageFile });
+      const upload = await uploadImageAndGetPublicUrl({
+        bucket: 'images',
+        folder: 'projects',
+        file: imageFile,
+      });
       if (!upload.success) {
         setError(upload.error || "Erreur lors de l'upload de l'image");
         setLoading(false);
@@ -212,7 +244,7 @@ export default function EditProject(): JSX.Element {
     }
 
     if (!id) {
-      setError("ID du projet manquant");
+      setError('ID du projet manquant');
       setLoading(false);
       return;
     }
@@ -222,7 +254,7 @@ export default function EditProject(): JSX.Element {
     if (result.success) {
       router.push('/admin/projects');
     } else {
-      setError(result.error || "Erreur lors de la mise à jour du projet");
+      setError(result.error || 'Erreur lors de la mise à jour du projet');
     }
 
     setLoading(false);
@@ -232,35 +264,35 @@ export default function EditProject(): JSX.Element {
     const fieldMappings = [
       {
         sourceField: 'title_fr',
-        targetFields: ['title_en', 'title_hi', 'title_ar']
+        targetFields: ['title_en', 'title_hi', 'title_ar'],
       },
       {
         sourceField: 'title_en',
-        targetFields: ['title_fr', 'title_hi', 'title_ar']
+        targetFields: ['title_fr', 'title_hi', 'title_ar'],
       },
       {
         sourceField: 'description_fr',
-        targetFields: ['description_en', 'description_hi', 'description_ar']
+        targetFields: ['description_en', 'description_hi', 'description_ar'],
       },
       {
         sourceField: 'description_en',
-        targetFields: ['description_fr', 'description_hi', 'description_ar']
-      }
-    ]
+        targetFields: ['description_fr', 'description_hi', 'description_ar'],
+      },
+    ];
 
     const result = await translateFields(
-      formData as Record<string, any>, 
-      setFormData as React.Dispatch<React.SetStateAction<Record<string, any>>>, 
-      fieldMappings, 
-      true
-    )
+      formData as Record<string, any>,
+      setFormData as React.Dispatch<React.SetStateAction<Record<string, any>>>,
+      fieldMappings,
+      true,
+    );
 
     if (result.success) {
       // console.log(`✅ Translated ${result.translated} fields - Page will refresh soon!`)
     } else if (result.error) {
       // console.error('❌ Translation failed:', result.error)
     }
-  }
+  };
 
   if (fetchLoading) {
     return (
@@ -334,7 +366,7 @@ export default function EditProject(): JSX.Element {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Modifier le Projet</h1>
           <p className="text-gray-600">
-            Modifiez les informations de &ldquo;{project?.title_fr}&rdquo;
+            Modifiez les informations de &quot;{project?.title_fr}&rdquo;
           </p>
         </div>
       </div>
@@ -352,11 +384,15 @@ export default function EditProject(): JSX.Element {
             <Card>
               <CardHeader>
                 <CardTitle>Informations générales</CardTitle>
-                <CardDescription>
-                  Détails de base du projet
-                </CardDescription>
+                <CardDescription>Détails de base du projet</CardDescription>
                 <div className="mt-2">
-                  <Button type="button" variant="outline" size="sm" onClick={handleAutoTranslate} disabled={translating}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAutoTranslate}
+                    disabled={translating}
+                  >
                     {translating ? 'Traduction...' : 'Traduire automatiquement'}
                   </Button>
                 </div>
@@ -422,9 +458,7 @@ export default function EditProject(): JSX.Element {
             <Card>
               <CardHeader>
                 <CardTitle>Descriptions</CardTitle>
-                <CardDescription>
-                  Descriptions multilingues du projet
-                </CardDescription>
+                <CardDescription>Descriptions multilingues du projet</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -480,9 +514,7 @@ export default function EditProject(): JSX.Element {
           <Card>
             <CardHeader>
               <CardTitle>Catégories et Technologies</CardTitle>
-              <CardDescription>
-                Classification et technologies utilisées
-              </CardDescription>
+              <CardDescription>Classification et technologies utilisées</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Catégories */}
@@ -494,7 +526,9 @@ export default function EditProject(): JSX.Element {
                       <Checkbox
                         id={category}
                         checked={formData.category.includes(category)}
-                        onCheckedChange={(checked) => handleCategoryChange(category, Boolean(checked))}
+                        onCheckedChange={(checked) =>
+                          handleCategoryChange(category, Boolean(checked))
+                        }
                       />
                       <Label htmlFor={category} className="capitalize">
                         {category}
@@ -513,7 +547,7 @@ export default function EditProject(): JSX.Element {
                       <SelectValue placeholder="Sélectionner une technologie" />
                     </SelectTrigger>
                     <SelectContent>
-                      {TECH_TAGS.filter(tag => !formData.tags.includes(tag)).map((tag) => (
+                      {TECH_TAGS.filter((tag) => !formData.tags.includes(tag)).map((tag) => (
                         <SelectItem key={tag} value={tag}>
                           {tag}
                         </SelectItem>
@@ -563,14 +597,15 @@ export default function EditProject(): JSX.Element {
             <Card>
               <CardHeader>
                 <CardTitle>Paramètres</CardTitle>
-                <CardDescription>
-                  Configuration du projet
-                </CardDescription>
+                <CardDescription>Configuration du projet</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="status">Statut</Label>
-                  <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value) => handleInputChange('status', value)}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -625,7 +660,10 @@ export default function EditProject(): JSX.Element {
                 {formData.is_mega_project && (
                   <div className="space-y-2">
                     <Label htmlFor="stack">Stack principal</Label>
-                    <Select value={formData.stack} onValueChange={(value) => handleInputChange('stack', value)}>
+                    <Select
+                      value={formData.stack}
+                      onValueChange={(value) => handleInputChange('stack', value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionner la stack" />
                       </SelectTrigger>
@@ -645,9 +683,7 @@ export default function EditProject(): JSX.Element {
             <Card>
               <CardHeader>
                 <CardTitle>Liens</CardTitle>
-                <CardDescription>
-                  URLs et liens du projet
-                </CardDescription>
+                <CardDescription>URLs et liens du projet</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -722,7 +758,7 @@ export default function EditProject(): JSX.Element {
                       Mise à jour...
                     </>
                   ) : (
-                    "Mettre à jour le projet"
+                    'Mettre à jour le projet'
                   )}
                 </Button>
               </div>
@@ -733,6 +769,3 @@ export default function EditProject(): JSX.Element {
     </div>
   );
 }
-
-
-

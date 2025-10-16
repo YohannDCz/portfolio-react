@@ -77,15 +77,13 @@ export default function AdminLogin(): JSX.Element {
         <div className="text-center">
           <Shield className="mx-auto h-12 w-12 text-primary" />
           <h2 className="mt-6 text-3xl font-bold text-gray-900">Administration Portfolio</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Connectez-vous pour gérer votre contenu
-          </p>
+          <p className="mt-2 text-sm text-gray-600">Connectez-vous pour gérer votre contenu</p>
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle>Connexion Admin</CardTitle>
-            <CardDescription>Saisissez vos identifiants d'administrateur</CardDescription>
+            <CardDescription>Saisissez vos identifiants d$apos;administrateur</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -132,11 +130,7 @@ export default function AdminLogin(): JSX.Element {
             </form>
 
             <div className="mt-4 text-center text-sm">
-              <Button
-                variant="link"
-                className="text-gray-600"
-                onClick={handleReturnToSite}
-              >
+              <Button variant="link" className="text-gray-600" onClick={handleReturnToSite}>
                 Retour sur le site
               </Button>
             </div>
@@ -144,7 +138,7 @@ export default function AdminLogin(): JSX.Element {
         </Card>
 
         <div className="text-center text-sm text-gray-500">
-          <p>Interface d'administration sécurisée</p>
+          <p>Interface d$apos;administration sécurisée</p>
           <p>Accès restreint aux administrateurs autorisés</p>
         </div>
       </div>

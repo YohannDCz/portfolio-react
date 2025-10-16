@@ -1,6 +1,6 @@
 'use client';
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,32 +11,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useAdminGuest } from "@/contexts/AdminGuestContext";
+} from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useAdminGuest } from '@/contexts/AdminGuestContext';
 import {
   createFreelancePlatform,
   deleteFreelancePlatform,
   updateFreelancePlatform,
-  useFreelancePlatforms
-} from "@/lib/supabase";
-import {
-  Edit,
-  ExternalLink,
-  Globe,
-  Plus,
-  Save,
-  Search,
-  Star,
-  Trash2,
-  X
-} from "lucide-react";
-import { useState } from "react";
+  useFreelancePlatforms,
+} from '@/lib/supabase';
+import { Edit, ExternalLink, Globe, Plus, Save, Search, Star, Trash2, X } from 'lucide-react';
+import { useState } from 'react';
 
 const PREDEFINED_PLATFORMS = [
   {
@@ -45,7 +35,7 @@ const PREDEFINED_PLATFORMS = [
     description_fr: 'Plateforme française de freelance tech',
     description_en: 'French tech freelance platform',
     rating: 4.5,
-    reviews_count: 150
+    reviews_count: 150,
   },
   {
     name: 'Upwork',
@@ -53,7 +43,7 @@ const PREDEFINED_PLATFORMS = [
     description_fr: 'Plateforme internationale de freelance',
     description_en: 'International freelance platform',
     rating: 4.2,
-    reviews_count: 89
+    reviews_count: 89,
   },
   {
     name: 'Freelancer',
@@ -61,7 +51,7 @@ const PREDEFINED_PLATFORMS = [
     description_fr: 'Marketplace global pour freelances',
     description_en: 'Global marketplace for freelancers',
     rating: 4.0,
-    reviews_count: 45
+    reviews_count: 45,
   },
   {
     name: 'Fiverr',
@@ -69,7 +59,7 @@ const PREDEFINED_PLATFORMS = [
     description_fr: 'Plateforme de services créatifs',
     description_en: 'Creative services platform',
     rating: 4.3,
-    reviews_count: 76
+    reviews_count: 76,
   },
   {
     name: '99designs',
@@ -77,8 +67,8 @@ const PREDEFINED_PLATFORMS = [
     description_fr: 'Plateforme spécialisée en design',
     description_en: 'Design specialized platform',
     rating: 4.1,
-    reviews_count: 32
-  }
+    reviews_count: 32,
+  },
 ];
 
 interface FormData {
@@ -104,11 +94,11 @@ interface PredefinedPlatform {
 export default function PlatformsAdmin() {
   const { isGuest } = useAdminGuest();
   const { platforms, loading, error } = useFreelancePlatforms();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [editingPlatform, setEditingPlatform] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [actionLoading, setActionLoading] = useState("");
-  const [actionError, setActionError] = useState("");
+  const [actionLoading, setActionLoading] = useState('');
+  const [actionError, setActionError] = useState('');
 
   // État du formulaire
   const [formData, setFormData] = useState<FormData>({
@@ -119,7 +109,7 @@ export default function PlatformsAdmin() {
     description_hi: '',
     description_ar: '',
     rating: 0,
-    reviews_count: 0
+    reviews_count: 0,
   });
 
   const resetForm = () => {
@@ -131,7 +121,7 @@ export default function PlatformsAdmin() {
       description_hi: '',
       description_ar: '',
       rating: 0,
-      reviews_count: 0
+      reviews_count: 0,
     });
     setEditingPlatform(null);
     setShowAddForm(false);
@@ -146,7 +136,7 @@ export default function PlatformsAdmin() {
       description_hi: platform.description_hi || '',
       description_ar: platform.description_ar || '',
       rating: platform.rating || 0,
-      reviews_count: platform.reviews_count || 0
+      reviews_count: platform.reviews_count || 0,
     });
     setEditingPlatform(platform.id);
     setShowAddForm(false);
@@ -154,25 +144,25 @@ export default function PlatformsAdmin() {
     // Scroll vers le haut pour voir le formulaire d'édition
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: 'smooth',
     });
   };
 
   const handleInputChange = (field: keyof FormData, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setActionLoading(editingPlatform ? 'update' : 'create');
-    setActionError("");
+    setActionError('');
 
     if (!formData.name.trim() || !formData.url.trim()) {
       setActionError("Le nom et l'URL sont obligatoires");
-      setActionLoading("");
+      setActionLoading('');
       return;
     }
 
@@ -190,12 +180,12 @@ export default function PlatformsAdmin() {
       setActionError(result.error);
     }
 
-    setActionLoading("");
+    setActionLoading('');
   };
 
   const handleDelete = async (platformId: string, platformName: string) => {
     setActionLoading(platformId);
-    setActionError("");
+    setActionError('');
 
     const result = await deleteFreelancePlatform(platformId);
 
@@ -205,7 +195,7 @@ export default function PlatformsAdmin() {
       setActionError(result.error);
     }
 
-    setActionLoading("");
+    setActionLoading('');
   };
 
   const addPredefinedPlatform = async (predefinedPlatform: PredefinedPlatform) => {
@@ -216,19 +206,22 @@ export default function PlatformsAdmin() {
     } else {
       setActionError(result.error);
     }
-    setActionLoading("");
+    setActionLoading('');
   };
 
   // Filtrer les plateformes
-  const filteredPlatforms = platforms?.filter(platform => {
-    const matchesSearch = platform.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      platform.description_fr?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch;
-  }) || [];
+  const filteredPlatforms =
+    platforms?.filter((platform) => {
+      const matchesSearch =
+        platform.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        platform.description_fr?.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesSearch;
+    }) || [];
 
   // Plateformes prédéfinies non encore ajoutées
-  const availablePredefined = PREDEFINED_PLATFORMS.filter(predefined =>
-    !platforms?.some(platform => platform.name.toLowerCase() === predefined.name.toLowerCase())
+  const availablePredefined = PREDEFINED_PLATFORMS.filter(
+    (predefined) =>
+      !platforms?.some((platform) => platform.name.toLowerCase() === predefined.name.toLowerCase()),
   );
 
   const renderStars = (rating: number) => {
@@ -277,20 +270,19 @@ export default function PlatformsAdmin() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Plateformes Freelance</h1>
-          <p className="text-gray-600">
-            Gérez vos profils sur les plateformes de freelance
-          </p>
+          <p className="text-gray-600">Gérez vos profils sur les plateformes de freelance</p>
         </div>
-        <Button onClick={() => {
-          setShowAddForm(!showAddForm);
-          if (!showAddForm) {
-            // Scroll vers le haut pour voir le formulaire
-            window.scrollTo({
-              top: 0,
-              behavior: 'smooth'
-            });
-          }
-        }}
+        <Button
+          onClick={() => {
+            setShowAddForm(!showAddForm);
+            if (!showAddForm) {
+              // Scroll vers le haut pour voir le formulaire
+              window.scrollTo({
+                top: 0,
+                behavior: 'smooth',
+              });
+            }
+          }}
           disabled={isGuest}
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -348,13 +340,15 @@ export default function PlatformsAdmin() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="reviews_count">Nombre d'avis</Label>
+                    <Label htmlFor="reviews_count">Nombre d$apos;avis</Label>
                     <Input
                       id="reviews_count"
                       type="number"
                       min="0"
                       value={formData.reviews_count}
-                      onChange={(e) => handleInputChange('reviews_count', parseInt(e.target.value) || 0)}
+                      onChange={(e) =>
+                        handleInputChange('reviews_count', parseInt(e.target.value) || 0)
+                      }
                       placeholder="150"
                     />
                   </div>
@@ -408,10 +402,16 @@ export default function PlatformsAdmin() {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button type="submit" disabled={actionLoading === 'create' || actionLoading === 'update' || isGuest}>
+                  <Button
+                    type="submit"
+                    disabled={actionLoading === 'create' || actionLoading === 'update' || isGuest}
+                  >
                     <Save className="w-4 h-4 mr-2" />
-                    {actionLoading === 'create' || actionLoading === 'update' ? 'Sauvegarde...' :
-                      editingPlatform ? 'Mettre à jour' : 'Ajouter'}
+                    {actionLoading === 'create' || actionLoading === 'update'
+                      ? 'Sauvegarde...'
+                      : editingPlatform
+                        ? 'Mettre à jour'
+                        : 'Ajouter'}
                   </Button>
                   <Button type="button" variant="outline" onClick={resetForm}>
                     <X className="w-4 h-4 mr-2" />
@@ -436,7 +436,10 @@ export default function PlatformsAdmin() {
           <CardContent>
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {availablePredefined.map((platform) => (
-                <div key={platform.name} className="flex items-center justify-between p-3 border rounded-lg">
+                <div
+                  key={platform.name}
+                  className="flex items-center justify-between p-3 border rounded-lg"
+                >
                   <div className="flex-1">
                     <h4 className="font-medium">{platform.name}</h4>
                     <p className="text-sm text-gray-600">{platform.description_fr}</p>
@@ -483,7 +486,11 @@ export default function PlatformsAdmin() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">
-              {Math.round((platforms?.reduce((sum, p) => sum + (p.rating || 0), 0) / (platforms?.length || 1)) * 10) / 10 || 0}
+              {Math.round(
+                (platforms?.reduce((sum, p) => sum + (p.rating || 0), 0) /
+                  (platforms?.length || 1)) *
+                  10,
+              ) / 10 || 0}
             </div>
             <p className="text-xs text-muted-foreground">Note moyenne</p>
           </CardContent>
@@ -566,8 +573,8 @@ export default function PlatformsAdmin() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Supprimer la plateforme</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Êtes-vous sûr de vouloir supprimer la plateforme "{platform.name}" ?
-                          Cette action est irréversible.
+                          Êtes-vous sûr de vouloir supprimer la plateforme &quot;{platform.name}
+                          &quot; ? Cette action est irréversible.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -577,7 +584,7 @@ export default function PlatformsAdmin() {
                           onClick={() => handleDelete(platform.id, platform.name)}
                           disabled={actionLoading === platform.id}
                         >
-                          {actionLoading === platform.id ? "Suppression..." : "Supprimer"}
+                          {actionLoading === platform.id ? 'Suppression...' : 'Supprimer'}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -598,22 +605,22 @@ export default function PlatformsAdmin() {
                 <Globe className="w-8 h-8 text-gray-400" />
               </div>
               <h3 className="text-lg font-semibold mb-2">
-                {searchQuery ? "Aucune plateforme trouvée" : "Aucune plateforme"}
+                {searchQuery ? 'Aucune plateforme trouvée' : 'Aucune plateforme'}
               </h3>
               <p className="text-gray-600 mb-4">
                 {searchQuery
-                  ? "Essayez de modifier votre recherche"
-                  : "Commencez par ajouter vos plateformes freelance"
-                }
+                  ? 'Essayez de modifier votre recherche'
+                  : 'Commencez par ajouter vos plateformes freelance'}
               </p>
-              <Button onClick={() => {
-                setShowAddForm(true);
-                // Scroll vers le haut pour voir le formulaire
-                window.scrollTo({
-                  top: 0,
-                  behavior: 'smooth'
-                });
-              }}
+              <Button
+                onClick={() => {
+                  setShowAddForm(true);
+                  // Scroll vers le haut pour voir le formulaire
+                  window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth',
+                  });
+                }}
                 disabled={isGuest}
               >
                 <Plus className="w-4 h-4 mr-2" />

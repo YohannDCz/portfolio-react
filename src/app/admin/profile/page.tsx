@@ -1,34 +1,23 @@
 'use client';
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useAdminGuest } from "@/contexts/AdminGuestContext";
-import { useTranslation } from "@/hooks/useTranslation";
-import {
-  updateProfile,
-  uploadImageAndGetPublicUrl,
-  useProfile
-} from "@/lib/supabase";
-import {
-  Calendar,
-  Globe,
-  Plus,
-  Save,
-  User,
-  X
-} from "lucide-react";
-import { useEffect, useState } from "react";
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useAdminGuest } from '@/contexts/AdminGuestContext';
+import { useTranslation } from '@/hooks/useTranslation';
+import { updateProfile, uploadImageAndGetPublicUrl, useProfile } from '@/lib/supabase';
+import { Calendar, Globe, Plus, Save, User, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 const LANGUAGES = [
   { code: 'FR', name: 'Français' },
   { code: 'EN', name: 'English' },
   { code: 'HI', name: 'हिन्दी' },
-  { code: 'AR', name: 'العربية' }
+  { code: 'AR', name: 'العربية' },
 ];
 
 interface FormData {
@@ -99,12 +88,12 @@ export default function ProfileAdmin() {
     availability_hours_en: '',
     availability_hours_hi: '',
     availability_hours_ar: '',
-    spoken_languages: []
+    spoken_languages: [],
   });
 
   const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState("");
-  const [saveSuccess, setSaveSuccess] = useState("");
+  const [saveError, setSaveError] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState('');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const { translateFields, translating } = useTranslation();
@@ -143,49 +132,49 @@ export default function ProfileAdmin() {
         availability_hours_en: profile.availability_hours_en || '',
         availability_hours_hi: profile.availability_hours_hi || '',
         availability_hours_ar: profile.availability_hours_ar || '',
-        spoken_languages: profile.spoken_languages || []
+        spoken_languages: profile.spoken_languages || [],
       });
     }
   }, [profile]);
 
   const handleInputChange = (field: keyof FormData, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const addLanguage = (langCode: string) => {
     if (!formData.spoken_languages.includes(langCode)) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        spoken_languages: [...prev.spoken_languages, langCode]
+        spoken_languages: [...prev.spoken_languages, langCode],
       }));
     }
   };
 
   const removeLanguage = (langCode: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      spoken_languages: prev.spoken_languages.filter(lang => lang !== langCode)
+      spoken_languages: prev.spoken_languages.filter((lang) => lang !== langCode),
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setSaveError("");
-    setSaveSuccess("");
+    setSaveError('');
+    setSaveSuccess('');
 
     // Validation basique
     if (!formData.name) {
-      setSaveError("Le nom est obligatoire");
+      setSaveError('Le nom est obligatoire');
       setSaving(false);
       return;
     }
 
     if (!formData.title_fr || !formData.title_en) {
-      setSaveError("Les titres en français et anglais sont obligatoires");
+      setSaveError('Les titres en français et anglais sont obligatoires');
       setSaving(false);
       return;
     }
@@ -193,7 +182,11 @@ export default function ProfileAdmin() {
     let payload = { ...formData };
     // Upload avatar
     if (avatarFile) {
-      const up = await uploadImageAndGetPublicUrl({ bucket: 'images', folder: 'avatars', file: avatarFile });
+      const up = await uploadImageAndGetPublicUrl({
+        bucket: 'images',
+        folder: 'avatars',
+        file: avatarFile,
+      });
       if (!up.success) {
         setSaveError(up.error);
         setSaving(false);
@@ -203,7 +196,11 @@ export default function ProfileAdmin() {
     }
     // Upload cover
     if (coverFile) {
-      const up2 = await uploadImageAndGetPublicUrl({ bucket: 'images', folder: 'covers', file: coverFile });
+      const up2 = await uploadImageAndGetPublicUrl({
+        bucket: 'images',
+        folder: 'covers',
+        file: coverFile,
+      });
       if (!up2.success) {
         setSaveError(up2.error);
         setSaving(false);
@@ -217,7 +214,7 @@ export default function ProfileAdmin() {
     console.log('Payload:', payload);
 
     if (!profile?.id) {
-      setSaveError("Profil non trouvé - impossible de mettre à jour");
+      setSaveError('Profil non trouvé - impossible de mettre à jour');
       setSaving(false);
       return;
     }
@@ -225,8 +222,8 @@ export default function ProfileAdmin() {
     const result = await updateProfile(profile.id, payload);
 
     if (result.success) {
-      setSaveSuccess("Profil mis à jour avec succès !");
-      setTimeout(() => setSaveSuccess(""), 3000);
+      setSaveSuccess('Profil mis à jour avec succès !');
+      setTimeout(() => setSaveSuccess(''), 3000);
     } else {
       setSaveError(result.error);
     }
@@ -238,54 +235,54 @@ export default function ProfileAdmin() {
     const fieldMappings = [
       {
         sourceField: 'title_fr',
-        targetFields: ['title_en', 'title_hi', 'title_ar']
+        targetFields: ['title_en', 'title_hi', 'title_ar'],
       },
       {
         sourceField: 'title_en',
-        targetFields: ['title_fr', 'title_hi', 'title_ar']
+        targetFields: ['title_fr', 'title_hi', 'title_ar'],
       },
       {
         sourceField: 'tagline_fr',
-        targetFields: ['tagline_en', 'tagline_hi', 'tagline_ar']
+        targetFields: ['tagline_en', 'tagline_hi', 'tagline_ar'],
       },
       {
         sourceField: 'tagline_en',
-        targetFields: ['tagline_fr', 'tagline_hi', 'tagline_ar']
+        targetFields: ['tagline_fr', 'tagline_hi', 'tagline_ar'],
       },
       {
         sourceField: 'bio_fr',
-        targetFields: ['bio_en', 'bio_hi', 'bio_ar']
+        targetFields: ['bio_en', 'bio_hi', 'bio_ar'],
       },
       {
         sourceField: 'bio_en',
-        targetFields: ['bio_fr', 'bio_hi', 'bio_ar']
+        targetFields: ['bio_fr', 'bio_hi', 'bio_ar'],
       },
       {
         sourceField: 'availability_fr',
-        targetFields: ['availability_en', 'availability_hi', 'availability_ar']
+        targetFields: ['availability_en', 'availability_hi', 'availability_ar'],
       },
       {
         sourceField: 'availability_en',
-        targetFields: ['availability_fr', 'availability_hi', 'availability_ar']
+        targetFields: ['availability_fr', 'availability_hi', 'availability_ar'],
       },
       {
         sourceField: 'availability_hours_fr',
-        targetFields: ['availability_hours_en', 'availability_hours_hi', 'availability_hours_ar']
+        targetFields: ['availability_hours_en', 'availability_hours_hi', 'availability_hours_ar'],
       },
       {
         sourceField: 'availability_hours_en',
-        targetFields: ['availability_hours_fr', 'availability_hours_hi', 'availability_hours_ar']
-      }
-    ]
+        targetFields: ['availability_hours_fr', 'availability_hours_hi', 'availability_hours_ar'],
+      },
+    ];
 
-    const result = await translateFields(formData, setFormData, fieldMappings, true)
+    const result = await translateFields(formData, setFormData, fieldMappings, true);
 
     if (result.success) {
-      console.log(`✅ Translated ${result.translated} fields - Page will refresh soon!`)
+      console.log(`✅ Translated ${result.translated} fields - Page will refresh soon!`);
     } else if (result.error) {
-      console.error('❌ Translation failed:', result.error)
+      console.error('❌ Translation failed:', result.error);
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -314,13 +311,14 @@ export default function ProfileAdmin() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Profil</h1>
-          <p className="text-gray-600">
-            Gérez vos informations personnelles et professionnelles
-          </p>
+          <p className="text-gray-600">Gérez vos informations personnelles et professionnelles</p>
         </div>
         <div className="flex items-center gap-2">
           <User className="w-5 h-5 text-gray-400" />
-          <span className="text-sm text-gray-600">Dernière mise à jour: {profile?.updated_at ? new Date(profile.updated_at).toLocaleDateString('fr-FR') : 'N/A'}</span>
+          <span className="text-sm text-gray-600">
+            Dernière mise à jour:{' '}
+            {profile?.updated_at ? new Date(profile.updated_at).toLocaleDateString('fr-FR') : 'N/A'}
+          </span>
         </div>
       </div>
 
@@ -347,11 +345,15 @@ export default function ProfileAdmin() {
                   <User className="w-5 h-5" />
                   Informations de base
                 </CardTitle>
-                <CardDescription>
-                  Vos informations personnelles principales
-                </CardDescription>
+                <CardDescription>Vos informations personnelles principales</CardDescription>
                 <div className="mt-2">
-                  <Button type="button" variant="outline" size="sm" onClick={handleAutoTranslate} disabled={translating}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAutoTranslate}
+                    disabled={translating}
+                  >
                     {translating ? 'Traduction...' : '🌍 Traduire automatiquement'}
                   </Button>
                 </div>
@@ -379,7 +381,12 @@ export default function ProfileAdmin() {
                   />
                   <div className="grid gap-2">
                     <Label htmlFor="avatar_file">ou téléverser une image</Label>
-                    <Input id="avatar_file" type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files?.[0] || null)} />
+                    <Input
+                      id="avatar_file"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
+                    />
                   </div>
                 </div>
 
@@ -425,9 +432,7 @@ export default function ProfileAdmin() {
                   <Globe className="w-5 h-5" />
                   Liens professionnels
                 </CardTitle>
-                <CardDescription>
-                  Vos profils sur les réseaux et plateformes
-                </CardDescription>
+                <CardDescription>Vos profils sur les réseaux et plateformes</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -492,9 +497,7 @@ export default function ProfileAdmin() {
           <Card>
             <CardHeader>
               <CardTitle>Titres professionnels</CardTitle>
-              <CardDescription>
-                Vos titres dans différentes langues
-              </CardDescription>
+              <CardDescription>Vos titres dans différentes langues</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
@@ -546,10 +549,8 @@ export default function ProfileAdmin() {
           {/* Taglines */}
           <Card>
             <CardHeader>
-              <CardTitle>Phrases d'accroche</CardTitle>
-              <CardDescription>
-                Phrases courtes qui vous décrivent
-              </CardDescription>
+              <CardTitle>Phrases d$apos;accroche</CardTitle>
+              <CardDescription>Phrases courtes qui vous décrivent</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
@@ -604,9 +605,7 @@ export default function ProfileAdmin() {
           <Card>
             <CardHeader>
               <CardTitle>Biographies</CardTitle>
-              <CardDescription>
-                Descriptions complètes de votre parcours
-              </CardDescription>
+              <CardDescription>Descriptions complètes de votre parcours</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
@@ -665,9 +664,7 @@ export default function ProfileAdmin() {
                   <Calendar className="w-5 h-5" />
                   Disponibilité
                 </CardTitle>
-                <CardDescription>
-                  Informations sur votre disponibilité
-                </CardDescription>
+                <CardDescription>Informations sur votre disponibilité</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4">
@@ -757,26 +754,26 @@ export default function ProfileAdmin() {
             <Card>
               <CardHeader>
                 <CardTitle>Langues parlées</CardTitle>
-                <CardDescription>
-                  Sélectionnez les langues que vous maîtrisez
-                </CardDescription>
+                <CardDescription>Sélectionnez les langues que vous maîtrisez</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Ajouter une langue</Label>
                   <div className="flex flex-wrap gap-2">
-                    {LANGUAGES.filter(lang => !formData.spoken_languages.includes(lang.code)).map((lang) => (
-                      <Button
-                        key={lang.code}
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => addLanguage(lang.code)}
-                      >
-                        <Plus className="w-3 h-3 mr-1" />
-                        {lang.name}
-                      </Button>
-                    ))}
+                    {LANGUAGES.filter((lang) => !formData.spoken_languages.includes(lang.code)).map(
+                      (lang) => (
+                        <Button
+                          key={lang.code}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => addLanguage(lang.code)}
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          {lang.name}
+                        </Button>
+                      ),
+                    )}
                   </div>
                 </div>
 
@@ -784,9 +781,13 @@ export default function ProfileAdmin() {
                   <Label>Langues sélectionnées</Label>
                   <div className="flex flex-wrap gap-2">
                     {formData.spoken_languages.map((langCode) => {
-                      const lang = LANGUAGES.find(l => l.code === langCode);
+                      const lang = LANGUAGES.find((l) => l.code === langCode);
                       return (
-                        <Badge key={langCode} variant="secondary" className="flex items-center gap-1">
+                        <Badge
+                          key={langCode}
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
                           {lang?.name}
                           <button
                             type="button"
@@ -810,7 +811,7 @@ export default function ProfileAdmin() {
               <div className="flex gap-4 justify-end">
                 <Button type="submit" disabled={saving || isGuest}>
                   <Save className="w-4 h-4 mr-2" />
-                  {saving ? "Sauvegarde..." : "Sauvegarder le profil"}
+                  {saving ? 'Sauvegarde...' : 'Sauvegarder le profil'}
                 </Button>
               </div>
             </CardContent>

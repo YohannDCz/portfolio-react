@@ -58,7 +58,9 @@ export default function ProjectsSection({
     <section id="projets" className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">{t.projectSelection}</h2>
+          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
+            {t.projectSelection}
+          </h2>
           <p className="text-muted-foreground">{t.projectFilter}</p>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
@@ -85,8 +87,8 @@ export default function ProjectsSection({
           <div className="mb-4">
             <p className="text-muted-foreground">
               {totalSearchResults.length}{' '}
-              {totalSearchResults.length === 1 ? 'résultat trouvé' : 'résultats trouvés'}{' '}
-              pour &ldquo;{query}&rdquo;
+              {totalSearchResults.length === 1 ? 'résultat trouvé' : 'résultats trouvés'} pour
+              &quot;{query}&rdquo;
             </p>
           </div>
           {projectsLoading ? (
@@ -96,31 +98,52 @@ export default function ProjectsSection({
           ) : totalSearchResults.length > 0 ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {totalSearchResults.map((p) => (
-                <ProjectCard key={p.id} project={p} currentLang={currentLang} t={t} isAdminMode={isAdminMode} />
+                <ProjectCard
+                  key={p.id}
+                  project={p}
+                  currentLang={currentLang}
+                  t={t}
+                  isAdminMode={isAdminMode}
+                />
               ))}
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">Aucun projet trouvé pour &ldquo;{query}&rdquo;</p>
+              <p className="text-muted-foreground">Aucun projet trouvé pour &quot;{query}&rdquo;</p>
             </div>
           )}
         </div>
       ) : (
         <Tabs value={tab} onValueChange={onTabChange} className="mt-4">
           <TabsList className="grid grid-cols-5 bg-muted w-full md:w-[560px]">
-            <TabsTrigger value="tous" className="font-bold text-xs sm:text-sm dark:text-white light:text-black">
+            <TabsTrigger
+              value="tous"
+              className="font-bold text-xs sm:text-sm dark:text-white light:text-black"
+            >
               {t.all}
             </TabsTrigger>
-            <TabsTrigger value="web" className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black">
+            <TabsTrigger
+              value="web"
+              className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black"
+            >
               {t.web}
             </TabsTrigger>
-            <TabsTrigger value="mobile" className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black">
+            <TabsTrigger
+              value="mobile"
+              className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black"
+            >
               {t.mobile}
             </TabsTrigger>
-            <TabsTrigger value="design" className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black">
+            <TabsTrigger
+              value="design"
+              className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black"
+            >
               {t.design}
             </TabsTrigger>
-            <TabsTrigger value="autre" className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black">
+            <TabsTrigger
+              value="autre"
+              className="font-bold text-xs sm:text-sm dark:text-blue-400 light:text-black"
+            >
               {t.other}
             </TabsTrigger>
           </TabsList>
@@ -133,7 +156,13 @@ export default function ProjectsSection({
               <div className="space-y-6">
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
                   {paginatedProjects.map((p) => (
-                    <ProjectCard key={p.id} project={p} currentLang={currentLang} t={t} isAdminMode={isAdminMode} />
+                    <ProjectCard
+                      key={p.id}
+                      project={p}
+                      currentLang={currentLang}
+                      t={t}
+                      isAdminMode={isAdminMode}
+                    />
                   ))}
                 </div>
 
@@ -148,7 +177,11 @@ export default function ProjectsSection({
                     >
                       ←
                       <span className="hidden sm:inline">
-                        {currentLang === 'ar' ? 'السابق' : currentLang === 'hi' ? 'पिछला' : 'Précédent'}
+                        {currentLang === 'ar'
+                          ? 'السابق'
+                          : currentLang === 'hi'
+                            ? 'पिछला'
+                            : 'Précédent'}
                       </span>
                     </Button>
 
@@ -174,7 +207,11 @@ export default function ProjectsSection({
                       className="flex items-center gap-2"
                     >
                       <span className="hidden sm:inline">
-                        {currentLang === 'ar' ? 'التالي' : currentLang === 'hi' ? 'अगला' : 'Suivant'}
+                        {currentLang === 'ar'
+                          ? 'التالي'
+                          : currentLang === 'hi'
+                            ? 'अगला'
+                            : 'Suivant'}
                       </span>
                       →
                     </Button>

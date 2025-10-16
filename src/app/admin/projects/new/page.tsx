@@ -1,30 +1,58 @@
 'use client';
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useAdminGuest } from "@/contexts/AdminGuestContext";
-import { useTranslation } from "@/hooks/useTranslation";
-import { createProject, uploadImageAndGetPublicUrl } from "@/lib/supabase";
-import { ArrowLeft, Plus, X } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useAdminGuest } from '@/contexts/AdminGuestContext';
+import { useTranslation } from '@/hooks/useTranslation';
+import { createProject, uploadImageAndGetPublicUrl } from '@/lib/supabase';
+import { ArrowLeft, Plus, X } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 const CATEGORIES = ['web', 'mobile', 'design', 'autre'];
 const TECH_TAGS = [
-  'React', 'Vue.js', 'Angular', 'Next.js', 'Nuxt.js',
-  'Node.js', 'Express', 'PHP', 'Laravel', 'Python',
-  'React Native', 'Flutter', 'Swift', 'Kotlin',
-  'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Sass',
-  'Tailwind CSS', 'Bootstrap', 'MongoDB', 'PostgreSQL',
-  'MySQL', 'Firebase', 'Supabase', 'Docker', 'AWS'
+  'React',
+  'Vue.js',
+  'Angular',
+  'Next.js',
+  'Nuxt.js',
+  'Node.js',
+  'Express',
+  'PHP',
+  'Laravel',
+  'Python',
+  'React Native',
+  'Flutter',
+  'Swift',
+  'Kotlin',
+  'TypeScript',
+  'JavaScript',
+  'HTML',
+  'CSS',
+  'Sass',
+  'Tailwind CSS',
+  'Bootstrap',
+  'MongoDB',
+  'PostgreSQL',
+  'MySQL',
+  'Firebase',
+  'Supabase',
+  'Docker',
+  'AWS',
 ];
 
 interface FormData {
@@ -56,7 +84,7 @@ export default function NewProject() {
   const { isGuest } = useAdminGuest();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   // État du formulaire
   const [formData, setFormData] = useState<FormData>({
@@ -80,7 +108,7 @@ export default function NewProject() {
     featured: false,
     stack: '',
     priority: 1,
-    sort_order: 0
+    sort_order: 0,
   });
 
   const [newTag, setNewTag] = useState('');
@@ -88,52 +116,52 @@ export default function NewProject() {
   const { translateFields, translating } = useTranslation();
 
   const handleInputChange = (field: keyof FormData, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleCategoryChange = (category: string, checked: boolean) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       category: checked
         ? [...prev.category, category]
-        : prev.category.filter(c => c !== category)
+        : prev.category.filter((c) => c !== category),
     }));
   };
 
   const addTag = (tag: string) => {
     if (tag && !formData.tags.includes(tag)) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        tags: [...prev.tags, tag]
+        tags: [...prev.tags, tag],
       }));
     }
     setNewTag('');
   };
 
   const removeTag = (tagToRemove: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
+      tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setError('');
 
     // Validation basique
     if (!formData.title_fr || !formData.title_en) {
-      setError("Les titres en français et anglais sont obligatoires");
+      setError('Les titres en français et anglais sont obligatoires');
       setLoading(false);
       return;
     }
 
     if (formData.category.length === 0) {
-      setError("Sélectionnez au moins une catégorie");
+      setError('Sélectionnez au moins une catégorie');
       setLoading(false);
       return;
     }
@@ -141,7 +169,11 @@ export default function NewProject() {
     // Upload image file if provided
     let payload = { ...formData };
     if (imageFile) {
-      const upload = await uploadImageAndGetPublicUrl({ bucket: 'images', folder: 'projects', file: imageFile });
+      const upload = await uploadImageAndGetPublicUrl({
+        bucket: 'images',
+        folder: 'projects',
+        file: imageFile,
+      });
       if (!upload.success) {
         setError(upload.error);
         setLoading(false);
@@ -165,30 +197,30 @@ export default function NewProject() {
     const fieldMappings = [
       {
         sourceField: 'title_fr',
-        targetFields: ['title_en', 'title_hi', 'title_ar']
+        targetFields: ['title_en', 'title_hi', 'title_ar'],
       },
       {
         sourceField: 'title_en',
-        targetFields: ['title_fr', 'title_hi', 'title_ar']
+        targetFields: ['title_fr', 'title_hi', 'title_ar'],
       },
       {
         sourceField: 'description_fr',
-        targetFields: ['description_en', 'description_hi', 'description_ar']
+        targetFields: ['description_en', 'description_hi', 'description_ar'],
       },
       {
         sourceField: 'description_en',
-        targetFields: ['description_fr', 'description_hi', 'description_ar']
-      }
-    ]
+        targetFields: ['description_fr', 'description_hi', 'description_ar'],
+      },
+    ];
 
-    const result = await translateFields(formData, setFormData, fieldMappings, true)
+    const result = await translateFields(formData, setFormData, fieldMappings, true);
 
     if (result.success) {
-      console.log(`✅ Translated ${result.translated} fields - Page will refresh soon!`)
+      console.log(`✅ Translated ${result.translated} fields - Page will refresh soon!`);
     } else if (result.error) {
-      console.error('❌ Translation failed:', result.error)
+      console.error('❌ Translation failed:', result.error);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -219,11 +251,15 @@ export default function NewProject() {
             <Card>
               <CardHeader>
                 <CardTitle>Informations générales</CardTitle>
-                <CardDescription>
-                  Détails de base du projet
-                </CardDescription>
+                <CardDescription>Détails de base du projet</CardDescription>
                 <div className="mt-2">
-                  <Button type="button" variant="outline" size="sm" onClick={handleAutoTranslate} disabled={translating}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAutoTranslate}
+                    disabled={translating}
+                  >
                     {translating ? 'Traduction...' : '🌍 Traduire automatiquement'}
                   </Button>
                 </div>
@@ -287,9 +323,7 @@ export default function NewProject() {
             <Card>
               <CardHeader>
                 <CardTitle>Descriptions</CardTitle>
-                <CardDescription>
-                  Descriptions multilingues du projet
-                </CardDescription>
+                <CardDescription>Descriptions multilingues du projet</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -343,9 +377,7 @@ export default function NewProject() {
           <Card>
             <CardHeader>
               <CardTitle>Catégories et Technologies</CardTitle>
-              <CardDescription>
-                Classification et technologies utilisées
-              </CardDescription>
+              <CardDescription>Classification et technologies utilisées</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Catégories */}
@@ -357,7 +389,9 @@ export default function NewProject() {
                       <Checkbox
                         id={category}
                         checked={formData.category.includes(category)}
-                        onCheckedChange={(checked) => handleCategoryChange(category, checked as boolean)}
+                        onCheckedChange={(checked) =>
+                          handleCategoryChange(category, checked as boolean)
+                        }
                       />
                       <Label htmlFor={category} className="capitalize">
                         {category}
@@ -376,7 +410,7 @@ export default function NewProject() {
                       <SelectValue placeholder="Sélectionner une technologie" />
                     </SelectTrigger>
                     <SelectContent>
-                      {TECH_TAGS.filter(tag => !formData.tags.includes(tag)).map((tag) => (
+                      {TECH_TAGS.filter((tag) => !formData.tags.includes(tag)).map((tag) => (
                         <SelectItem key={tag} value={tag}>
                           {tag}
                         </SelectItem>
@@ -426,14 +460,15 @@ export default function NewProject() {
             <Card>
               <CardHeader>
                 <CardTitle>Paramètres</CardTitle>
-                <CardDescription>
-                  Configuration du projet
-                </CardDescription>
+                <CardDescription>Configuration du projet</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="status">Statut</Label>
-                  <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value) => handleInputChange('status', value)}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -447,7 +482,7 @@ export default function NewProject() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="stars">Nombre d'étoiles</Label>
+                  <Label htmlFor="stars">Nombre d&apos;étoiles</Label>
                   <Input
                     id="stars"
                     type="number"
@@ -488,7 +523,10 @@ export default function NewProject() {
                 {formData.is_mega_project && (
                   <div className="space-y-2">
                     <Label htmlFor="stack">Stack principal</Label>
-                    <Select value={formData.stack} onValueChange={(value) => handleInputChange('stack', value)}>
+                    <Select
+                      value={formData.stack}
+                      onValueChange={(value) => handleInputChange('stack', value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionner la stack" />
                       </SelectTrigger>
@@ -508,9 +546,7 @@ export default function NewProject() {
             <Card>
               <CardHeader>
                 <CardTitle>Liens</CardTitle>
-                <CardDescription>
-                  URLs et liens du projet
-                </CardDescription>
+                <CardDescription>URLs et liens du projet</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -579,7 +615,7 @@ export default function NewProject() {
                   </Button>
                 </Link>
                 <Button type="submit" disabled={loading || isGuest}>
-                  {loading ? "Création..." : "Créer le projet"}
+                  {loading ? 'Création...' : 'Créer le projet'}
                 </Button>
               </div>
             </CardContent>

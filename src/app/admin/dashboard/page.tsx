@@ -1,16 +1,16 @@
 'use client';
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAdminGuest } from "@/contexts/AdminGuestContext";
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAdminGuest } from '@/contexts/AdminGuestContext';
 import {
   useCertifications,
   useFreelancePlatforms,
   useProfile,
   useProjects,
-  useSkills
-} from "@/lib/supabase";
+  useSkills,
+} from '@/lib/supabase';
 import {
   Award,
   Calendar,
@@ -20,12 +20,12 @@ import {
   Plus,
   Settings,
   User,
-  LucideIcon
-} from "lucide-react";
-import Link from "next/link";
+  LucideIcon,
+} from 'lucide-react';
+import Link from 'next/link';
 
 // TypeScript interfaces
-type ColorType = "primary" | "green" | "blue" | "purple" | "orange";
+type ColorType = 'primary' | 'green' | 'blue' | 'purple' | 'orange';
 
 interface StatCardProps {
   title: string;
@@ -45,14 +45,21 @@ interface QuickActionProps {
   external?: boolean;
 }
 
-function StatCard({ title, value, description, icon: Icon, href, color = "primary" }: StatCardProps): JSX.Element {
+function StatCard({
+  title,
+  value,
+  description,
+  icon: Icon,
+  href,
+  color = 'primary',
+}: StatCardProps): JSX.Element {
   const { isGuest } = useAdminGuest();
   const colorClasses: Record<ColorType, string> = {
-    primary: "text-primary",
-    green: "text-green-600",
-    blue: "text-blue-600",
-    purple: "text-purple-600",
-    orange: "text-orange-600"
+    primary: 'text-primary',
+    green: 'text-green-600',
+    blue: 'text-blue-600',
+    purple: 'text-purple-600',
+    orange: 'text-orange-600',
   };
 
   return (
@@ -76,14 +83,21 @@ function StatCard({ title, value, description, icon: Icon, href, color = "primar
   );
 }
 
-function QuickAction({ title, description, href, icon: Icon, color = "primary", external = false }: QuickActionProps): JSX.Element {
+function QuickAction({
+  title,
+  description,
+  href,
+  icon: Icon,
+  color = 'primary',
+  external = false,
+}: QuickActionProps): JSX.Element {
   const { isGuest } = useAdminGuest();
   const colorClasses: Record<ColorType, string> = {
-    primary: "bg-primary text-primary-foreground hover:bg-primary/90",
-    green: "bg-green-600 text-white hover:bg-green-700",
-    blue: "bg-blue-600 text-white hover:bg-blue-700",
-    purple: "bg-purple-600 text-white hover:bg-purple-700",
-    orange: "bg-orange-600 text-white hover:bg-orange-700"
+    primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+    green: 'bg-green-600 text-white hover:bg-green-700',
+    blue: 'bg-blue-600 text-white hover:bg-blue-700',
+    purple: 'bg-purple-600 text-white hover:bg-purple-700',
+    orange: 'bg-orange-600 text-white hover:bg-orange-700',
   };
 
   if (isGuest) {
@@ -154,11 +168,11 @@ export default function AdminDashboard(): JSX.Element {
   // const { stats: kanbanStats, loading: kanbanStatsLoading } = useKanbanStats();
   // const { tasks: kanbanTasks, loading: kanbanTasksLoading } = useKanbanTasks();
 
-  const completedProjects = projects?.filter(p => p.status === 'completed') || [];
-  const toDeployProjects = projects?.filter(p => p.status === 'to_deploy') || [];
-  const inProgressProjects = projects?.filter(p => p.status === 'in_progress') || [];
-  const completedCerts = certifications?.filter(c => c.status === 'completed') || [];
-  
+  const completedProjects = projects?.filter((p) => p.status === 'completed') || [];
+  const toDeployProjects = projects?.filter((p) => p.status === 'to_deploy') || [];
+  const inProgressProjects = projects?.filter((p) => p.status === 'in_progress') || [];
+  const completedCerts = certifications?.filter((c) => c.status === 'completed') || [];
+
   // Suppression des statistiques Kanban
   // const totalTasks = kanbanTasks?.length || 0;
   // const completedTasks = kanbanTasks?.filter(t => t.column?.name === 'Terminé').length || 0;
@@ -174,9 +188,7 @@ export default function AdminDashboard(): JSX.Element {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">
-            Bienvenue dans votre panel d'administration
-          </p>
+          <p className="text-gray-600">Bienvenue dans votre panel d$apos;administration</p>
         </div>
         <div className="flex items-center space-x-2">
           <Badge variant="outline" className="flex items-center gap-1">
@@ -190,7 +202,7 @@ export default function AdminDashboard(): JSX.Element {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
         <StatCard
           title="Projets Total"
-          value={projectsLoading ? "..." : projects?.length || 0}
+          value={projectsLoading ? '...' : projects?.length || 0}
           description={`${completedProjects.length} terminés`}
           icon={FolderOpen}
           href="/admin/projects"
@@ -198,7 +210,7 @@ export default function AdminDashboard(): JSX.Element {
         />
         <StatCard
           title="Certifications"
-          value={certsLoading ? "..." : certifications?.length || 0}
+          value={certsLoading ? '...' : certifications?.length || 0}
           description={`${completedCerts.length} obtenues`}
           icon={Award}
           href="/admin/certifications"
@@ -206,7 +218,7 @@ export default function AdminDashboard(): JSX.Element {
         />
         <StatCard
           title="Compétences"
-          value={skillsLoading ? "..." : skills?.length || 0}
+          value={skillsLoading ? '...' : skills?.length || 0}
           description="Technologies maîtrisées"
           icon={Settings}
           href="/admin/skills"
@@ -258,9 +270,7 @@ export default function AdminDashboard(): JSX.Element {
               <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
               Projets à déployer
             </CardTitle>
-            <CardDescription>
-              Projets prêts pour le déploiement
-            </CardDescription>
+            <CardDescription>Projets prêts pour le déploiement</CardDescription>
           </CardHeader>
           <CardContent>
             {projectsLoading ? (
@@ -268,7 +278,10 @@ export default function AdminDashboard(): JSX.Element {
             ) : toDeployProjects?.length > 0 ? (
               <div className="space-y-3">
                 {toDeployProjects.slice(0, 5).map((project) => (
-                  <div key={project.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                  <div
+                    key={project.id}
+                    className="flex items-center justify-between py-2 border-b last:border-0"
+                  >
                     <div className="flex-1">
                       <h4 className="font-medium">{project.title_fr}</h4>
                       <div className="flex items-center gap-2 mt-1">
@@ -277,9 +290,7 @@ export default function AdminDashboard(): JSX.Element {
                         </Badge>
                       </div>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      ⭐ {project.stars}
-                    </div>
+                    <div className="text-sm text-muted-foreground">⭐ {project.stars}</div>
                   </div>
                 ))}
                 <div className="flex gap-2 mt-4">
@@ -289,7 +300,11 @@ export default function AdminDashboard(): JSX.Element {
                     </Button>
                   </Link>
                   {toDeployProjects[0]?.live_url && (
-                    <a href={toDeployProjects[0].live_url} target="_blank" rel="noopener noreferrer">
+                    <a
+                      href={toDeployProjects[0].live_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
                         Déployer
                       </Button>
@@ -304,7 +319,9 @@ export default function AdminDashboard(): JSX.Element {
                 </div>
                 <p className="text-muted-foreground">Aucun projet à déployer</p>
                 <Link href="/admin/projects/new">
-                  <Button className="mt-2" disabled={isGuest}>Créer un projet</Button>
+                  <Button className="mt-2" disabled={isGuest}>
+                    Créer un projet
+                  </Button>
                 </Link>
               </div>
             )}
@@ -318,16 +335,14 @@ export default function AdminDashboard(): JSX.Element {
               <CheckSquare className="h-5 w-5" />
               Compétences
             </CardTitle>
-            <CardDescription>
-              Vos compétences durement acquises
-            </CardDescription>
+            <CardDescription>Vos compétences durement acquises</CardDescription>
           </CardHeader>
           <CardContent>
             {/* kanbanTasksLoading ? (
               <p className="text-muted-foreground">Chargement...</p>
             ) : kanbanTasks?.length > 0 ? ( */}
-              <div className="space-y-3">
-                {/* {kanbanTasks
+            <div className="space-y-3">
+              {/* {kanbanTasks
                   .filter(task => task.column?.name !== 'Terminé')
                   .sort((a, b) => {
                     // Tri par priorité puis par date d'échéance
@@ -385,12 +400,16 @@ export default function AdminDashboard(): JSX.Element {
                       </div>
                     );
                   })} */}
-                <a href="https://github.com/YohannDCz/kanban-react" target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" className="w-full mt-4">
-                    Voir le projet Kanban (externe)
-                  </Button>
-                </a>
-              </div>
+              <a
+                href="https://github.com/YohannDCz/kanban-react"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button variant="outline" className="w-full mt-4">
+                  Voir le projet Kanban (externe)
+                </Button>
+              </a>
+            </div>
             {/* ) : (
               <div className="text-center py-6">
                 <CheckSquare className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -410,9 +429,7 @@ export default function AdminDashboard(): JSX.Element {
               <Award className="h-5 w-5" />
               Certifications
             </CardTitle>
-            <CardDescription>
-              État de vos certifications
-            </CardDescription>
+            <CardDescription>État de vos certifications</CardDescription>
           </CardHeader>
           <CardContent>
             {certsLoading ? (
@@ -420,18 +437,33 @@ export default function AdminDashboard(): JSX.Element {
             ) : certifications?.length > 0 ? (
               <div className="space-y-3">
                 {certifications.slice(0, 5).map((cert) => (
-                  <div key={cert.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                  <div
+                    key={cert.id}
+                    className="flex items-center justify-between py-2 border-b last:border-0"
+                  >
                     <div className="flex-1">
                       <h4 className="font-medium">{cert.title}</h4>
                       <p className="text-sm text-muted-foreground">{cert.provider}</p>
                     </div>
-                    <Badge 
-                      variant={cert.status === 'completed' ? 'default' : cert.status === 'to_deploy' ? 'default' : cert.status === 'in_progress' ? 'secondary' : 'outline'}
+                    <Badge
+                      variant={
+                        cert.status === 'completed'
+                          ? 'default'
+                          : cert.status === 'to_deploy'
+                            ? 'default'
+                            : cert.status === 'in_progress'
+                              ? 'secondary'
+                              : 'outline'
+                      }
                       className={`text-xs ${cert.status === 'to_deploy' ? 'bg-emerald-500 text-white hover:bg-emerald-600' : ''}`}
                     >
-                      {cert.status === 'completed' ? 'Obtenue' : 
-                       cert.status === 'to_deploy' ? 'À déployer' :
-                       cert.status === 'in_progress' ? 'En cours' : 'Planifiée'}
+                      {cert.status === 'completed'
+                        ? 'Obtenue'
+                        : cert.status === 'to_deploy'
+                          ? 'À déployer'
+                          : cert.status === 'in_progress'
+                            ? 'En cours'
+                            : 'Planifiée'}
                     </Badge>
                   </div>
                 ))}
@@ -446,7 +478,9 @@ export default function AdminDashboard(): JSX.Element {
                 <Award className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">Aucune certification</p>
                 <Link href="/admin/certifications/new">
-                  <Button className="mt-2" disabled={isGuest}>Ajouter une certification</Button>
+                  <Button className="mt-2" disabled={isGuest}>
+                    Ajouter une certification
+                  </Button>
                 </Link>
               </div>
             )}
