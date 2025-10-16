@@ -8,8 +8,7 @@ import type { Certification, Language } from '@/types';
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd';
 import { Edit, ExternalLink, GripVertical, Trash2 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
-import { debugError } from '@/lib/utils';
+import { JSX, useState } from 'react';
 
 // =====================================
 // TYPE DEFINITIONS
@@ -34,7 +33,7 @@ interface CertificationWithUrls extends Certification {
   title: string;
   provider: string;
   year?: number;
-  certificate_urls?: CertificationUrls;
+  certificate_urls?: Record<string, string>;
 }
 
 interface CertificationDragDropProps {
@@ -92,7 +91,6 @@ export default function CertificationDragDrop({
       // Call parent's reorder function
       await onReorder(items);
     } catch (error) {
-      debugError('Failed to reorder certifications:', error);
     } finally {
       setIsDragDisabled(false);
     }
