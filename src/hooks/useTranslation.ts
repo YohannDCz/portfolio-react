@@ -2,7 +2,6 @@
 
 import type { Language } from '@/types';
 import { Dispatch, SetStateAction, useState } from 'react';
-import { debugError, debugPrint } from '@/lib/debug';
 
 // =====================================
 // TYPE DEFINITIONS
@@ -106,9 +105,7 @@ export function useTranslation(): UseTranslationReturn {
               updates[targetField] = data.translatedText;
               translationCount++;
             }
-          } catch (error) {
-            debugError(error, `Translation failed for ${targetField}`);
-          }
+          } catch (error) {}
         }
       }
 
@@ -122,13 +119,11 @@ export function useTranslation(): UseTranslationReturn {
 
       // Show success notification if requested
       if (translationCount > 0 && showNotification) {
-        debugPrint(`Successfully translated ${translationCount} field(s)`);
       }
 
       return { success: translationCount > 0, translated: translationCount, updates };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      debugError(error, 'Translation error');
       return { success: false, error: errorMessage };
     } finally {
       setTranslating(false);
