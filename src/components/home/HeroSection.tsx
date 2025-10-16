@@ -13,6 +13,7 @@ import type { TranslationContent } from '@/types/translations';
 import type { Profile, Project, Skill } from '@/types';
 import type { JSX } from 'react';
 import { ArrowUpRight } from 'lucide-react';
+import Image from 'next/image';
 
 interface HeroSectionProps {
   profile: Profile | null;
@@ -79,8 +80,13 @@ export default function HeroSection({
 
           <div>
             <Card className="overflow-hidden">
-              <div className="h-40 overflow-hidden">
-                <img src={profile?.cover_url || 'cover.png'} alt="cover" className="w-full h-full object-cover" />
+              <div className="h-40 overflow-hidden relative">
+                <Image
+                  src={profile?.cover_url || 'cover.png'}
+                  alt="cover"
+                  fill
+                  className="object-cover"
+                />
               </div>
 
               <CardContent className="-mt-9">
@@ -96,7 +102,9 @@ export default function HeroSection({
                     </Avatar>
                   </ProfileImageModal>
                   <div className="pb-1">
-                    <h3 className="text-xl font-semibold leading-tight">{profile?.name || 'Yohann Di Crescenzo'}</h3>
+                    <h3 className="text-xl font-semibold leading-tight">
+                      {profile?.name || 'Yohann Di Crescenzo'}
+                    </h3>
                     <p className="text-muted-foreground">{profile?.location || 'Paris, France'}</p>
                   </div>
                 </div>

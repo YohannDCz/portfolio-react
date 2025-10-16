@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type SyntheticEvent } from 'react';
+import Image from 'next/image';
 
 // =====================================
 // TYPE DEFINITIONS
@@ -102,11 +103,11 @@ export default function ProjectImage({
       )}
 
       {/* Image principale */}
-      <img
+      <Image
         src={src}
         alt={alt}
-        className={`w-full h-full object-contain transition-all duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
+        fill
+        className={`object-contain transition-all duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
         onError={handleImageError}
         onLoad={handleImageLoad}
         loading="lazy"

@@ -1,5 +1,6 @@
 import type { TranslationRequest, TranslationResult } from '@/types';
 import { NextRequest } from 'next/server';
+import { debugError } from '@/lib/logger';
 
 // =====================================
 // TYPE DEFINITIONS
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     return Response.json(successResponse);
   } catch (error) {
-    console.error('Translation error:', error);
+    debugError(error, 'Translation error in simple-translate route');
 
     const errorResponse: ErrorResponse = {
       error: error instanceof Error ? error.message : 'Unknown error occurred',

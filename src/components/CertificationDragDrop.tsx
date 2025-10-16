@@ -9,6 +9,7 @@ import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-p
 import { Edit, ExternalLink, GripVertical, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { debugError } from '@/lib/utils';
 
 // =====================================
 // TYPE DEFINITIONS
@@ -91,7 +92,7 @@ export default function CertificationDragDrop({
       // Call parent's reorder function
       await onReorder(items);
     } catch (error) {
-      console.error('Failed to reorder certifications:', error);
+      debugError('Failed to reorder certifications:', error);
     } finally {
       setIsDragDisabled(false);
     }
@@ -136,8 +137,9 @@ export default function CertificationDragDrop({
           <div
             {...provided.droppableProps}
             ref={provided.innerRef}
-            className={`grid gap-4 md:grid-cols-2 lg:grid-cols-3 transition-colors ${snapshot.isDraggingOver ? 'bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2' : ''
-              }`}
+            className={`grid gap-4 md:grid-cols-2 lg:grid-cols-3 transition-colors ${
+              snapshot.isDraggingOver ? 'bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2' : ''
+            }`}
           >
             {certifications.map((cert, index) => (
               <Draggable
@@ -150,10 +152,11 @@ export default function CertificationDragDrop({
                   <Card
                     ref={provided.innerRef}
                     {...provided.draggableProps}
-                    className={`transition-all duration-200 ${snapshot.isDragging
+                    className={`transition-all duration-200 ${
+                      snapshot.isDragging
                         ? 'shadow-lg scale-105 rotate-2 bg-white dark:bg-gray-800 border-primary'
                         : 'hover:shadow-md'
-                      } ${isDragDisabled ? 'opacity-50' : ''}`}
+                    } ${isDragDisabled ? 'opacity-50' : ''}`}
                   >
                     <CardHeader className="pb-2">
                       <div className="flex items-start justify-between">
@@ -161,10 +164,11 @@ export default function CertificationDragDrop({
                           {/* Drag Handle */}
                           <div
                             {...provided.dragHandleProps}
-                            className={`p-2 rounded-md transition-colors ${isGuest
+                            className={`p-2 rounded-md transition-colors ${
+                              isGuest
                                 ? 'text-gray-300 cursor-not-allowed'
                                 : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100 cursor-grab active:cursor-grabbing'
-                              }`}
+                            }`}
                             title={
                               isGuest
                                 ? 'Réorganisation non disponible en mode invité'
